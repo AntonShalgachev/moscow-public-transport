@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Транспорт Москвы</string>
+    <string name="action_settings">Настройки</string>
+
+    <string name="type_bus_name">Автобус</string>
+    <string name="type_trolley_name">Троллейбус</string>
+    <string name="type_tram_name">Трамвай</string>
+
+    <string name="add_transport_title">Добавить %1$s</string>
+    <string name="add_bus_title_extra">автобус</string>
+    <string name="add_trolley_title_extra">троллейбус</string>
+    <string name="add_tram_title_extra">трамвай</string>
+</resources>
