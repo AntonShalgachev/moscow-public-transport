@@ -7,7 +7,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.TransportType;
-import com.shalgachev.moscowpublictransport.fragments.TransportListFragment;
+import com.shalgachev.moscowpublictransport.fragments.RouteListFragment;
 
 import java.util.ArrayList;
 
@@ -15,10 +15,10 @@ import java.util.ArrayList;
  * Created by anton on 5/26/2017.
  */
 
-public class TransportListPagerAdapter extends FragmentPagerAdapter {
+public class RouteListPagerAdapter extends FragmentPagerAdapter {
     Context mContext;
 
-    public TransportListPagerAdapter(FragmentManager fragmentManager, Context context) {
+    public RouteListPagerAdapter(FragmentManager fragmentManager, Context context) {
         super(fragmentManager);
         mContext = context;
     }
@@ -29,7 +29,7 @@ public class TransportListPagerAdapter extends FragmentPagerAdapter {
         types.add(TransportType.BUS);
         types.add(TransportType.TROLLEY);
         types.add(TransportType.TRAM);
-        return TransportListFragment.newInstance(types.get(position));
+        return RouteListFragment.newInstance(types.get(position));
     }
 
     @Override

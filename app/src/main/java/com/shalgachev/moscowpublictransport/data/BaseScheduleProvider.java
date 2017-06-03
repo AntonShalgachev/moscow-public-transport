@@ -12,7 +12,7 @@ public abstract class BaseScheduleProvider implements IScheduleProvider {
         if (!getRoutes(transportType).contains(route))
             throw new IllegalArgumentException("Invalid route");
 
-        if (!getDays(transportType, route).contains(days))
+        if (!getDaysMask(transportType, route).contains(days))
             throw new IllegalArgumentException("Invalid days");
 
         if (!getDirections(transportType, route, days).contains(direction))

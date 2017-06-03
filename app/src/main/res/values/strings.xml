@@ -10,4 +10,31 @@
     <string name="add_bus_title_extra">автобус</string>
     <string name="add_trolley_title_extra">троллейбус</string>
     <string name="add_tram_title_extra">трамвай</string>
+
+    <string name="select_stops">Выберите остановки:</string>
+    <string name="select_route">Укажите маршрут</string>
+
+    <string name="date_monday">понедельник</string>
+    <string name="date_tuesday">вторник</string>
+    <string name="date_wednesday">среда</string>
+    <string name="date_thursday">четверг</string>
+    <string name="date_friday">пятница</string>
+    <string name="date_saturday">суббота</string>
+    <string name="date_sunday">воскресенье</string>
+
+    <string name="date_monday_short">пн</string>
+    <string name="date_tuesday_short">вт</string>
+    <string name="date_wednesday_short">ср</string>
+    <string name="date_thursday_short">чт</string>
+    <string name="date_friday_short">пт</string>
+    <string name="date_saturday_short">сб</string>
+    <string name="date_sunday_short">вс</string>
+
+    <string name="date_all">Все дни</string>
+    <string name="date_weekdays">Будни</string>
+    <string name="date_weekends">Выходные</string>
+
+    <string name="date_delimiter">", "</string>
+    <string name="menu_done">Готово</string>
+    <string name="next_in">Ближайший через:</string>
 </resources>

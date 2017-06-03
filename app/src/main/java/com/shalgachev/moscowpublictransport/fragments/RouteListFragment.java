@@ -3,7 +3,6 @@ package com.shalgachev.moscowpublictransport.fragments;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,16 +18,16 @@ import com.shalgachev.moscowpublictransport.data.TransportType;
  * Created by anton on 5/26/2017.
  */
 
-public class TransportListFragment extends Fragment {
+public class RouteListFragment extends Fragment {
 
     private static final String ARG_TRANSPORT_TYPE = "transport_type";
 
-    public TransportListFragment() {
+    public RouteListFragment() {
 
     }
 
-    public static TransportListFragment newInstance(TransportType type) {
-        TransportListFragment fragment = new TransportListFragment();
+    public static RouteListFragment newInstance(TransportType type) {
+        RouteListFragment fragment = new RouteListFragment();
 
         Bundle args = new Bundle();
         args.putSerializable(ARG_TRANSPORT_TYPE, type);
@@ -39,7 +38,7 @@ public class TransportListFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_transport_list, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_route_list, container, false);
 
         FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {

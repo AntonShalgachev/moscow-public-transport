@@ -1,8 +1,6 @@
 package com.shalgachev.moscowpublictransport.activities;
 
-import android.content.Intent;
 import android.support.design.widget.TabLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -11,37 +9,34 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.shalgachev.moscowpublictransport.R;
-import com.shalgachev.moscowpublictransport.adapters.TransportListPagerAdapter;
+import com.shalgachev.moscowpublictransport.adapters.RouteListPagerAdapter;
 
-public class TransportListActivity extends AppCompatActivity {
+public class RouteListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_transport_list);
+        setContentView(R.layout.activity_route_list);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        TransportListPagerAdapter sectionsPagerAdapter = new TransportListPagerAdapter(getSupportFragmentManager(), this);
+        RouteListPagerAdapter sectionsPagerAdapter = new RouteListPagerAdapter(getSupportFragmentManager(), this);
 
         ViewPager viewPager = (ViewPager) findViewById(R.id.container);
         viewPager.setAdapter(sectionsPagerAdapter);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
-
-
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_transport_list, menu);
+        getMenuInflater().inflate(R.menu.menu_route_list, menu);
         return true;
     }
 
