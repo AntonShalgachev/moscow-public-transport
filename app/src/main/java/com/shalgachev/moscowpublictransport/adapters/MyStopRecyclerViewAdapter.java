@@ -39,7 +39,7 @@ public class MyStopRecyclerViewAdapter extends RecyclerView.Adapter<MyStopRecycl
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.stopListItem = mValues.get(position);
         holder.stop.setText(mValues.get(position).stop);
-        holder.nextIn.setText("Foreva");
+        holder.nextIn.setText(mValues.get(position).next);
         holder.checkBox.setChecked(mValues.get(position).selected);
 
         holder.view.setOnClickListener(new View.OnClickListener() {

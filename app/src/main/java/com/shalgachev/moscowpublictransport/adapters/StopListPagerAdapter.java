@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 
 import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
 import com.shalgachev.moscowpublictransport.data.StopListItem;
@@ -27,18 +28,15 @@ public class StopListPagerAdapter extends FragmentPagerAdapter {
     }
 
     private Context mContext;
+    FragmentManager mFragmentManager;
     private List<FragmentHolder> mFragmentHolders;
 
     public StopListPagerAdapter(FragmentManager fragmentManager, Context context) {
         super(fragmentManager);
         mContext = context;
+        mFragmentManager = fragmentManager;
 
         reset();
-    }
-
-    @Override
-    public Fragment getItem(int position) {
-        return mFragmentHolders.get(position).fragment;
     }
 
     @Override
@@ -47,8 +45,18 @@ public class StopListPagerAdapter extends FragmentPagerAdapter {
     }
 
     @Override
+    public Fragment getItem(int position) {
+        return mFragmentHolders.get(position).fragment;
+    }
+
+    @Override
     public CharSequence getPageTitle(int position) {
         return mFragmentHolders.get(position).title;
+    }
+
+    @Override
+    public int getItemPosition(Object object) {
+        return POSITION_NONE;
     }
 
     public void addTab(CharSequence daysMask, List<CharSequence> stopsList) {
@@ -64,6 +72,15 @@ public class StopListPagerAdapter extends FragmentPagerAdapter {
     }
 
     public void reset() {
+        if (mFragmentHolders != null) {
+            FragmentTransaction transaction = mFragmentManager.beginTransaction();
+            for (FragmentHolder holder : mFragmentHolders) {
+                transaction.remove(holder.fragment);
+            }
+            transaction.commit();
+            mFragmentManager.executePendingTransactions();
+        }
+
         mFragmentHolders = new ArrayList<>();
         notifyDataSetChanged();
     }
