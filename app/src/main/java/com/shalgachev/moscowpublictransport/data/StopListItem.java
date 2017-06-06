@@ -7,11 +7,19 @@ import java.io.Serializable;
  */
 
 public class StopListItem implements Serializable {
-    public final CharSequence stop;
-    public final CharSequence next;
+    public CharSequence providerId;
+    public CharSequence route;
+    public CharSequence daysMask;
+    public Direction direction;
+    public CharSequence stop;
+    public CharSequence next;
     public boolean selected;
 
-    public StopListItem(CharSequence stop, CharSequence next, boolean selected) {
+    public StopListItem(CharSequence providerId, CharSequence route, CharSequence daysMask, Direction direction, CharSequence stop, CharSequence next, boolean selected) {
+        this.providerId = providerId;
+        this.route = route;
+        this.daysMask = daysMask;
+        this.direction = direction;
         this.stop = stop;
         this.next = next;
         this.selected = selected;

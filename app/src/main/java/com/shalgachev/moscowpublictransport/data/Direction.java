@@ -2,11 +2,13 @@ package com.shalgachev.moscowpublictransport.data;
 
 import android.support.annotation.NonNull;
 
+import java.io.Serializable;
+
 /**
  * Created by anton on 5/28/2017.
  */
 
-public class Direction implements Comparable<Direction> {
+public class Direction implements Comparable<Direction>, Serializable {
     @Override
     public int hashCode() {
         int hash = 17;

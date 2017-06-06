@@ -59,13 +59,9 @@ public class StopListPagerAdapter extends FragmentPagerAdapter {
         return POSITION_NONE;
     }
 
-    public void addTab(CharSequence daysMask, List<CharSequence> stopsList) {
-        ArrayList<StopListItem> items = new ArrayList<>();
-        for (CharSequence name : stopsList)
-            items.add(new StopListItem(name, "Foreva", false));
-
+    public void addTab(CharSequence daysMask, ArrayList<StopListItem> stopListItems) {
         CharSequence title = ScheduleUtils.daysMaskToString(mContext, daysMask, true);
-        Fragment fragment = StopListFragment.newInstance(items);
+        Fragment fragment = StopListFragment.newInstance(stopListItems);
 
         mFragmentHolders.add(new FragmentHolder(title, fragment));
         notifyDataSetChanged();

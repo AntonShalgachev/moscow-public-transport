@@ -9,11 +9,12 @@ import java.util.List;
 public interface IScheduleProvider {
     List<TransportType> getTransportTypes();
     List<CharSequence> getRoutes(TransportType transportType);
-    List<CharSequence> getDaysMask(TransportType transportType, CharSequence route);
-    List<Direction> getDirections(TransportType transportType, CharSequence route, CharSequence days);
+    List<CharSequence> getDaysMasks(TransportType transportType, CharSequence route);
+    List<Direction> getDirections(TransportType transportType, CharSequence route, CharSequence daysMask);
     List<CharSequence> getStops(TransportType transportType, CharSequence route, CharSequence days, Direction direction);
 
     Schedule getSchedule(TransportType transportType, CharSequence route, CharSequence days, Direction direction, CharSequence stop);
 
+    CharSequence getProviderId();
     CharSequence getProviderName();
 }

@@ -13,12 +13,14 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.adapters.StopListPagerAdapter;
 import com.shalgachev.moscowpublictransport.data.Direction;
 import com.shalgachev.moscowpublictransport.data.DummyScheduleProvider;
 import com.shalgachev.moscowpublictransport.data.IScheduleProvider;
+import com.shalgachev.moscowpublictransport.data.StopListItem;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 
 import java.util.ArrayList;
@@ -63,7 +65,14 @@ public class AddTransportActivity extends AppCompatActivity {
                 finish();
                 break;
             case R.id.add_transport_done:
-                finish();
+                if (mStopListItems != null) {
+                    StringBuilder text = new StringBuilder("Following stops selected:\n");
+                    for (StopListItem stopListItem : mStopListItems)
+                        if (stopListItem.selected)
+                            text.append(stopListItem.stop).append("\n");
+                    Toast.makeText(this, text.toString(), Toast.LENGTH_SHORT).show();
+                }
+//                finish();
                 break;
         }
 
@@ -92,22 +101,16 @@ public class AddTransportActivity extends AppCompatActivity {
     }
 
     private void loadRoutes() {
-        // FIXME: 6/2/2017 implement own adapter and don't iterate over routes
-        ArrayList<String> routes = new ArrayList<>();
-        for (CharSequence route : mScheduleProvider.getRoutes(mTransportType)) {
-            routes.add(route.toString());
-        }
+        List<CharSequence> routes = mScheduleProvider.getRoutes(mTransportType);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_dropdown_item_1line, routes);
-
+        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, routes);
         mRouteTextView.setAdapter(adapter);
 
         mRouteTextView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if(actionId== EditorInfo.IME_ACTION_DONE){
-                    mRoute = mRouteTextView.getText();
+                    mRoute = mRouteTextView.getText().toString();
                     loadDirections();
                 }
                 return false;
@@ -118,7 +121,7 @@ public class AddTransportActivity extends AppCompatActivity {
     private void loadDirections() {
         Set<Direction> directionsSet = new TreeSet<>();
 
-        for (CharSequence day : mScheduleProvider.getDaysMask(mTransportType, mRoute)) {
+        for (CharSequence day : mScheduleProvider.getDaysMasks(mTransportType, mRoute)) {
             for (Direction direction : mScheduleProvider.getDirections(mTransportType, mRoute, day)) {
                 directionsSet.add(direction);
             }
@@ -150,21 +153,19 @@ public class AddTransportActivity extends AppCompatActivity {
     }
 
     private void loadStops() {
+        mStopListItems = new ArrayList<>();
         mPagerAdapter.reset();
-        for (CharSequence daysMask : mScheduleProvider.getDaysMask(mTransportType, mRoute)) {
-            List<CharSequence> stops = mScheduleProvider.getStops(mTransportType, mRoute, daysMask, getCurrentDirection());
 
-            mPagerAdapter.addTab(daysMask, stops);
+        for (CharSequence daysMask : mScheduleProvider.getDaysMasks(mTransportType, mRoute)) {
+            ArrayList<StopListItem> tabStopListItems = new ArrayList<>();
+            for (CharSequence stop : mScheduleProvider.getStops(mTransportType, mRoute, daysMask, getCurrentDirection())) {
+                StopListItem item = new StopListItem(mScheduleProvider.getProviderId(), mRoute, daysMask, getCurrentDirection(), stop, "Neva", false);
+                mStopListItems.add(item);
+                tabStopListItems.add(item);
+            }
+
+            mPagerAdapter.addTab(daysMask, tabStopListItems);
         }
-    }
-
-    private List<CharSequence> mergeStops(List<List<CharSequence>> stopsList) {
-        Set<CharSequence> allStops = new HashSet<>();
-        for (List<CharSequence> stops : stopsList) {
-            allStops.addAll(stops);
-        }
-
-        return new ArrayList<>(allStops);
     }
 
     private TransportData getTransportData() {
@@ -208,6 +209,8 @@ public class AddTransportActivity extends AppCompatActivity {
     private CharSequence mRoute;
     private ArrayList<Direction> mDirections;
     private int mDirectionIdx;
+
+    private ArrayList<StopListItem> mStopListItems;
 
     private StopListPagerAdapter mPagerAdapter;
 }
