@@ -38,7 +38,7 @@ public class MyStopRecyclerViewAdapter extends RecyclerView.Adapter<MyStopRecycl
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.stopListItem = mValues.get(position);
-        holder.stop.setText(mValues.get(position).stop);
+        holder.stop.setText(mValues.get(position).stop.name);
         holder.nextIn.setText(mValues.get(position).next);
         holder.checkBox.setChecked(mValues.get(position).selected);
 
