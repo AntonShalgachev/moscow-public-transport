@@ -10,19 +10,11 @@ import java.util.Set;
 
 public class Schedule {
     private ScheduleType mScheduleType;
-    private TransportType mTransportType;
-    private CharSequence mRoute;
-    private CharSequence mDayMask;
-    private Direction mDirection;
-    private CharSequence mStop;
+    private Stop mStop;
     private HashMap<Integer, Set<Integer>> mTimepoints;
 
-    public void setAsTimepoints(TransportType transportType, CharSequence route, CharSequence dayMask, Direction direction, CharSequence stop, Map<Integer, Set<Integer>> timepoints) {
+    public void setAsTimepoints(Stop stop, Map<Integer, Set<Integer>> timepoints) {
         mScheduleType = ScheduleType.TIMEPOINTS;
-        mTransportType = transportType;
-        mRoute = route;
-        mDayMask = dayMask;
-        mDirection = direction;
         mStop = stop;
         mTimepoints = new HashMap<>(timepoints);
     }
@@ -31,23 +23,7 @@ public class Schedule {
         return mScheduleType;
     }
 
-    public TransportType getTransportType() {
-        return mTransportType;
-    }
-
-    public CharSequence getRoute() {
-        return mRoute;
-    }
-
-    public CharSequence getDayMask() {
-        return mDayMask;
-    }
-
-    public Direction getDirection() {
-        return mDirection;
-    }
-
-    public CharSequence getStop() {
+    public Stop getStop() {
         return mStop;
     }
 

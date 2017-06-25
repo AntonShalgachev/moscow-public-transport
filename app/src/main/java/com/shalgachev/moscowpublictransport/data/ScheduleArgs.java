@@ -1,5 +1,7 @@
 package com.shalgachev.moscowpublictransport.data;
 
+import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
+
 /**
  * Created by anton on 6/13/2017.
  */
@@ -21,10 +23,10 @@ public class ScheduleArgs {
         return args;
     }
 
-    BaseScheduleProvider.OperationType operationType;
-    TransportType transportType;
-    CharSequence route;
-    CharSequence daysMask;
-    Direction direction;
-    CharSequence stop;
+    public BaseScheduleProvider.OperationType operationType;
+    public TransportType transportType;
+    public CharSequence route;
+    public CharSequence daysMask;
+    public Direction direction;
+    public CharSequence stop;
 }

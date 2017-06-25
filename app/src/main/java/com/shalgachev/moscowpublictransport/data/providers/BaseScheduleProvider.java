@@ -1,6 +1,10 @@
-package com.shalgachev.moscowpublictransport.data;
+package com.shalgachev.moscowpublictransport.data.providers;
 
-import android.os.AsyncTask;
+import com.shalgachev.moscowpublictransport.data.Schedule;
+import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
+import com.shalgachev.moscowpublictransport.data.ScheduleTask;
+import com.shalgachev.moscowpublictransport.data.Stop;
+import com.shalgachev.moscowpublictransport.data.TransportType;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,7 +35,7 @@ public abstract class BaseScheduleProvider {
     private static void createScheduleProviders() {
         Set<BaseScheduleProvider> providers = new HashSet<>();
         providers.add(new DummyScheduleProvider());
-//        providers.add(new MosgortransScheduleProvider());
+        providers.add(new MosgortransScheduleProvider());
 
         mScheduleProviders = new HashMap<>();
         for (BaseScheduleProvider provider : providers) {

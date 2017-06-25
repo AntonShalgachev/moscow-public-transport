@@ -1,11 +1,13 @@
 package com.shalgachev.moscowpublictransport.activities;
 
 import android.app.ProgressDialog;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.StringRes;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -20,7 +22,7 @@ import android.widget.Toast;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.adapters.StopListPagerAdapter;
-import com.shalgachev.moscowpublictransport.data.BaseScheduleProvider;
+import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
 import com.shalgachev.moscowpublictransport.data.Direction;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
 import com.shalgachev.moscowpublictransport.data.ScheduleTask;
@@ -48,9 +50,9 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
 
         mTransportType = (TransportType) getIntent().getExtras().getSerializable("transport_type");
         if (mTransportType == null)
-            throw new IllegalArgumentException("Transport type is null");
+            throw new IllegalArgumentException("Transport transportType is null");
 
-        mScheduleProvider = BaseScheduleProvider.getScheduleProvider("dummy");
+        mScheduleProvider = BaseScheduleProvider.getScheduleProvider("mosgortrans");
 
         initActivity();
 
@@ -151,6 +153,11 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
     }
 
     private void onStopsAvailable() {
+        if (mStops.isEmpty()) {
+            showErrorMessage(R.string.error_loading_stops);
+            return;
+        }
+
         Set<Direction> directions = new HashSet<>();
         mStopListItems = new ArrayList<>();
         for (Stop stop : mStops) {
@@ -204,6 +211,9 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
     }
 
     private Direction getCurrentDirection() {
+        if (mDirections == null)
+            return null;
+
         return mDirections.get(mDirectionIdx);
     }
 
@@ -267,10 +277,25 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
                 transportData.iconImageResource = R.drawable.tram;
                 break;
             default:
-                throw new IllegalArgumentException("Unexpected transport type");
+                throw new IllegalArgumentException("Unexpected transport transportType");
         }
 
         return transportData;
+    }
+
+    private void showErrorMessage(@StringRes int messageId) {
+        AlertDialog.Builder builder;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Light_Dialog_NoActionBar);
+        } else {
+            builder = new AlertDialog.Builder(this);
+        }
+
+        builder.setTitle(R.string.error_title)
+                .setMessage(messageId)
+                .setPositiveButton(android.R.string.ok, null)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
 
     private class TransportData {

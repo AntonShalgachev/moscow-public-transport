@@ -7,8 +7,9 @@ import java.io.Serializable;
  */
 
 public class Stop implements Serializable {
-    Stop(CharSequence providerId, CharSequence route, CharSequence daysMask, Direction direction, CharSequence name) {
+    public Stop(CharSequence providerId, TransportType transportType, CharSequence route, CharSequence daysMask, Direction direction, CharSequence name) {
         this.providerId = providerId;
+        this.transportType = transportType;
         this.route = route;
         this.daysMask = daysMask;
         this.direction = direction;
@@ -16,6 +17,7 @@ public class Stop implements Serializable {
     }
 
     public CharSequence providerId;
+    public TransportType transportType;
     public CharSequence route;
     public CharSequence daysMask;
     public Direction direction;

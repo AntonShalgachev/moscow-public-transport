@@ -2,6 +2,8 @@ package com.shalgachev.moscowpublictransport.data;
 
 import android.os.AsyncTask;
 
+import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
+
 /**
  * Created by anton on 6/24/2017.
  */

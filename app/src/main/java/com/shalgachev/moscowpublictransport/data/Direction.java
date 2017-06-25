@@ -42,6 +42,15 @@ public class Direction implements Comparable<Direction>, Serializable {
         mTo = to;
     }
 
+    public Direction(CharSequence id) {
+        mId = id;
+    }
+
+    public void setEndpoints(CharSequence from, CharSequence to) {
+        mFrom = from;
+        mTo = to;
+    }
+
     public CharSequence getFrom() {
         return mFrom;
     }

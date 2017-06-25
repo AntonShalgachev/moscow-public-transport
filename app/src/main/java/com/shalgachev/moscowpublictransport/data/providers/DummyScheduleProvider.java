@@ -1,6 +1,13 @@
-package com.shalgachev.moscowpublictransport.data;
+package com.shalgachev.moscowpublictransport.data.providers;
 
+import android.net.Uri;
 import android.util.Log;
+
+import com.shalgachev.moscowpublictransport.data.Direction;
+import com.shalgachev.moscowpublictransport.data.Schedule;
+import com.shalgachev.moscowpublictransport.data.Stop;
+import com.shalgachev.moscowpublictransport.data.TransportType;
+import com.shalgachev.moscowpublictransport.data.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,17 +51,15 @@ public class DummyScheduleProvider extends BaseScheduleProvider {
     }
 
     private List<TransportType> getTransportTypes() {
-        ArrayList<TransportType> transportTypes = new ArrayList<>();
-        transportTypes.add(TransportType.BUS);
-        transportTypes.add(TransportType.TRAM);
-        transportTypes.add(TransportType.TROLLEY);
-
-        return transportTypes;
+        return new ArrayList<>(Arrays.asList(
+                TransportType.BUS,
+                TransportType.TRAM,
+                TransportType.TROLLEY
+        ));
     }
 
     private List<CharSequence> getRoutes() {
-//        return new ArrayList<CharSequence>(Arrays.asList("268", "268К", "5Э"));
-        return Utils.fetchUrlAsList("http://www.mosgortrans.org/pass3/request.ajax.php?list=ways&type=avto");
+        return new ArrayList<CharSequence>(Arrays.asList("268", "268К", "5Э"));
     }
 
     private List<CharSequence> getDaysMasks() {
@@ -66,19 +71,25 @@ public class DummyScheduleProvider extends BaseScheduleProvider {
     }
 
     private List<Stop> getStops(CharSequence route, CharSequence daysMask, Direction direction) {
-//        CharSequence route = getArgs().route;
-//        CharSequence daysMask = getArgs().daysMask;
-//        Direction direction = getArgs().direction;
-
         List<CharSequence> stopNames;
-        if (direction.getId().equals("1"))
-            stopNames = new ArrayList<CharSequence>(Arrays.asList("Нижние подзалупки", "Дратути", "Берлин", "Карманово", "WTF", "Верхние подзалупки"));
-        else
-            stopNames = new ArrayList<CharSequence>(Arrays.asList("Верхние подзалупки", "WTF", "Карманово", "Берлин", "Дратути", "Нижние подзалупки"));
+
+        if (daysMask.equals("1111100")) {
+            if (direction.getId().equals("1")) {
+                stopNames = new ArrayList<CharSequence>(Arrays.asList("Нижние подзалупки", "Дратути", "Берлин", "Карманово", "WTF", "Верхние подзалупки"));
+            } else {
+                stopNames = new ArrayList<CharSequence>(Arrays.asList("Верхние подзалупки", "WTF", "Карманово", "Берлин", "Дратути", "Нижние подзалупки"));
+            }
+        } else {
+            if (direction.getId().equals("1")) {
+                stopNames = new ArrayList<CharSequence>(Arrays.asList("Нижние подзалупки (вых)", "Дратути (вых)", "Берлин (вых)", "Карманово (вых)", "WTF (вых)", "Верхние подзалупки (вых)"));
+            } else {
+                stopNames = new ArrayList<CharSequence>(Arrays.asList("Верхние подзалупки (вых)", "WTF (вых)", "Карманово (вых)", "Берлин (вых)", "Дратути (вых)", "Нижние подзалупки (вых)"));
+            }
+        }
 
         List<Stop> stops = new ArrayList<>();
         for(CharSequence name : stopNames) {
-            Stop stop = new Stop(getProviderId(), route, daysMask, direction, name);
+            Stop stop = new Stop(getProviderId(), getArgs().transportType, route, daysMask, direction, name);
             stops.add(stop);
         }
 
@@ -107,7 +118,7 @@ public class DummyScheduleProvider extends BaseScheduleProvider {
         timepoints.put(11, new HashSet<>(Arrays.asList(0, 10, 20, 30, 40, 50)));
 
         Schedule schedule = new Schedule();
-        schedule.setAsTimepoints(getArgs().transportType, getArgs().route, getArgs().daysMask, getArgs().direction, getArgs().stop, timepoints);
+        schedule.setAsTimepoints(null, timepoints);
 
         return schedule;
     }
