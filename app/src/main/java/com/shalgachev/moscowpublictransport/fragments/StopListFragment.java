@@ -3,7 +3,6 @@ package com.shalgachev.moscowpublictransport.fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,7 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.shalgachev.moscowpublictransport.R;
-import com.shalgachev.moscowpublictransport.adapters.MyStopRecyclerViewAdapter;
+import com.shalgachev.moscowpublictransport.adapters.StopListRecyclerViewAdapter;
 import com.shalgachev.moscowpublictransport.data.StopListItem;
 
 import java.io.Serializable;
@@ -66,7 +65,7 @@ public class StopListFragment extends Fragment {
             Context context = view.getContext();
             RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            recyclerView.setAdapter(new MyStopRecyclerViewAdapter(mItems, mListener));
+            recyclerView.setAdapter(new StopListRecyclerViewAdapter(mItems, mListener));
         }
         return view;
     }

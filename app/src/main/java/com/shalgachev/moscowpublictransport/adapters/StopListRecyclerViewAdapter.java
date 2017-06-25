@@ -19,12 +19,12 @@ import java.util.List;
  * specified {@link OnListFragmentInteractionListener}.
  * TODO: Replace the implementation with code for your data type.
  */
-public class MyStopRecyclerViewAdapter extends RecyclerView.Adapter<MyStopRecyclerViewAdapter.ViewHolder> {
+public class StopListRecyclerViewAdapter extends RecyclerView.Adapter<StopListRecyclerViewAdapter.ViewHolder> {
 
     private final List<StopListItem> mValues;
     private final OnListFragmentInteractionListener mListener;
 
-    public MyStopRecyclerViewAdapter(List<StopListItem> items, OnListFragmentInteractionListener listener) {
+    public StopListRecyclerViewAdapter(List<StopListItem> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
