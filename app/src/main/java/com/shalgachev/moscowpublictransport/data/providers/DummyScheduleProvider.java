@@ -1,13 +1,11 @@
 package com.shalgachev.moscowpublictransport.data.providers;
 
-import android.net.Uri;
 import android.util.Log;
 
 import com.shalgachev.moscowpublictransport.data.Direction;
 import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.TransportType;
-import com.shalgachev.moscowpublictransport.data.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,7 +86,7 @@ public class DummyScheduleProvider extends BaseScheduleProvider {
         }
 
         List<Stop> stops = new ArrayList<>();
-        for(CharSequence name : stopNames) {
+        for (CharSequence name : stopNames) {
             Stop stop = new Stop(getProviderId(), getArgs().transportType, route, daysMask, direction, name);
             stops.add(stop);
         }

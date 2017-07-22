@@ -18,7 +18,7 @@ import java.util.List;
  * Created by anton on 7/2/2017.
  */
 
-    public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
+public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
     public static final String TABLE_SAVED_STOPS = "saved_stops";
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_PROVIDER_ID = "provider_id";
@@ -89,7 +89,7 @@ import java.util.List;
 
         SQLiteDatabase db = getReadableDatabase();
 
-        Cursor cursor = db.query(TABLE_SAVED_STOPS, new String[] {
+        Cursor cursor = db.query(TABLE_SAVED_STOPS, new String[]{
                         COLUMN_ID,
                         COLUMN_PROVIDER_ID,
                         COLUMN_TRANSPORT_TYPE,
@@ -100,7 +100,7 @@ import java.util.List;
                         COLUMN_DIRECTION_TO,
                         COLUMN_NAME,
                 },
-                COLUMN_ID + " = ?", new String[] {String.valueOf(id)}, null, null, null, null);
+                COLUMN_ID + " = ?", new String[]{String.valueOf(id)}, null, null, null, null);
 
         if (cursor == null || !cursor.moveToFirst())
             return null;
@@ -118,7 +118,7 @@ import java.util.List;
         SQLiteDatabase db = getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        while(cursor.moveToNext()) {
+        while (cursor.moveToNext()) {
             stops.add(cursorToStop(cursor));
         }
 
@@ -133,14 +133,14 @@ import java.util.List;
         String selectQuery = "SELECT * FROM " + TABLE_SAVED_STOPS + "WHERE "
                 + COLUMN_TRANSPORT_TYPE + " = ?";
 
-        String[] selectArgs = new String[] {
+        String[] selectArgs = new String[]{
                 transportTypeToString(transportType)
         };
 
         SQLiteDatabase db = getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, selectArgs);
 
-        while(cursor.moveToNext()) {
+        while (cursor.moveToNext()) {
             stops.add(cursorToStop(cursor));
         }
 
@@ -159,7 +159,7 @@ import java.util.List;
                 + " AND " + COLUMN_DIRECTION_ID + " = ?"
                 + " AND " + COLUMN_NAME + " = ?";
 
-        String[] args = new String[] {
+        String[] args = new String[]{
                 stop.providerId.toString(), transportTypeToString(stop.transportType), stop.route.toString(), stop.daysMask.toString(),
                 stop.direction.getId().toString(),
                 stop.name.toString()
@@ -207,7 +207,7 @@ import java.util.List;
                     break;
             }
         }
-        
+
         Direction direction = new Direction(direction_id, direction_from, direction_to);
         return new Stop(provider_id, stringToTransportType(transport_type), route, days_mask, direction, name);
     }

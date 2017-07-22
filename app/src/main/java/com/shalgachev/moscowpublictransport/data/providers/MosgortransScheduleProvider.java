@@ -21,49 +21,9 @@ import java.util.Set;
  */
 
 public class MosgortransScheduleProvider extends BaseScheduleProvider {
-    private enum MetadataListType {
-        ROUTES,
-        DAYS_MASKS,
-        DIRECTIONS,
-        STOPS
-    }
-
     private static final String LOG_TAG = "MosgortransSP";
     private static final CharSequence PROVIDER_ID = "mosgortrans";
     private static final String BASE_METADATA_URL = "http://www.mosgortrans.org/pass3/request.ajax.php?";
-
-    @Override
-    public Result run() {
-        Result result = new Result();
-
-        TransportType transportType = getArgs().transportType;
-        CharSequence route = getArgs().route;
-
-        switch (getArgs().operationType) {
-            case TYPES:
-                result.transportTypes = getTransportTypes();
-                break;
-            case ROUTES:
-                result.routes = getRoutes(transportType);
-                break;
-            case STOPS:
-                result.stops = getStops(transportType, route);
-                break;
-            case SCHEDULE:
-                result.schedule = getSchedule(null);
-                break;
-        }
-
-        return result;
-    }
-
-    private List<TransportType> getTransportTypes() {
-        return new ArrayList<>(Arrays.asList(
-                TransportType.BUS,
-                TransportType.TRAM,
-                TransportType.TROLLEY
-        ));
-    }
 
     private static List<CharSequence> getRoutes(TransportType transportType) {
         String url = constructMetadataUrl(MetadataListType.ROUTES, transportType);
@@ -106,7 +66,7 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
         List<CharSequence> stopList = Utils.fetchUrlAsList(url);
 
         List<Stop> stops = new ArrayList<>();
-        for(CharSequence name : stopList) {
+        for (CharSequence name : stopList) {
             Stop stop = new Stop(PROVIDER_ID, transportType, route, daysMask, direction, name);
             stops.add(stop);
         }
@@ -139,10 +99,6 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
         schedule.setAsTimepoints(stop, timepoints);
 
         return schedule;
-    }
-
-    public CharSequence getProviderId() {
-        return PROVIDER_ID;
     }
 
     private static String getTransportTypeId(TransportType type) {
@@ -207,5 +163,49 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
             directionId = direction.getId();
 
         return constructMetadataUrl(listType, transportType, route, daysMask, directionId);
+    }
+
+    @Override
+    public Result run() {
+        Result result = new Result();
+
+        TransportType transportType = getArgs().transportType;
+        CharSequence route = getArgs().route;
+
+        switch (getArgs().operationType) {
+            case TYPES:
+                result.transportTypes = getTransportTypes();
+                break;
+            case ROUTES:
+                result.routes = getRoutes(transportType);
+                break;
+            case STOPS:
+                result.stops = getStops(transportType, route);
+                break;
+            case SCHEDULE:
+                result.schedule = getSchedule(null);
+                break;
+        }
+
+        return result;
+    }
+
+    private List<TransportType> getTransportTypes() {
+        return new ArrayList<>(Arrays.asList(
+                TransportType.BUS,
+                TransportType.TRAM,
+                TransportType.TROLLEY
+        ));
+    }
+
+    public CharSequence getProviderId() {
+        return PROVIDER_ID;
+    }
+
+    private enum MetadataListType {
+        ROUTES,
+        DAYS_MASKS,
+        DIRECTIONS,
+        STOPS
     }
 }

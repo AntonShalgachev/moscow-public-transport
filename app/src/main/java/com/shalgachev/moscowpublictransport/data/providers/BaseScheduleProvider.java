@@ -17,20 +17,8 @@ import java.util.Set;
  */
 
 public abstract class BaseScheduleProvider {
-    public class Result {
-        public OperationType operationType;
-        public List<TransportType> transportTypes;
-        public List<CharSequence> routes;
-        public List<Stop> stops;
-        public Schedule schedule;
-    }
-
-    public enum OperationType {
-        TYPES,
-        ROUTES,
-        STOPS,
-        SCHEDULE
-    }
+    private static Map<CharSequence, BaseScheduleProvider> mScheduleProviders;
+    private ScheduleArgs mArgs;
 
     private static void createScheduleProviders() {
         Set<BaseScheduleProvider> providers = new HashSet<>();
@@ -53,11 +41,12 @@ public abstract class BaseScheduleProvider {
         return mScheduleProviders.get(id);
     }
 
-    public void setArgs(ScheduleArgs args) {
-        mArgs = args;
-    }
     public ScheduleArgs getArgs() {
         return mArgs;
+    }
+
+    public void setArgs(ScheduleArgs args) {
+        mArgs = args;
     }
 
     public ScheduleTask createTask() {
@@ -65,9 +54,21 @@ public abstract class BaseScheduleProvider {
     }
 
     public abstract Result run();
+
     public abstract CharSequence getProviderId();
 
-    private ScheduleArgs mArgs;
+    public enum OperationType {
+        TYPES,
+        ROUTES,
+        STOPS,
+        SCHEDULE
+    }
 
-    private static Map<CharSequence, BaseScheduleProvider> mScheduleProviders;
+    public class Result {
+        public OperationType operationType;
+        public List<TransportType> transportTypes;
+        public List<CharSequence> routes;
+        public List<Stop> stops;
+        public Schedule schedule;
+    }
 }

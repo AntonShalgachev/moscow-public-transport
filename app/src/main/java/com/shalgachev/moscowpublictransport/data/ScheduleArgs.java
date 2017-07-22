@@ -6,6 +6,13 @@ import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
  * Created by anton on 6/13/2017.
  */
 public class ScheduleArgs {
+    public BaseScheduleProvider.OperationType operationType;
+    public TransportType transportType;
+    public CharSequence route;
+    public CharSequence daysMask;
+    public Direction direction;
+    public CharSequence stop;
+
     public static ScheduleArgs asRoutesArgs(TransportType type) {
         ScheduleArgs args = new ScheduleArgs();
         args.operationType = BaseScheduleProvider.OperationType.ROUTES;
@@ -22,11 +29,4 @@ public class ScheduleArgs {
 
         return args;
     }
-
-    public BaseScheduleProvider.OperationType operationType;
-    public TransportType transportType;
-    public CharSequence route;
-    public CharSequence daysMask;
-    public Direction direction;
-    public CharSequence stop;
 }

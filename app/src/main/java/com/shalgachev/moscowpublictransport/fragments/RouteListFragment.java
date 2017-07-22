@@ -26,6 +26,8 @@ import java.util.List;
 public class RouteListFragment extends Fragment {
 
     private static final String ARG_TRANSPORT_TYPE = "transport_type";
+    private ListView mListView;
+    private TransportType mTransportType;
 
     public RouteListFragment() {
 
@@ -87,12 +89,9 @@ public class RouteListFragment extends Fragment {
         ArrayAdapter<String> listViewAdapter = new ArrayAdapter<>(
                 getActivity(),
                 android.R.layout.simple_list_item_1,
-                names.toArray(new String[] {})
+                names.toArray(new String[]{})
         );
 
         mListView.setAdapter(listViewAdapter);
     }
-
-    private ListView mListView;
-    private TransportType mTransportType;
 }

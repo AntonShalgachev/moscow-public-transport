@@ -9,6 +9,20 @@ import java.io.Serializable;
  */
 
 public class Direction implements Comparable<Direction>, Serializable {
+    private CharSequence mId;
+    private CharSequence mFrom;
+    private CharSequence mTo;
+
+    public Direction(CharSequence id, CharSequence from, CharSequence to) {
+        mId = id;
+        mFrom = from;
+        mTo = to;
+    }
+
+    public Direction(CharSequence id) {
+        mId = id;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -30,16 +44,6 @@ public class Direction implements Comparable<Direction>, Serializable {
         return other.getId().toString().compareTo(other.toString());
     }
 
-    public Direction(CharSequence id, CharSequence from, CharSequence to) {
-        mId = id;
-        mFrom = from;
-        mTo = to;
-    }
-
-    public Direction(CharSequence id) {
-        mId = id;
-    }
-
     public void setEndpoints(CharSequence from, CharSequence to) {
         mFrom = from;
         mTo = to;
@@ -56,8 +60,4 @@ public class Direction implements Comparable<Direction>, Serializable {
     public CharSequence getId() {
         return mId;
     }
-
-    private CharSequence mId;
-    private CharSequence mFrom;
-    private CharSequence mTo;
 }

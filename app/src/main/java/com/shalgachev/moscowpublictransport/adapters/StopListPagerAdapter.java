@@ -18,19 +18,9 @@ import java.util.List;
  */
 
 public class StopListPagerAdapter extends FragmentPagerAdapter {
-    private class FragmentHolder {
-        FragmentHolder(CharSequence title, Fragment fragment) {
-            this.title = title;
-            this.fragment = fragment;
-        }
-        private CharSequence title;
-        private Fragment fragment;
-    }
-
-    private Context mContext;
     FragmentManager mFragmentManager;
+    private Context mContext;
     private List<FragmentHolder> mFragmentHolders;
-
     public StopListPagerAdapter(FragmentManager fragmentManager, Context context) {
         super(fragmentManager);
         mContext = context;
@@ -79,5 +69,14 @@ public class StopListPagerAdapter extends FragmentPagerAdapter {
 
         mFragmentHolders = new ArrayList<>();
         notifyDataSetChanged();
+    }
+
+    private class FragmentHolder {
+        private CharSequence title;
+        private Fragment fragment;
+        FragmentHolder(CharSequence title, Fragment fragment) {
+            this.title = title;
+            this.fragment = fragment;
+        }
     }
 }

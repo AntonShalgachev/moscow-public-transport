@@ -7,8 +7,6 @@ import com.shalgachev.moscowpublictransport.data.TransportType;
  */
 
 public class SQLStop {
-    private long id;
-
     public CharSequence providerId;
     public TransportType transportType;
     public CharSequence route;
@@ -17,6 +15,7 @@ public class SQLStop {
     public CharSequence directionFrom;
     public CharSequence directionTo;
     public CharSequence name;
+    private long id;
 
     public long getId() {
         return id;

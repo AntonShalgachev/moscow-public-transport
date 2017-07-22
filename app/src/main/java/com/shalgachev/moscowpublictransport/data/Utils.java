@@ -2,7 +2,6 @@ package com.shalgachev.moscowpublictransport.data;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
@@ -42,7 +41,7 @@ public class Utils {
             in.close();
 
             return response.toString();
-        } catch(java.io.IOException e) {
+        } catch (java.io.IOException e) {
             return "";
         }
     }

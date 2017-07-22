@@ -7,6 +7,12 @@ import java.io.Serializable;
  */
 
 public class Stop implements Serializable {
+    public CharSequence providerId;
+    public TransportType transportType;
+    public CharSequence route;
+    public CharSequence daysMask;
+    public Direction direction;
+    public CharSequence name;
     public Stop(CharSequence providerId, TransportType transportType, CharSequence route, CharSequence daysMask, Direction direction, CharSequence name) {
         this.providerId = providerId;
         this.transportType = transportType;
@@ -15,13 +21,6 @@ public class Stop implements Serializable {
         this.direction = direction;
         this.name = name;
     }
-
-    public CharSequence providerId;
-    public TransportType transportType;
-    public CharSequence route;
-    public CharSequence daysMask;
-    public Direction direction;
-    public CharSequence name;
 
     @Override
     public boolean equals(Object o) {

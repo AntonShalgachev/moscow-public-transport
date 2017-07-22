@@ -9,9 +9,8 @@ import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
  */
 
 public class ScheduleTask extends AsyncTask<Void, Void, BaseScheduleProvider.Result> {
-    public interface IScheduleReceiver {
-        void onScheduleProviderExecuted(BaseScheduleProvider.Result result);
-    }
+    BaseScheduleProvider mProvider;
+    private IScheduleReceiver mReceiver;
 
     public ScheduleTask(BaseScheduleProvider provider) {
         mProvider = provider;
@@ -53,7 +52,7 @@ public class ScheduleTask extends AsyncTask<Void, Void, BaseScheduleProvider.Res
         result.operationType = mProvider.getArgs().operationType;
         return result;
     }
-
-    BaseScheduleProvider mProvider;
-    private IScheduleReceiver mReceiver;
+    public interface IScheduleReceiver {
+        void onScheduleProviderExecuted(BaseScheduleProvider.Result result);
+    }
 }

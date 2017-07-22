@@ -22,14 +22,14 @@ import android.widget.Toast;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.adapters.StopListPagerAdapter;
-import com.shalgachev.moscowpublictransport.data.db.SavedStopsSQLiteHelper;
-import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
 import com.shalgachev.moscowpublictransport.data.Direction;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
 import com.shalgachev.moscowpublictransport.data.ScheduleTask;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.StopListItem;
 import com.shalgachev.moscowpublictransport.data.TransportType;
+import com.shalgachev.moscowpublictransport.data.db.SavedStopsSQLiteHelper;
+import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,6 +39,20 @@ import java.util.Map;
 import java.util.Set;
 
 public class AddTransportActivity extends AppCompatActivity implements ScheduleTask.IScheduleReceiver {
+    private TransportType mTransportType;
+    private BaseScheduleProvider mScheduleProvider;
+    private AutoCompleteTextView mRouteTextView;
+    private TextView mDirectionFromTextView;
+    private TextView mDirectionToTextView;
+    private List<CharSequence> mRoutes;
+    private CharSequence mRoute;
+    private ArrayList<Direction> mDirections;
+    private int mDirectionIdx;
+    private List<Stop> mStops;
+    private ArrayList<StopListItem> mStopListItems;
+    private StopListPagerAdapter mPagerAdapter;
+    private ProgressDialog mProgressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -177,7 +191,7 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
         mRouteTextView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if(actionId== EditorInfo.IME_ACTION_DONE){
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
                     mRoute = mRouteTextView.getText().toString();
 
                     loadStops();
@@ -310,27 +324,14 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
     }
 
     private class TransportData {
-        private @StringRes int titleExtraResource;
-        private @DrawableRes int iconBackgroundResource;
-        private @DrawableRes int iconImageResource;
+        private
+        @StringRes
+        int titleExtraResource;
+        private
+        @DrawableRes
+        int iconBackgroundResource;
+        private
+        @DrawableRes
+        int iconImageResource;
     }
-
-    private TransportType mTransportType;
-    private BaseScheduleProvider mScheduleProvider;
-
-    private AutoCompleteTextView mRouteTextView;
-    private TextView mDirectionFromTextView;
-    private TextView mDirectionToTextView;
-
-    private List<CharSequence> mRoutes;
-    private CharSequence mRoute;
-    private ArrayList<Direction> mDirections;
-    private int mDirectionIdx;
-    private List<Stop> mStops;
-
-    private ArrayList<StopListItem> mStopListItems;
-
-    private StopListPagerAdapter mPagerAdapter;
-
-    private ProgressDialog mProgressDialog;
 }
