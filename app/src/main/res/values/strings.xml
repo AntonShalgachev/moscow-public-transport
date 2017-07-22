@@ -47,4 +47,7 @@
 
     <string name="error_title">Внутренняя ошибка</string>
     <string name="error_loading_stops">Невозможно загрузить остановки</string>
+
+    <string name="toast_stops_saved">Добавлено остановок: %d</string>
+    <string name="toast_stops_deleted">Удалено остановок: %d</string>
 </resources>

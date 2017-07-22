@@ -86,26 +86,39 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
         if (mStopListItems == null)
             return;
 
-        StringBuilder text = new StringBuilder("Following stops selected:\n");
-        for (StopListItem stopListItem : mStopListItems)
-            if (stopListItem.selected)
-                text.append("'").append(stopListItem.stop.name).append("'").append("\n");
-        Toast.makeText(this, text.toString(), Toast.LENGTH_LONG).show();
-
         SavedStopsSQLiteHelper db = new SavedStopsSQLiteHelper(this);
         List<Stop> savedStops = db.getStops();
+
+        int stopsSaved = 0;
+        int stopsDeleted = 0;
 
         for (StopListItem stopListItem : mStopListItems) {
             Stop stop = stopListItem.stop;
             boolean isStopSaved = savedStops.contains(stop);
             if (stopListItem.selected && !isStopSaved) {
                 db.addStop(stop);
+                stopsSaved++;
             } else if (!stopListItem.selected && isStopSaved) {
                 db.deleteStop(stop);
+                stopsDeleted++;
             }
         }
 
         db.close();
+
+        if (stopsSaved > 0 || stopsDeleted > 0) {
+            StringBuilder text = new StringBuilder();
+            String prefix = "";
+            if (stopsSaved > 0) {
+                text.append(prefix).append(getString(R.string.toast_stops_saved, stopsSaved));
+                prefix = "\n";
+            }
+            if (stopsDeleted > 0) {
+                text.append(prefix).append(getString(R.string.toast_stops_deleted, stopsDeleted));
+                prefix = "\n";
+            }
+            Toast.makeText(this, text.toString(), Toast.LENGTH_LONG).show();
+        }
     }
 
     private void initActivity() {
@@ -197,6 +210,8 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
 
         mDirections = new ArrayList<>(directions);
         mDirectionIdx = 0;
+
+        db.close();
 
         updateDirection();
         updateStops();

@@ -45,35 +45,13 @@ public class RouteListFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        SavedStopsSQLiteHelper db = new SavedStopsSQLiteHelper(getActivity());
-
-        // TODO: 7/22/2017 Query stops with actual transport type
-        List<Stop> stops = db.getStops();
-
-        List<String> names = new ArrayList<>();
-
-        for (Stop stop : stops) {
-            if (!stop.transportType.equals(mTransportType))
-                continue;
-
-            names.add(stop.toString());
-        }
-
-        ArrayAdapter<String> listViewAdapter = new ArrayAdapter<>(
-                getActivity(),
-                android.R.layout.simple_list_item_1,
-                names.toArray(new String[] {})
-        );
-
-//        ListView listView = (ListView) mRootView.findViewById(R.id.transport_list);
-        mListView.setAdapter(listViewAdapter);
+        updateStops();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_route_list, container, false);
 
-//        mRootView = rootView;
         mListView = (ListView) rootView.findViewById(R.id.transport_list);
 
         mTransportType = (TransportType) getArguments().getSerializable(ARG_TRANSPORT_TYPE);
@@ -92,10 +70,29 @@ public class RouteListFragment extends Fragment {
     }
 
     void updateStops() {
+        SavedStopsSQLiteHelper db = new SavedStopsSQLiteHelper(getActivity());
 
+        List<String> names = new ArrayList<>();
+
+        // TODO: 7/22/2017 Query stops with actual transport type
+        List<Stop> stops = db.getStops();
+        for (Stop stop : stops) {
+            if (!stop.transportType.equals(mTransportType))
+                continue;
+
+            names.add(stop.toString());
+        }
+        db.close();
+
+        ArrayAdapter<String> listViewAdapter = new ArrayAdapter<>(
+                getActivity(),
+                android.R.layout.simple_list_item_1,
+                names.toArray(new String[] {})
+        );
+
+        mListView.setAdapter(listViewAdapter);
     }
 
-//    private View mRootView;
     private ListView mListView;
     private TransportType mTransportType;
 }
