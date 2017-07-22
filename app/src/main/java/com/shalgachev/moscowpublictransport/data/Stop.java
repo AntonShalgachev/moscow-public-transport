@@ -22,4 +22,44 @@ public class Stop implements Serializable {
     public CharSequence daysMask;
     public Direction direction;
     public CharSequence name;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Stop stop = (Stop) o;
+
+        if (!providerId.equals(stop.providerId)) return false;
+        if (transportType != stop.transportType) return false;
+        if (!route.equals(stop.route)) return false;
+        if (!daysMask.equals(stop.daysMask)) return false;
+        if (!direction.equals(stop.direction)) return false;
+        return name.equals(stop.name);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = providerId.hashCode();
+        result = 31 * result + transportType.hashCode();
+        result = 31 * result + route.hashCode();
+        result = 31 * result + daysMask.hashCode();
+        result = 31 * result + direction.hashCode();
+        result = 31 * result + name.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(providerId).append(",");
+        sb.append(transportType.name()).append(",");
+        sb.append(route).append(",");
+        sb.append(daysMask).append(",");
+        sb.append(direction.getId()).append(",");
+        sb.append(name).append(",");
+
+        return sb.toString();
+    }
 }

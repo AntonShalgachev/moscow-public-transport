@@ -80,6 +80,8 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
     }
 
     private static List<Direction> getDirections(TransportType transportType, CharSequence route, CharSequence daysMask) {
+        // TODO: 6/25/2017 return just 2 directions without query
+
         String url = constructMetadataUrl(MetadataListType.DIRECTIONS, transportType, route, daysMask);
         Log.i(LOG_TAG, String.format("getDirections: Fetching '%s'", url));
 
@@ -91,19 +93,7 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
         List<Direction> directions = new ArrayList<>();
 
         for (int i = 0; i < directionList.size(); i++) {
-            String name = directionList.get(i).toString();
-
-//            String[] endpoints = name.split(" - ");
-//            if (endpoints.length != 2) {
-//                Log.e(LOG_TAG, String.format("getDirections(%s, %s, %s): Unusual direction name: '%s'", transportType.name(), route, daysMask, name));
-//
-//                return new ArrayList<>();
-//            }
-
-//            String from = endpoints[0];
-//            String to = endpoints[1];
             CharSequence id = (i == 0) ? "AB" : "BA";
-
             directions.add(new Direction(id));
         }
 

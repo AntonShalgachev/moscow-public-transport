@@ -12,6 +12,10 @@ import android.view.MenuItem;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.adapters.RouteListPagerAdapter;
+import com.shalgachev.moscowpublictransport.data.Stop;
+import com.shalgachev.moscowpublictransport.data.db.SavedStopsSQLiteHelper;
+
+import java.util.List;
 
 public class RouteListActivity extends AppCompatActivity {
     @Override
@@ -31,7 +35,6 @@ public class RouteListActivity extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -9,14 +9,17 @@ import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 import com.shalgachev.moscowpublictransport.fragments.RouteListFragment;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by anton on 5/26/2017.
  */
 
 public class RouteListPagerAdapter extends FragmentPagerAdapter {
-    Context mContext;
+    private final List<TransportType> YTANSPORT_TYPES = Arrays.asList(TransportType.BUS, TransportType.TROLLEY, TransportType.TRAM);
+
+    private Context mContext;
 
     public RouteListPagerAdapter(FragmentManager fragmentManager, Context context) {
         super(fragmentManager);
@@ -25,16 +28,12 @@ public class RouteListPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        ArrayList<TransportType> types = new ArrayList<>();
-        types.add(TransportType.BUS);
-        types.add(TransportType.TROLLEY);
-        types.add(TransportType.TRAM);
-        return RouteListFragment.newInstance(types.get(position));
+        return RouteListFragment.newInstance(YTANSPORT_TYPES.get(position));
     }
 
     @Override
     public int getCount() {
-        return 3;
+        return YTANSPORT_TYPES.size();
     }
 
     @Override

@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.adapters.StopListPagerAdapter;
+import com.shalgachev.moscowpublictransport.data.db.SavedStopsSQLiteHelper;
 import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
 import com.shalgachev.moscowpublictransport.data.Direction;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
@@ -73,17 +74,38 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
                 finish();
                 break;
             case R.id.add_transport_done:
-                if (mStopListItems != null) {
-                    StringBuilder text = new StringBuilder("Following stops selected:\n");
-                    for (StopListItem stopListItem : mStopListItems)
-                        if (stopListItem.selected)
-                            text.append("'").append(stopListItem.stop.name).append("'").append("\n");
-                    Toast.makeText(this, text.toString(), Toast.LENGTH_SHORT).show();
-                }
+                saveStops();
+                finish();
                 break;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void saveStops() {
+        if (mStopListItems == null)
+            return;
+
+        StringBuilder text = new StringBuilder("Following stops selected:\n");
+        for (StopListItem stopListItem : mStopListItems)
+            if (stopListItem.selected)
+                text.append("'").append(stopListItem.stop.name).append("'").append("\n");
+        Toast.makeText(this, text.toString(), Toast.LENGTH_LONG).show();
+
+        SavedStopsSQLiteHelper db = new SavedStopsSQLiteHelper(this);
+        List<Stop> savedStops = db.getStops();
+
+        for (StopListItem stopListItem : mStopListItems) {
+            Stop stop = stopListItem.stop;
+            boolean isStopSaved = savedStops.contains(stop);
+            if (stopListItem.selected && !isStopSaved) {
+                db.addStop(stop);
+            } else if (!stopListItem.selected && isStopSaved) {
+                db.deleteStop(stop);
+            }
+        }
+
+        db.close();
     }
 
     private void initActivity() {
@@ -144,7 +166,7 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if(actionId== EditorInfo.IME_ACTION_DONE){
                     mRoute = mRouteTextView.getText().toString();
-//                    loadDirections();
+
                     loadStops();
                 }
                 return false;
@@ -158,6 +180,9 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
             return;
         }
 
+        SavedStopsSQLiteHelper db = new SavedStopsSQLiteHelper(this);
+        List<Stop> savedStops = db.getStops();
+
         Set<Direction> directions = new HashSet<>();
         mStopListItems = new ArrayList<>();
         for (Stop stop : mStops) {
@@ -165,6 +190,9 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
 
             StopListItem item = new StopListItem(stop, "Neva", false);
             mStopListItems.add(item);
+
+            if (savedStops.contains(stop))
+                item.selected = true;
         }
 
         mDirections = new ArrayList<>(directions);
@@ -184,21 +212,6 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
         executeScheduleProvider(R.string.loading_stops);
     }
 
-    private void loadDirections() {
-//        Set<Direction> directionsSet = new TreeSet<>();
-//
-//        for (CharSequence day : mScheduleProvider.getDaysMasks(mTransportType, mRoute)) {
-//            for (Direction direction : mScheduleProvider.getDirections(mTransportType, mRoute, day)) {
-//                directionsSet.add(direction);
-//            }
-//        }
-//
-//        mDirections = new ArrayList<>(directionsSet);
-//        mDirectionIdx = 0;
-//        updateDirection();
-//        loadStops();
-    }
-
     public void onClickSwapDirections(View view) {
         if (mDirections == null)
             return;
@@ -207,7 +220,6 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
 
         updateDirection();
         updateStops();
-//        loadStops();
     }
 
     private Direction getCurrentDirection() {
@@ -241,22 +253,6 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
             mPagerAdapter.addTab(daysMask, items);
         }
     }
-
-//    private void loadStops() {
-//        mStopListItems = new ArrayList<>();
-//        mPagerAdapter.reset();
-//
-//        for (CharSequence daysMask : mScheduleProvider.getDaysMasks(mTransportType, mRoute)) {
-//            ArrayList<StopListItem> tabStopListItems = new ArrayList<>();
-//            for (CharSequence stop : mScheduleProvider.getStops(mTransportType, mRoute, daysMask, getCurrentDirection())) {
-//                StopListItem item = new StopListItem(mScheduleProvider.getProviderId(), mRoute, daysMask, getCurrentDirection(), stop, "Neva", false);
-//                mStopListItems.add(item);
-//                tabStopListItems.add(item);
-//            }
-//
-//            mPagerAdapter.addTab(daysMask, tabStopListItems);
-//        }
-//    }
 
     private TransportData getTransportData() {
         TransportData transportData = new TransportData();
@@ -294,7 +290,7 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
         builder.setTitle(R.string.error_title)
                 .setMessage(messageId)
                 .setPositiveButton(android.R.string.ok, null)
-                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setIcon(R.drawable.ic_error_black_48dp)
                 .show();
     }
 

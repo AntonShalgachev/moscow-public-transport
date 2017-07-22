@@ -10,25 +10,19 @@ import java.io.Serializable;
 
 public class Direction implements Comparable<Direction>, Serializable {
     @Override
-    public int hashCode() {
-        int hash = 17;
-        hash = 31 * hash + getFrom().hashCode();
-        hash = 31 * hash + getTo().hashCode();
-        return hash;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Direction direction = (Direction) o;
+
+        return mId.equals(direction.mId);
+
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-
-        Direction other = (Direction) obj;
-
-        return other.getId().equals(getId());
+    public int hashCode() {
+        return mId.hashCode();
     }
 
     @Override
