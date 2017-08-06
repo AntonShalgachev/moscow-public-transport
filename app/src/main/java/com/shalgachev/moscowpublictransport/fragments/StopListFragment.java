@@ -69,6 +69,12 @@ public class StopListFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
     public interface OnListFragmentInteractionListener {
         void onListFragmentInteraction(StopListItem item);
     }

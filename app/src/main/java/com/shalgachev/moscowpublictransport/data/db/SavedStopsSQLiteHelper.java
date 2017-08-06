@@ -130,7 +130,7 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
 
         List<Stop> stops = new ArrayList<>();
 
-        String selectQuery = "SELECT * FROM " + TABLE_SAVED_STOPS + "WHERE "
+        String selectQuery = "SELECT * FROM " + TABLE_SAVED_STOPS + " WHERE "
                 + COLUMN_TRANSPORT_TYPE + " = ?";
 
         String[] selectArgs = new String[]{

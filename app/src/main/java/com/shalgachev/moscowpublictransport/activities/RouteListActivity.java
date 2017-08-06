@@ -10,7 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.shalgachev.moscowpublictransport.R;
-import com.shalgachev.moscowpublictransport.adapters.RouteListPagerAdapter;
+import com.shalgachev.moscowpublictransport.adapters.SavedStopPagerAdapter;
 
 public class RouteListActivity extends AppCompatActivity {
     @Override
@@ -22,7 +22,7 @@ public class RouteListActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        RouteListPagerAdapter sectionsPagerAdapter = new RouteListPagerAdapter(getSupportFragmentManager(), this);
+        SavedStopPagerAdapter sectionsPagerAdapter = new SavedStopPagerAdapter(getSupportFragmentManager(), this);
 
         ViewPager viewPager = (ViewPager) findViewById(R.id.container);
         viewPager.setAdapter(sectionsPagerAdapter);
