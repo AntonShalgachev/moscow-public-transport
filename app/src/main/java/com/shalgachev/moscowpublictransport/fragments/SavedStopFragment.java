@@ -105,7 +105,7 @@ public class SavedStopFragment extends Fragment {
         List<Stop> stops = db.getStops(mTransportType);
         db.close();
 
-        mRecycleView.setAdapter(new SavedStopRecyclerViewAdapter(stops, mListener));
+        mRecycleView.setAdapter(new SavedStopRecyclerViewAdapter(stops, mListener, getActivity()));
     }
 
     public interface OnListFragmentInteractionListener {

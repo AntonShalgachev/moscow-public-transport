@@ -38,6 +38,8 @@
     <string name="menu_done">Готово</string>
     <string name="next_in">Ближайший через:</string>
 
+    <string name="saved_stop_direction">%1$s → %2$s</string>
+
     <string name="provider_name_dummy">Фиктивный</string>
     <string name="provider_name_mosgortrans">Мосгортранс</string>
     <string name="provider_name_avtoline">Автолайн</string>
