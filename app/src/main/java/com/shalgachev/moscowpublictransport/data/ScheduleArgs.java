@@ -11,7 +11,8 @@ public class ScheduleArgs {
     public CharSequence route;
     public CharSequence daysMask;
     public Direction direction;
-    public CharSequence stop;
+
+    public Stop stop;
 
     public static ScheduleArgs asRoutesArgs(TransportType type) {
         ScheduleArgs args = new ScheduleArgs();
@@ -26,6 +27,15 @@ public class ScheduleArgs {
         args.operationType = BaseScheduleProvider.OperationType.STOPS;
         args.transportType = type;
         args.route = route;
+
+        return args;
+    }
+
+    public static ScheduleArgs asScheduleArgs(Stop stop) {
+        ScheduleArgs args = new ScheduleArgs();
+        args.operationType = BaseScheduleProvider.OperationType.SCHEDULE;
+
+        args.stop = stop;
 
         return args;
     }

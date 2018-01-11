@@ -9,7 +9,7 @@ import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
  */
 
 public class ScheduleTask extends AsyncTask<Void, Void, BaseScheduleProvider.Result> {
-    BaseScheduleProvider mProvider;
+    private BaseScheduleProvider mProvider;
     private IScheduleReceiver mReceiver;
 
     public ScheduleTask(BaseScheduleProvider provider) {

@@ -30,6 +30,22 @@
     <string name="date_saturday_short">сб</string>
     <string name="date_sunday_short">вс</string>
 
+    <string name="date_monday_capital">Понедельник</string>
+    <string name="date_tuesday_capital">Вторник</string>
+    <string name="date_wednesday_capital">Среда</string>
+    <string name="date_thursday_capital">Четверг</string>
+    <string name="date_friday_capital">Пятница</string>
+    <string name="date_saturday_capital">Суббота</string>
+    <string name="date_sunday_capital">Воскресенье</string>
+
+    <string name="date_monday_short_capital">Пн</string>
+    <string name="date_tuesday_short_capital">Вт</string>
+    <string name="date_wednesday_short_capital">Ср</string>
+    <string name="date_thursday_short_capital">Чт</string>
+    <string name="date_friday_short_capital">Пт</string>
+    <string name="date_saturday_short_capital">Сб</string>
+    <string name="date_sunday_short_capital">Вс</string>
+
     <string name="date_all">Все дни</string>
     <string name="date_weekdays">Будни</string>
     <string name="date_weekends">Выходные</string>
@@ -52,4 +68,7 @@
 
     <string name="toast_stops_saved">Добавлено остановок: %d</string>
     <string name="toast_stops_deleted">Удалено остановок: %d</string>
+
+    <string name="title_activity_schedule">ScheduleActivity</string>
+    <string name="large_text">SOMELARGETEXT</string>
 </resources>

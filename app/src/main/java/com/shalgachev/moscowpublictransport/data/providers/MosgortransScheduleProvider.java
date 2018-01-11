@@ -9,12 +9,20 @@ import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 import com.shalgachev.moscowpublictransport.data.Utils;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Created by anton on 6/25/2017.
@@ -24,6 +32,7 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
     private static final String LOG_TAG = "MosgortransSP";
     private static final CharSequence PROVIDER_ID = "mosgortrans";
     private static final String BASE_METADATA_URL = "http://www.mosgortrans.org/pass3/request.ajax.php?";
+    private static final String BASE_SCHEDULE_URL = "http://www.mosgortrans.org/pass3/shedule.printable.php?";
 
     private static List<CharSequence> getRoutes(TransportType transportType) {
         String url = constructMetadataUrl(MetadataListType.ROUTES, transportType);
@@ -66,8 +75,8 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
         List<CharSequence> stopList = Utils.fetchUrlAsList(url);
 
         List<Stop> stops = new ArrayList<>();
-        for (CharSequence name : stopList) {
-            Stop stop = new Stop(PROVIDER_ID, transportType, route, daysMask, direction, name);
+        for (int i = 0; i < stopList.size(); i++) {
+            Stop stop = new Stop(PROVIDER_ID, transportType, route, daysMask, direction, stopList.get(i), i);
             stops.add(stop);
         }
 
@@ -80,9 +89,8 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
             for (Direction direction : getDirections(transportType, route, mask)) {
                 List<Stop> stops = getStops(transportType, route, mask, direction);
                 direction.setEndpoints(stops.get(0).name, stops.get(stops.size() - 1).name);
-                for (Stop stop : stops) {
-                    allStops.add(stop);
-                }
+
+                allStops.addAll(stops);
             }
         }
 
@@ -90,16 +98,48 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
     }
 
     private static Schedule getSchedule(Stop stop) {
-        HashMap<Integer, Set<Integer>> timepoints = new HashMap<>();
-        timepoints.put(9, new HashSet<>(Arrays.asList(10, 16, 28, 49, 59)));
-        timepoints.put(10, new HashSet<>(Arrays.asList(2, 14, 30, 50, 58)));
-        timepoints.put(11, new HashSet<>(Arrays.asList(0, 10, 20, 30, 40, 50)));
+        HashMap<Integer, SortedSet<Integer>> timepoints = new HashMap<>();
+//        timepoints.put(9, new TreeSet<>(Arrays.asList(10, 16, 28, 49, 59)));
+//        timepoints.put(10, new TreeSet<>(Arrays.asList(2, 14, 30, 50, 58)));
+//        timepoints.put(11, new TreeSet<>(Arrays.asList(0, 10, 20, 30, 40, 50)));
+
+        String url = constructScheduleUrl(stop);
+
+        try {
+            Document doc = Jsoup.connect(url).get();
+            Elements timeTags = doc.select("span[class~=(?:hour|minute)]");
+
+            int hour = -1;
+            for (Element tag : timeTags) {
+                String tagClass = tag.className();
+                String tagText = tag.text();
+
+                int value;
+                try {
+                    value = Integer.parseInt(tagText);
+                } catch (NumberFormatException e) {
+                    Log.e(LOG_TAG, String.format("Failed to parse data '%s'", tagText));
+                    continue;
+                }
+
+                if (tagClass.equals("hour")) {
+                    hour = value;
+                    timepoints.put(hour, new TreeSet<Integer>());
+                } else if (tagClass.equals("minute")) {
+                    timepoints.get(hour).add(value);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         Schedule schedule = new Schedule();
         schedule.setAsTimepoints(stop, timepoints);
 
         return schedule;
     }
+
+
 
     private static String getTransportTypeId(TransportType type) {
         switch (type) {
@@ -165,25 +205,38 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
         return constructMetadataUrl(listType, transportType, route, daysMask, directionId);
     }
 
+    private static String constructScheduleUrl(Stop stop) {
+        final String TRANSPORT_TYPE_PARAM = "type";
+        final String ROUTE_PARAM = "way";
+        final String DAYS_MASK_PARAM = "date";
+        final String DIRECTION_PARAM = "direction";
+        final String WAYPOINT_PARAM = "waypoint";
+
+        return Uri.parse(BASE_SCHEDULE_URL).buildUpon()
+                .appendQueryParameter(TRANSPORT_TYPE_PARAM, getTransportTypeId(stop.transportType))
+                .appendQueryParameter(ROUTE_PARAM, stop.route.toString())
+                .appendQueryParameter(DAYS_MASK_PARAM, stop.daysMask.toString())
+                .appendQueryParameter(DIRECTION_PARAM, stop.direction.getId().toString())
+                .appendQueryParameter(WAYPOINT_PARAM, String.valueOf(stop.id))
+                .build().toString();
+    }
+
     @Override
     public Result run() {
         Result result = new Result();
-
-        TransportType transportType = getArgs().transportType;
-        CharSequence route = getArgs().route;
 
         switch (getArgs().operationType) {
             case TYPES:
                 result.transportTypes = getTransportTypes();
                 break;
             case ROUTES:
-                result.routes = getRoutes(transportType);
+                result.routes = getRoutes(getArgs().transportType);
                 break;
             case STOPS:
-                result.stops = getStops(transportType, route);
+                result.stops = getStops(getArgs().transportType, getArgs().route);
                 break;
             case SCHEDULE:
-                result.schedule = getSchedule(null);
+                result.schedule = getSchedule(getArgs().stop);
                 break;
         }
 

@@ -1,6 +1,7 @@
 package com.shalgachev.moscowpublictransport.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,9 +9,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.shalgachev.moscowpublictransport.R;
+import com.shalgachev.moscowpublictransport.activities.ScheduleActivity;
 import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.fragments.SavedStopFragment.OnListFragmentInteractionListener;
+import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
 
 import java.util.List;
 
@@ -39,7 +42,7 @@ public class SavedStopRecyclerViewAdapter extends RecyclerView.Adapter<SavedStop
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        Stop stop = mValues.get(position);
+        final Stop stop = mValues.get(position);
         holder.item = stop;
         holder.mRouteView.setText(stop.route);
         holder.mDaysView.setText(ScheduleUtils.daysMaskToString(mContext, stop.daysMask, true));
@@ -52,6 +55,12 @@ public class SavedStopRecyclerViewAdapter extends RecyclerView.Adapter<SavedStop
                 if (null != mListener) {
                     mListener.onListFragmentInteraction(holder.item);
                 }
+
+                Intent intent = new Intent(mContext, ScheduleActivity.class);
+
+                intent.putExtra(ExtraHelper.STOP_EXTRA, stop);
+
+                mContext.startActivity(intent);
             }
         });
     }
@@ -72,10 +81,10 @@ public class SavedStopRecyclerViewAdapter extends RecyclerView.Adapter<SavedStop
         public ViewHolder(View view) {
             super(view);
             this.view = view;
-            mRouteView = (TextView) view.findViewById(R.id.route);
-            mDaysView = (TextView) view.findViewById(R.id.days);
-            mNameView = (TextView) view.findViewById(R.id.name);
-            mDirectionView = (TextView) view.findViewById(R.id.direction);
+            mRouteView = view.findViewById(R.id.route);
+            mDaysView = view.findViewById(R.id.days);
+            mNameView = view.findViewById(R.id.name);
+            mDirectionView = view.findViewById(R.id.direction);
         }
 
         @Override

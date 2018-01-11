@@ -17,6 +17,7 @@ import com.shalgachev.moscowpublictransport.adapters.SavedStopRecyclerViewAdapte
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 import com.shalgachev.moscowpublictransport.data.db.SavedStopsSQLiteHelper;
+import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
 
 import java.util.List;
 
@@ -41,8 +42,6 @@ public class SavedStopFragment extends Fragment {
     public SavedStopFragment() {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
     public static SavedStopFragment newInstance(TransportType transportType) {
         SavedStopFragment fragment = new SavedStopFragment();
         Bundle args = new Bundle();
@@ -81,7 +80,7 @@ public class SavedStopFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), AddTransportActivity.class);
-                intent.putExtra("transport_type", mTransportType);
+                intent.putExtra(ExtraHelper.TRANSPORT_TYPE_EXTRA, mTransportType);
                 startActivity(intent);
             }
         });

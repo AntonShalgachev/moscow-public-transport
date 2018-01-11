@@ -22,7 +22,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.AddTransportActivity"/>
+        <activity android:name=".activities.AddTransportActivity" />
+        <activity
+            android:name=".activities.ScheduleActivity"
+            android:label="@string/title_activity_schedule"
+            android:parentActivityName=".activities.RouteListActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.shalgachev.moscowpublictransport.activities.RouteListActivity" />
+        </activity>
     </application>
 
 </manifest>

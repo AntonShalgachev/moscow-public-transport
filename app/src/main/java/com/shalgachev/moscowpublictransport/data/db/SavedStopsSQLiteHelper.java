@@ -29,9 +29,10 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_DIRECTION_FROM = "direction_from";
     public static final String COLUMN_DIRECTION_TO = "direction_to";
     public static final String COLUMN_NAME = "name";
+    public static final String COLUMN_STOP_ID = "stop_id";
 
     private static final String DATABASE_NAME = "saved_stops.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     public SavedStopsSQLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -50,6 +51,7 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
                 + ", " + COLUMN_DIRECTION_FROM + " text not null"
                 + ", " + COLUMN_DIRECTION_TO + " text not null"
                 + ", " + COLUMN_NAME + " text not null"
+                + ", " + COLUMN_STOP_ID + " integer not null"
                 + ");";
 
         Log.i("SavedStopsSQLiteHelper", String.format("Creating new database with query:\n%s", DATABASE_CREATE_QUERY));
@@ -80,6 +82,7 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
         values.put(COLUMN_DIRECTION_FROM, stop.direction.getFrom().toString());
         values.put(COLUMN_DIRECTION_TO, stop.direction.getTo().toString());
         values.put(COLUMN_NAME, stop.name.toString());
+        values.put(COLUMN_STOP_ID, stop.id);
 
         db.insert(TABLE_SAVED_STOPS, null, values);
     }
@@ -99,6 +102,7 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
                         COLUMN_DIRECTION_FROM,
                         COLUMN_DIRECTION_TO,
                         COLUMN_NAME,
+                        COLUMN_STOP_ID,
                 },
                 COLUMN_ID + " = ?", new String[]{String.valueOf(id)}, null, null, null, null);
 
@@ -157,12 +161,14 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
                 + " AND " + COLUMN_ROUTE + " = ?"
                 + " AND " + COLUMN_DAYS_ROUTE + " = ?"
                 + " AND " + COLUMN_DIRECTION_ID + " = ?"
-                + " AND " + COLUMN_NAME + " = ?";
+                + " AND " + COLUMN_NAME + " = ?"
+                + " AND " + COLUMN_STOP_ID + " = ?";
 
         String[] args = new String[]{
                 stop.providerId.toString(), transportTypeToString(stop.transportType), stop.route.toString(), stop.daysMask.toString(),
                 stop.direction.getId().toString(),
-                stop.name.toString()
+                stop.name.toString(),
+                String.valueOf(stop.id),
         };
 
         int affectedRows = db.delete(TABLE_SAVED_STOPS, where, args);
@@ -176,6 +182,7 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
 
     private Stop cursorToStop(Cursor c) {
         String provider_id = "", transport_type = "", route = "", days_mask = "", direction_id = "", direction_from = "", direction_to = "", name = "";
+        int stop_id = 0;
 
         for (int i = 0; i < c.getColumnCount(); i++) {
             String cname = c.getColumnName(i);
@@ -205,11 +212,14 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
                 case COLUMN_NAME:
                     name = cvalue;
                     break;
+                case COLUMN_STOP_ID:
+                    stop_id = Integer.parseInt(cvalue);
+                    break;
             }
         }
 
         Direction direction = new Direction(direction_id, direction_from, direction_to);
-        return new Stop(provider_id, stringToTransportType(transport_type), route, days_mask, direction, name);
+        return new Stop(provider_id, stringToTransportType(transport_type), route, days_mask, direction, name, stop_id);
     }
 
     private String transportTypeToString(TransportType transportType) {

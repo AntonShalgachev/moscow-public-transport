@@ -13,13 +13,16 @@ public class Stop implements Serializable {
     public CharSequence daysMask;
     public Direction direction;
     public CharSequence name;
-    public Stop(CharSequence providerId, TransportType transportType, CharSequence route, CharSequence daysMask, Direction direction, CharSequence name) {
+    public int id;
+
+    public Stop(CharSequence providerId, TransportType transportType, CharSequence route, CharSequence daysMask, Direction direction, CharSequence name, int id) {
         this.providerId = providerId;
         this.transportType = transportType;
         this.route = route;
         this.daysMask = daysMask;
         this.direction = direction;
         this.name = name;
+        this.id = id;
     }
 
     @Override
@@ -34,7 +37,9 @@ public class Stop implements Serializable {
         if (!route.equals(stop.route)) return false;
         if (!daysMask.equals(stop.daysMask)) return false;
         if (!direction.equals(stop.direction)) return false;
-        return name.equals(stop.name);
+        if (!name.equals(stop.name)) return false;
+        if (id != stop.id) return false;
+        return true;
 
     }
 
@@ -46,6 +51,7 @@ public class Stop implements Serializable {
         result = 31 * result + daysMask.hashCode();
         result = 31 * result + direction.hashCode();
         result = 31 * result + name.hashCode();
+        result = 31 * result + id;
         return result;
     }
 
@@ -58,6 +64,7 @@ public class Stop implements Serializable {
         sb.append(daysMask).append(",");
         sb.append(direction.getId()).append(",");
         sb.append(name).append(",");
+        sb.append(id).append(",");
 
         return sb.toString();
     }

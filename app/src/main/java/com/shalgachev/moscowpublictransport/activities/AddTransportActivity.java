@@ -30,6 +30,7 @@ import com.shalgachev.moscowpublictransport.data.StopListItem;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 import com.shalgachev.moscowpublictransport.data.db.SavedStopsSQLiteHelper;
 import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
+import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,11 +64,12 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
-        mTransportType = (TransportType) getIntent().getExtras().getSerializable("transport_type");
+        mTransportType = (TransportType) getIntent().getExtras().getSerializable(ExtraHelper.TRANSPORT_TYPE_EXTRA);
         if (mTransportType == null)
             throw new IllegalArgumentException("Transport transportType is null");
 
-        mScheduleProvider = BaseScheduleProvider.getScheduleProvider("mosgortrans");
+        // TODO: 1/8/2018 Test provider
+        mScheduleProvider = BaseScheduleProvider.getTestScheduleProvider();
 
         initActivity();
 
@@ -140,20 +142,20 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
 
         setTitle(getString(R.string.add_transport_title, getString(transportData.titleExtraResource)));
 
-        ImageView transportIcon = (ImageView) findViewById(R.id.image_transport_icon);
+        ImageView transportIcon = findViewById(R.id.image_transport_icon);
         transportIcon.setBackgroundResource(transportData.iconBackgroundResource);
         transportIcon.setImageResource(transportData.iconImageResource);
 
-        ViewPager viewPager = (ViewPager) findViewById(R.id.container);
+        ViewPager viewPager = findViewById(R.id.container);
         mPagerAdapter = new StopListPagerAdapter(getSupportFragmentManager(), this);
         viewPager.setAdapter(mPagerAdapter);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.days_tabs);
+        TabLayout tabLayout = findViewById(R.id.days_tabs);
         tabLayout.setupWithViewPager(viewPager);
 
-        mRouteTextView = (AutoCompleteTextView) findViewById(R.id.text_route);
-        mDirectionFromTextView = (TextView) findViewById(R.id.text_direction_from);
-        mDirectionToTextView = (TextView) findViewById(R.id.text_direction_to);
+        mRouteTextView = findViewById(R.id.text_route);
+        mDirectionFromTextView = findViewById(R.id.text_direction_from);
+        mDirectionToTextView = findViewById(R.id.text_direction_to);
     }
 
     public void executeScheduleProvider(@StringRes int loadingStringId) {
@@ -166,7 +168,8 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
 
     @Override
     public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
-        mProgressDialog.dismiss();
+        if (mProgressDialog != null)
+            mProgressDialog.dismiss();
 
         switch (result.operationType) {
             case TYPES:
@@ -259,15 +262,22 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
     }
 
     private void updateDirection() {
-        Direction direction = getCurrentDirection();
-        mDirectionFromTextView.setText(direction.getFrom());
-        mDirectionToTextView.setText(direction.getTo());
+        Direction currentDirection = getCurrentDirection();
+        if (currentDirection == null)
+            return;
+
+        mDirectionFromTextView.setText(currentDirection.getFrom());
+        mDirectionToTextView.setText(currentDirection.getTo());
     }
 
     private void updateStops() {
+        Direction currentDirection = getCurrentDirection();
+        if (currentDirection == null)
+            return;
+
         Map<CharSequence, ArrayList<StopListItem>> stopMap = new HashMap<>();
         for (StopListItem item : mStopListItems) {
-            if (getCurrentDirection().equals(item.stop.direction)) {
+            if (currentDirection.equals(item.stop.direction)) {
                 if (!stopMap.containsKey(item.stop.daysMask))
                     stopMap.put(item.stop.daysMask, new ArrayList<StopListItem>());
                 stopMap.get(item.stop.daysMask).add(item);

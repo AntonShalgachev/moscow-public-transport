@@ -41,6 +41,11 @@ public abstract class BaseScheduleProvider {
         return mScheduleProviders.get(id);
     }
 
+    // TODO: 1/9/2018 Remove this
+    public static BaseScheduleProvider getTestScheduleProvider() {
+        return getScheduleProvider("mosgortrans");
+    }
+
     public ScheduleArgs getArgs() {
         return mArgs;
     }
