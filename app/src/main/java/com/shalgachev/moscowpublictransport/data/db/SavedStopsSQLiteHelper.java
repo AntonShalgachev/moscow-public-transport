@@ -113,20 +113,7 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
     }
 
     public List<Stop> getStops() {
-        Log.d("SavedStopsSQLiteHelper", "getStops()");
-
-        List<Stop> stops = new ArrayList<>();
-
-        String selectQuery = "SELECT * FROM " + TABLE_SAVED_STOPS;
-
-        SQLiteDatabase db = getWritableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
-
-        while (cursor.moveToNext()) {
-            stops.add(cursorToStop(cursor));
-        }
-
-        return stops;
+        return getStops(null);
     }
 
     public List<Stop> getStops(TransportType transportType) {
@@ -134,14 +121,17 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
 
         List<Stop> stops = new ArrayList<>();
 
-        String selectQuery = "SELECT * FROM " + TABLE_SAVED_STOPS + " WHERE "
-                + COLUMN_TRANSPORT_TYPE + " = ?";
+        String selectQuery = "SELECT * FROM " + TABLE_SAVED_STOPS;
+        String[] selectArgs = null;
 
-        String[] selectArgs = new String[]{
-                transportTypeToString(transportType)
-        };
+        if (transportType != null) {
+            selectQuery += " WHERE " + COLUMN_TRANSPORT_TYPE + " = ?";
+            selectArgs = new String[]{
+                    transportTypeToString(transportType)
+            };
+        }
 
-        SQLiteDatabase db = getWritableDatabase();
+        SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, selectArgs);
 
         while (cursor.moveToNext()) {
