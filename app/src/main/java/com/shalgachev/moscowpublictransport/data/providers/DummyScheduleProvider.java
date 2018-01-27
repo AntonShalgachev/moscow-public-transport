@@ -112,13 +112,8 @@ public class DummyScheduleProvider extends BaseScheduleProvider {
     }
 
     private Schedule getSchedule() {
-        HashMap<Integer, SortedSet<Integer>> timepoints = new HashMap<>();
-        timepoints.put(9, new TreeSet<>(Arrays.asList(10, 16, 28, 49, 59)));
-        timepoints.put(10, new TreeSet<>(Arrays.asList(2, 14, 30, 50, 58)));
-        timepoints.put(11, new TreeSet<>(Arrays.asList(0, 10, 20, 30, 40, 50)));
-
         Schedule schedule = new Schedule();
-        schedule.setAsTimepoints(null, timepoints);
+        schedule.setAsTimepoints(null, null);
 
         return schedule;
     }

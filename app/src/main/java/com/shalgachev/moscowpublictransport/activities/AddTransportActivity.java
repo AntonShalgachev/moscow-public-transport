@@ -103,7 +103,7 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
             return;
 
         SavedStopsSQLiteHelper db = new SavedStopsSQLiteHelper(this);
-        List<Stop> savedStops = db.getStops();
+        List<Stop> savedStops = db.getStopsOnMainMenu();
 
         int stopsSaved = 0;
         int stopsDeleted = 0;
@@ -112,10 +112,10 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
             Stop stop = stopListItem.stop;
             boolean isStopSaved = savedStops.contains(stop);
             if (stopListItem.selected && !isStopSaved) {
-                db.addStop(stop);
+                db.addToMainMenu(stop);
                 stopsSaved++;
             } else if (!stopListItem.selected && isStopSaved) {
-                db.deleteStop(stop);
+                db.removeFromMainMenu(stop);
                 stopsDeleted++;
             }
         }
@@ -211,7 +211,7 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
         }
 
         SavedStopsSQLiteHelper db = new SavedStopsSQLiteHelper(this);
-        List<Stop> savedStops = db.getStops();
+        List<Stop> savedStops = db.getStopsOnMainMenu();
 
         Set<Direction> directions = new HashSet<>();
         mStopListItems = new ArrayList<>();

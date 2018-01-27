@@ -100,8 +100,7 @@ public class SavedStopFragment extends Fragment {
 
         SavedStopsSQLiteHelper db = new SavedStopsSQLiteHelper(getActivity());
 
-        // TODO: 7/22/2017 Query stops with actual transport type
-        List<Stop> stops = db.getStops(mTransportType);
+        List<Stop> stops = db.getStopsOnMainMenu(mTransportType);
         db.close();
 
         mRecycleView.setAdapter(new SavedStopRecyclerViewAdapter(stops, mListener, getActivity()));

@@ -98,12 +98,8 @@ public class ScheduleActivity extends AppCompatActivity implements ScheduleTask.
         if (tempContent != null) {
             Schedule schedule = result.schedule;
             StringBuilder builder = new StringBuilder();
-            for (int hour : schedule.getHours()) {
-                builder.append(hour).append(":\n");
-
-                for (int minute : schedule.getMinutes(hour)) {
-                    builder.append("    ").append(minute).append("\n");
-                }
+            for (Schedule.Timepoint timepoint : schedule.getTimepoints()) {
+                builder.append(timepoint.hour).append(":").append(timepoint.minute).append("\n");
             }
 
             tempContent.setText(builder.toString());

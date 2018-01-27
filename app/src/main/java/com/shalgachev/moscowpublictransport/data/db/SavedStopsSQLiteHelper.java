@@ -3,11 +3,14 @@ package com.shalgachev.moscowpublictransport.data.db;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.shalgachev.moscowpublictransport.data.Direction;
+import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 
@@ -19,20 +22,30 @@ import java.util.List;
  */
 
 public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
-    public static final String TABLE_SAVED_STOPS = "saved_stops";
-    public static final String COLUMN_ID = "_id";
-    public static final String COLUMN_PROVIDER_ID = "provider_id";
-    public static final String COLUMN_TRANSPORT_TYPE = "transport_type";
-    public static final String COLUMN_ROUTE = "route";
-    public static final String COLUMN_DAYS_ROUTE = "days_mask";
-    public static final String COLUMN_DIRECTION_ID = "direction_id";
-    public static final String COLUMN_DIRECTION_FROM = "direction_from";
-    public static final String COLUMN_DIRECTION_TO = "direction_to";
-    public static final String COLUMN_NAME = "name";
-    public static final String COLUMN_STOP_ID = "stop_id";
+    private static final String LOG_TAG = "SavedStopsSQLiteHelper";
+    private static final boolean SQL_DEBUG = true;
+
+    private static final String TABLE_SAVED_STOPS = "saved_stops";
+    private static final String TABLE_SCHEDULE_TYPES = "schedule_types";
+    private static final String TABLE_TIMETABLES = "timetables";
+    private static final String TABLE_STOPS_ON_MAIN_SCREEN = "stops_on_main_screen";
+
+    private static final String COLUMN_ID = "_id";
+    private static final String COLUMN_PROVIDER_ID = "provider_id";
+    private static final String COLUMN_TRANSPORT_TYPE = "transport_type";
+    private static final String COLUMN_ROUTE = "route";
+    private static final String COLUMN_DAYS_ROUTE = "days_mask";
+    private static final String COLUMN_DIRECTION_ID = "direction_id";
+    private static final String COLUMN_DIRECTION_FROM = "direction_from";
+    private static final String COLUMN_DIRECTION_TO = "direction_to";
+    private static final String COLUMN_NAME = "name";
+    private static final String COLUMN_STOP_ID = "stop_id";
+    private static final String COLUMN_SAVED_STOP_ID = "saved_stop_id";
+    private static final String COLUMN_SCHEDULE_TYPE = "schedule_type";
+    private static final String COLUMN_TIMEPOINT = "timepoint";
 
     private static final String DATABASE_NAME = "saved_stops.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 7;
 
     public SavedStopsSQLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -40,7 +53,8 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        final String DATABASE_CREATE_QUERY = "create table " + TABLE_SAVED_STOPS
+        Log.i(LOG_TAG, "Creating new database");
+        final String SAVED_STOPS_CREATE_QUERY = "create table " + TABLE_SAVED_STOPS
                 + "( "
                 + COLUMN_ID + " integer primary key autoincrement"
                 + ", " + COLUMN_PROVIDER_ID + " text not null"
@@ -53,23 +67,203 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
                 + ", " + COLUMN_NAME + " text not null"
                 + ", " + COLUMN_STOP_ID + " integer not null"
                 + ");";
+        final String SCHEDULE_TYPES_CREATE_QUERY = "create table " + TABLE_SCHEDULE_TYPES
+                + "( "
+                + COLUMN_ID + " integer primary key autoincrement"
+                + ", " + COLUMN_SAVED_STOP_ID + " integer not null"
+                + ", " + COLUMN_SCHEDULE_TYPE + " text not null"
+                + ");";
+        final String TIMETABLES_CREATE_QUERY = "create table " + TABLE_TIMETABLES
+                + "( "
+                + COLUMN_ID + " integer primary key autoincrement"
+                + ", " + COLUMN_SAVED_STOP_ID + " integer not null"
+                + ", " + COLUMN_TIMEPOINT + " time not null"
+                + ");";
+        final String STOPS_ON_MAIN_SCREEN_CREATE_QUERY = "create table " + TABLE_STOPS_ON_MAIN_SCREEN
+                + "( "
+                + COLUMN_ID + " integer primary key autoincrement"
+                + ", " + COLUMN_SAVED_STOP_ID + " integer not null"
+                + ");";
 
-        Log.i("SavedStopsSQLiteHelper", String.format("Creating new database with query:\n%s", DATABASE_CREATE_QUERY));
-
-        db.execSQL(DATABASE_CREATE_QUERY);
+        execSQLDebug(db, SAVED_STOPS_CREATE_QUERY, true);
+        execSQLDebug(db, SCHEDULE_TYPES_CREATE_QUERY, true);
+        execSQLDebug(db, TIMETABLES_CREATE_QUERY, true);
+        execSQLDebug(db, STOPS_ON_MAIN_SCREEN_CREATE_QUERY, true);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.i("SavedStopsSQLiteHelper", "Upgrading database from version " + oldVersion
-                + " to " + newVersion + ", which will destroy all old data");
         // TODO: 7/23/2017 Don't drop database on upgrade
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_SAVED_STOPS);
+        Log.w(LOG_TAG, "Upgrading database from version " + oldVersion
+                + " to " + newVersion + ", which will destroy all old data");
+
+        final String SAVED_STOPS_DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_SAVED_STOPS;
+        final String SCHEDULE_TYPES_DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_SCHEDULE_TYPES;
+        final String TIMETABLES_DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_TIMETABLES;
+        final String STOPS_ON_MAIN_SCREEN_DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_STOPS_ON_MAIN_SCREEN;
+
+        execSQLDebug(db, SAVED_STOPS_DROP_QUERY, true);
+        execSQLDebug(db, SCHEDULE_TYPES_DROP_QUERY, true);
+        execSQLDebug(db, TIMETABLES_DROP_QUERY, true);
+        execSQLDebug(db, STOPS_ON_MAIN_SCREEN_DROP_QUERY, true);
+
         onCreate(db);
     }
 
-    public void addStop(Stop stop) {
-        Log.d("SavedStopsSQLiteHelper", String.format("addStop('%s')", stop.toString()));
+    private void execSQLDebug(SQLiteDatabase db, String sql) {
+        execSQLDebug(db, sql, false,"");
+    }
+
+    private void execSQLDebug(SQLiteDatabase db, String sql, boolean log) {
+        execSQLDebug(db, sql, log,"");
+    }
+
+    private void execSQLDebug(SQLiteDatabase db, String sql, boolean log, String text) {
+        if (text.isEmpty())
+            text = "Executing";
+
+        if (SQL_DEBUG && log)
+            Log.v(LOG_TAG, String.format("%s:\n%s", text, sql));
+
+        db.execSQL(sql);
+    }
+
+    public void cleanup() {
+        // TODO: 1/12/2018
+    }
+
+    public void cleanUnused() {
+        // TODO: 1/12/2018
+    }
+
+    private int getSavedStopId(Stop stop) {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cur = db.query(TABLE_SAVED_STOPS, new String[]{COLUMN_ID}, getStopWhereClause(), getStopWhereArgs(stop), null, null, null);
+
+        if (cur == null)
+            return -1;
+
+        if (!cur.moveToFirst()) {
+            cur.close();
+            return -1;
+        }
+
+        int stopId = cur.getInt(cur.getColumnIndex(COLUMN_ID));
+        cur.close();
+
+        return stopId;
+    }
+
+    private Stop getSavedStopById(int id) {
+        String selectQuery = "SELECT * FROM " + TABLE_SAVED_STOPS + " WHERE " +
+                COLUMN_ID + " = ?";
+        String[] selectArgs = new String[]{String.valueOf(id)};
+
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cur = db.rawQuery(selectQuery, selectArgs);
+
+        if (cur == null)
+            return null;
+
+        if (!cur.moveToFirst()) {
+            cur.close();
+            return null;
+        }
+
+        Stop stop = cursorToStop(cur);
+        cur.close();
+
+        return stop;
+    }
+
+    private boolean isStopSaved(Stop stop) {
+        return getSavedStopId(stop) >= 0;
+    }
+
+    public Schedule getSchedule(Stop stop) {
+        // TODO: 1/12/2018 implement me
+        return null;
+    }
+
+    private boolean isAddedToMainMenu(Stop stop) {
+        int stopId = getSavedStopId(stop);
+
+        if (stopId < 0)
+            return false;
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        String whereClause = COLUMN_SAVED_STOP_ID + " = ?";
+        String[] whereArgs = new String[] {
+                String.valueOf(stopId)
+        };
+
+        long rows = DatabaseUtils.queryNumEntries(db, TABLE_STOPS_ON_MAIN_SCREEN, whereClause, whereArgs);
+
+        if (rows < 0 || rows > 1)
+            Log.w(LOG_TAG, String.format("queryNumEntries returned %d rows", rows));
+
+        return rows > 0;
+    }
+
+    public void addToMainMenu(Stop stop) {
+        Log.d(LOG_TAG, String.format("addToMainMenu('%s')", stop.toString()));
+
+        if (!isStopSaved(stop))
+            saveStop(stop);
+
+        if (!isStopSaved(stop))
+            throw new RuntimeException("Failed to save the stop before adding to the main menu");
+
+        if (isAddedToMainMenu(stop)) {
+            Log.w(LOG_TAG, "The stop is already added");
+            return;
+        }
+
+        int stopId = getSavedStopId(stop);
+
+        SQLiteDatabase db = getWritableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_SAVED_STOP_ID, stopId);
+        db.insert(TABLE_STOPS_ON_MAIN_SCREEN, "", contentValues);
+    }
+
+    public void removeFromMainMenu(Stop stop) {
+        Log.d(LOG_TAG, String.format("removeFromMainMenu('%s')", stop.toString()));
+
+        if (!isStopSaved(stop)) {
+            Log.w(LOG_TAG, "The stop isn't saved");
+            return;
+        }
+
+        if (!isAddedToMainMenu(stop)) {
+            Log.w(LOG_TAG, "The stop isn't added to the main menu");
+            return;
+        }
+
+        int stopId = getSavedStopId(stop);
+
+        SQLiteDatabase db = getWritableDatabase();
+
+        String whereClause = COLUMN_SAVED_STOP_ID + " = ?";
+        String[] whereArgs = new String[] {
+                String.valueOf(stopId)
+        };
+
+        int affectedRows = db.delete(TABLE_STOPS_ON_MAIN_SCREEN, whereClause, whereArgs);
+
+        Log.d(LOG_TAG, String.format("Affected rows after removing from main menu: %d", affectedRows));
+
+        if (affectedRows != 1) {
+            Log.w(LOG_TAG, "Expected only 1 row to be affected");
+        }
+
+        cleanUnused();
+    }
+
+    private void saveStop(Stop stop) {
+        Log.d(LOG_TAG, String.format("saveStop('%s')", stop.toString()));
 
         SQLiteDatabase db = getWritableDatabase();
 
@@ -87,37 +281,28 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
         db.insert(TABLE_SAVED_STOPS, null, values);
     }
 
-    public Stop getStop(int id) {
-        Log.d("SavedStopsSQLiteHelper", String.format("getStop('%d')", id));
+    private void deleteSavedStop(Stop stop) {
+        Log.d(LOG_TAG, String.format("deleteSavedStop('%s')", stop.toString()));
 
-        SQLiteDatabase db = getReadableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
 
-        Cursor cursor = db.query(TABLE_SAVED_STOPS, new String[]{
-                        COLUMN_ID,
-                        COLUMN_PROVIDER_ID,
-                        COLUMN_TRANSPORT_TYPE,
-                        COLUMN_ROUTE,
-                        COLUMN_DAYS_ROUTE,
-                        COLUMN_DIRECTION_ID,
-                        COLUMN_DIRECTION_FROM,
-                        COLUMN_DIRECTION_TO,
-                        COLUMN_NAME,
-                        COLUMN_STOP_ID,
-                },
-                COLUMN_ID + " = ?", new String[]{String.valueOf(id)}, null, null, null, null);
+        // TODO: 1/27/2018 Check for references to this stop in other tables
 
-        if (cursor == null || !cursor.moveToFirst())
-            return null;
+        int affectedRows = db.delete(TABLE_SAVED_STOPS, getStopWhereClause(), getStopWhereArgs(stop));
 
-        return cursorToStop(cursor);
+        Log.d(LOG_TAG, String.format("Affected rows after deleting stop: %d", affectedRows));
+
+        if (affectedRows != 1) {
+            Log.w(LOG_TAG, "Expected only 1 row to be affected");
+        }
     }
 
-    public List<Stop> getStops() {
-        return getStops(null);
+    public List<Stop> getStopsOnMainMenu() {
+        return getStopsOnMainMenu(null);
     }
 
-    public List<Stop> getStops(TransportType transportType) {
-        Log.d("SavedStopsSQLiteHelper", String.format("getStops('%s')", transportTypeToString(transportType)));
+    public List<Stop> getStopsOnMainMenu(TransportType transportType) {
+        Log.d(LOG_TAG, String.format("getStopsOnMainMenu('%s')", transportTypeToString(transportType)));
 
         List<Stop> stops = new ArrayList<>();
 
@@ -132,88 +317,61 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
         }
 
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, selectArgs);
+        Cursor cur = db.rawQuery(selectQuery, selectArgs);
 
-        while (cursor.moveToNext()) {
-            stops.add(cursorToStop(cursor));
+        while (cur.moveToNext()) {
+            Stop stop = cursorToStop(cur);
+            if (isAddedToMainMenu(stop))
+                stops.add(stop);
         }
+
+        cur.close();
 
         return stops;
     }
 
-    public void deleteStop(Stop stop) {
-        Log.d("SavedStopsSQLiteHelper", String.format("deleteStop('%s')", stop.toString()));
+    private String getStopWhereClause() {
+        return COLUMN_PROVIDER_ID + " = ?"
+            + " AND " + COLUMN_TRANSPORT_TYPE + " = ?"
+            + " AND " + COLUMN_ROUTE + " = ?"
+            + " AND " + COLUMN_DAYS_ROUTE + " = ?"
+            + " AND " + COLUMN_DIRECTION_ID + " = ?"
+            + " AND " + COLUMN_NAME + " = ?"
+            + " AND " + COLUMN_STOP_ID + " = ?";
+    }
 
-        SQLiteDatabase db = getWritableDatabase();
-
-        final String where = COLUMN_PROVIDER_ID + " = ?"
-                + " AND " + COLUMN_TRANSPORT_TYPE + " = ?"
-                + " AND " + COLUMN_ROUTE + " = ?"
-                + " AND " + COLUMN_DAYS_ROUTE + " = ?"
-                + " AND " + COLUMN_DIRECTION_ID + " = ?"
-                + " AND " + COLUMN_NAME + " = ?"
-                + " AND " + COLUMN_STOP_ID + " = ?";
-
-        String[] args = new String[]{
-                stop.providerId.toString(), transportTypeToString(stop.transportType), stop.route.toString(), stop.daysMask.toString(),
+    private String[] getStopWhereArgs(Stop stop) {
+        return new String[]{
+                stop.providerId.toString(),
+                transportTypeToString(stop.transportType),
+                stop.route.toString(),
+                stop.daysMask.toString(),
                 stop.direction.getId().toString(),
                 stop.name.toString(),
                 String.valueOf(stop.id),
         };
-
-        int affectedRows = db.delete(TABLE_SAVED_STOPS, where, args);
-
-        Log.d("SavedStopsSQLiteHelper", String.format("Affected rows after deleting stop: %d", affectedRows));
-
-        if (affectedRows != 1) {
-            Log.w("SavedStopsSQLiteHelper", "Expected only 1 row to be affected");
-        }
     }
 
-    private Stop cursorToStop(Cursor c) {
-        String provider_id = "", transport_type = "", route = "", days_mask = "", direction_id = "", direction_from = "", direction_to = "", name = "";
-        int stop_id = 0;
-
-        for (int i = 0; i < c.getColumnCount(); i++) {
-            String cname = c.getColumnName(i);
-            String cvalue = c.getString(i);
-            switch (cname) {
-                case COLUMN_PROVIDER_ID:
-                    provider_id = cvalue;
-                    break;
-                case COLUMN_TRANSPORT_TYPE:
-                    transport_type = cvalue;
-                    break;
-                case COLUMN_ROUTE:
-                    route = cvalue;
-                    break;
-                case COLUMN_DAYS_ROUTE:
-                    days_mask = cvalue;
-                    break;
-                case COLUMN_DIRECTION_ID:
-                    direction_id = cvalue;
-                    break;
-                case COLUMN_DIRECTION_FROM:
-                    direction_from = cvalue;
-                    break;
-                case COLUMN_DIRECTION_TO:
-                    direction_to = cvalue;
-                    break;
-                case COLUMN_NAME:
-                    name = cvalue;
-                    break;
-                case COLUMN_STOP_ID:
-                    stop_id = Integer.parseInt(cvalue);
-                    break;
-            }
-        }
+    private Stop cursorToStop(@NonNull Cursor c) {
+        String provider_id = c.getString(c.getColumnIndex(COLUMN_PROVIDER_ID));
+        String transport_type = c.getString(c.getColumnIndex(COLUMN_TRANSPORT_TYPE));
+        String route = c.getString(c.getColumnIndex(COLUMN_ROUTE));
+        String days_mask = c.getString(c.getColumnIndex(COLUMN_DAYS_ROUTE));
+        String direction_id = c.getString(c.getColumnIndex(COLUMN_DIRECTION_ID));
+        String direction_from = c.getString(c.getColumnIndex(COLUMN_DIRECTION_FROM));
+        String direction_to = c.getString(c.getColumnIndex(COLUMN_DIRECTION_TO));
+        String name = c.getString(c.getColumnIndex(COLUMN_NAME));
+        int stop_id = c.getInt(c.getColumnIndex(COLUMN_STOP_ID));
 
         Direction direction = new Direction(direction_id, direction_from, direction_to);
         return new Stop(provider_id, stringToTransportType(transport_type), route, days_mask, direction, name, stop_id);
     }
 
     private String transportTypeToString(TransportType transportType) {
-        return transportType.name();
+        if (transportType != null)
+            return transportType.name();
+
+        return "null";
     }
 
     private TransportType stringToTransportType(String str) {

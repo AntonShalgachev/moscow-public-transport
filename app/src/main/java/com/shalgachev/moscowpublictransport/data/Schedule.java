@@ -1,6 +1,8 @@
 package com.shalgachev.moscowpublictransport.data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -11,14 +13,25 @@ import java.util.TreeSet;
  */
 
 public class Schedule {
+    public static class Timepoint
+    {
+        public Timepoint(int h, int m) {
+            hour = h;
+            minute = m;
+        }
+
+        public int hour;
+        public int minute;
+    }
+
     private ScheduleType mScheduleType;
     private Stop mStop;
-    private HashMap<Integer, SortedSet<Integer>> mTimepoints;
+    private List<Timepoint> mTimepoints;
 
-    public void setAsTimepoints(Stop stop, Map<Integer, SortedSet<Integer>> timepoints) {
+    public void setAsTimepoints(Stop stop, List<Timepoint> timepoints) {
         mScheduleType = ScheduleType.TIMEPOINTS;
         mStop = stop;
-        mTimepoints = new HashMap<>(timepoints);
+        mTimepoints = new ArrayList<>(timepoints);
     }
 
     public ScheduleType getScheduleType() {
@@ -29,11 +42,7 @@ public class Schedule {
         return mStop;
     }
 
-    public SortedSet<Integer> getHours() {
-        return new TreeSet<>(mTimepoints.keySet());
-    }
-
-    public SortedSet<Integer> getMinutes(int hour) {
-        return mTimepoints.get(hour);
+    public List<Timepoint> getTimepoints() {
+        return new ArrayList<>(mTimepoints);
     }
 }
