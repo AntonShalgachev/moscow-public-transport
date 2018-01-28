@@ -11,11 +11,14 @@ import android.util.Log;
 
 import com.shalgachev.moscowpublictransport.data.Direction;
 import com.shalgachev.moscowpublictransport.data.Schedule;
+import com.shalgachev.moscowpublictransport.data.ScheduleType;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by anton on 7/2/2017.
@@ -181,8 +184,128 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
     }
 
     public Schedule getSchedule(Stop stop) {
-        // TODO: 1/12/2018 implement me
+        Log.d(LOG_TAG, String.format("getSchedule('%s')", stop.toString()));
+        int stopId = getSavedStopId(stop);
+        ScheduleType type = getScheduleType(stopId);
+        if (type == null) {
+            Log.i(LOG_TAG, "No saved schedule for a given stop");
+            return null;
+        }
+
+        Log.d(LOG_TAG, String.format("Found saved schedule of type '%s'", type.toString()));
+
+        switch (type) {
+            case TIMEPOINTS:
+                return getTimetableSchedule(stop, stopId);
+            case INTERVALS:
+                throw new UnsupportedOperationException("Intervals aren't yet supported");
+        }
+
+        throw new IllegalArgumentException(String.format("Invalid schedule type '%s'", type.name()));
+    }
+
+    private ScheduleType getScheduleType(int stopId) {
+        SQLiteDatabase db = getReadableDatabase();
+
+        String whereClause = COLUMN_SAVED_STOP_ID + " = ?";
+        String[] whereArgs = new String[] {
+                String.valueOf(stopId)
+        };
+
+        Cursor cur = db.query(TABLE_SCHEDULE_TYPES, new String[]{COLUMN_SCHEDULE_TYPE}, whereClause, whereArgs, "", "", "");
+        try {
+            if (cur != null && cur.moveToFirst()) {
+                String val = cur.getString(cur.getColumnIndex(COLUMN_SCHEDULE_TYPE));
+                return ScheduleType.valueOf(val);
+            }
+        } finally {
+            if (cur != null)
+                cur.close();
+        }
+
         return null;
+    }
+
+    private Schedule getTimetableSchedule(Stop stop, int stopId) {
+        Log.d(LOG_TAG, String.format("getTimetableSchedule('%s', %d)", stop.toString(), stopId));
+        SQLiteDatabase db = getReadableDatabase();
+
+        String whereClause = COLUMN_SAVED_STOP_ID + " = ?";
+        String[] whereArgs = new String[] {
+                String.valueOf(stopId)
+        };
+
+        Log.d(LOG_TAG, "Selecting timetable");
+        Cursor cur = db.query(TABLE_TIMETABLES, new String[]{COLUMN_TIMEPOINT}, whereClause, whereArgs, "", "", "");
+        if (cur != null)
+            Log.d(LOG_TAG, String.format("There are %d rows in dataset", cur.getCount()));
+
+        List<Schedule.Timepoint> timepoints = new ArrayList<>();
+
+        try {
+            if (cur != null) {
+                while (cur.moveToNext()) {
+                    String str = cur.getString(cur.getColumnIndex(COLUMN_TIMEPOINT));
+                    timepoints.add(Schedule.Timepoint.valueOf(str));
+                }
+            }
+        } finally {
+            if (cur != null)
+                cur.close();
+        }
+
+        Schedule schedule = new Schedule();
+        schedule.setAsTimepoints(stop, timepoints);
+
+        return schedule;
+    }
+
+    public void saveSchedule(Schedule schedule) {
+        Log.d(LOG_TAG, String.format("saveSchedule('%s')", schedule.toString()));
+
+        // TODO: 1/28/2018 remove existing schedule first
+
+        ScheduleType type = schedule.getScheduleType();
+
+        Stop stop = schedule.getStop();
+        int stopId = getSavedStopId(stop);
+
+        saveScheduleType(type, stopId);
+
+        switch (type) {
+            case TIMEPOINTS:
+                saveTimetableSchedule(schedule, stopId);
+                break;
+            case INTERVALS:
+                throw new UnsupportedOperationException("Intervals aren't yet supported");
+        }
+    }
+
+    private void saveScheduleType(ScheduleType type, int stopId) {
+        Log.d(LOG_TAG, String.format("saveScheduleType('%s', %d)", type.toString(), stopId));
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_SAVED_STOP_ID, stopId);
+        values.put(COLUMN_SCHEDULE_TYPE, type.name());
+
+        db.insert(TABLE_SCHEDULE_TYPES, "", values);
+    }
+
+    private void saveTimetableSchedule(Schedule schedule, int stopId) {
+        Log.d(LOG_TAG, String.format("saveTimetableSchedule('%s', %d)", schedule.toString(), stopId));
+        SQLiteDatabase db = getWritableDatabase();
+
+        List<Schedule.Timepoint> timepoints = schedule.getTimepoints();
+
+        for (Schedule.Timepoint timepoint : timepoints) {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_SAVED_STOP_ID, stopId);
+            values.put(COLUMN_TIMEPOINT, timepoint.toString());
+
+            db.insert(TABLE_TIMETABLES, "", values);
+        }
+
+        Log.d(LOG_TAG, String.format("Saved %d timepoints", timepoints.size()));
     }
 
     private boolean isAddedToMainMenu(Stop stop) {

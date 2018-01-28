@@ -8,6 +8,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.style.TtsSpan;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -17,11 +18,12 @@ import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
 import com.shalgachev.moscowpublictransport.data.ScheduleTask;
 import com.shalgachev.moscowpublictransport.data.Stop;
+import com.shalgachev.moscowpublictransport.data.db.SavedStopsSQLiteHelper;
 import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
 import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
 
-public class ScheduleActivity extends AppCompatActivity implements ScheduleTask.IScheduleReceiver {
-
+public class ScheduleActivity extends AppCompatActivity {
+    private static final String LOG_TAG = "ScheduleActivity";
     private Stop mStop;
     private BaseScheduleProvider mScheduleProvider;
 
@@ -81,28 +83,51 @@ public class ScheduleActivity extends AppCompatActivity implements ScheduleTask.
 
     private void loadData()
     {
+        final SavedStopsSQLiteHelper db = new SavedStopsSQLiteHelper(this);
+        Log.i(LOG_TAG, "Trying to fetch schedule from the database");
+        Schedule schedule = db.getSchedule(mStop);
+        if (schedule != null) {
+            Log.i(LOG_TAG, "Found saved schedule");
+            onScheduleAvailable(schedule);
+            return;
+        }
+
+        Log.i(LOG_TAG, "Schedule isn't saved, loading from net");
+
         // TODO: 1/8/2018 Test provider
         mScheduleProvider = BaseScheduleProvider.getTestScheduleProvider();
 
         // TODO: 1/9/2018 Test data
         mScheduleProvider.setArgs(ScheduleArgs.asScheduleArgs(mStop));
         ScheduleTask task = mScheduleProvider.createTask();
-        task.setReceiver(this);
+        task.setReceiver(new ScheduleTask.IScheduleReceiver() {
+            @Override
+            public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
+                if (result != null && result.schedule != null) {
+                    onScheduleAvailable(result.schedule);
+                    db.saveSchedule(result.schedule);
+                } else {
+                    onScheduleError();
+                }
+            }
+        });
         task.execute();
     }
 
-    @Override
-    public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
+    private void onScheduleAvailable(Schedule schedule) {
         TextView tempContent = findViewById(R.id.temp_content);
 
         if (tempContent != null) {
-            Schedule schedule = result.schedule;
             StringBuilder builder = new StringBuilder();
-            for (Schedule.Timepoint timepoint : schedule.getTimepoints()) {
+
+            for (Schedule.Timepoint timepoint : schedule.getTimepoints())
                 builder.append(timepoint.hour).append(":").append(timepoint.minute).append("\n");
-            }
 
             tempContent.setText(builder.toString());
         }
+    }
+
+    private void onScheduleError() {
+        Log.e(LOG_TAG, "Failed to retrieve schedule");
     }
 }
