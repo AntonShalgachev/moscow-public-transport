@@ -89,10 +89,11 @@ public class ScheduleActivity extends AppCompatActivity {
         if (schedule != null) {
             Log.i(LOG_TAG, "Found saved schedule");
             onScheduleAvailable(schedule);
-            return;
+        } else {
+            Log.i(LOG_TAG, "Schedule isn't saved");
         }
 
-        Log.i(LOG_TAG, "Schedule isn't saved, loading from net");
+        Log.i(LOG_TAG, "Updating schedule from net");
 
         // TODO: 1/8/2018 Test provider
         mScheduleProvider = BaseScheduleProvider.getTestScheduleProvider();
@@ -109,6 +110,7 @@ public class ScheduleActivity extends AppCompatActivity {
                 } else {
                     onScheduleError();
                 }
+                db.close();
             }
         });
         task.execute();

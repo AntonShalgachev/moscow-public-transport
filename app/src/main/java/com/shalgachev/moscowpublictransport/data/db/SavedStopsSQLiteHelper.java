@@ -215,6 +215,10 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
         Cursor cur = db.query(TABLE_SCHEDULE_TYPES, new String[]{COLUMN_SCHEDULE_TYPE}, whereClause, whereArgs, "", "", "");
         try {
             if (cur != null && cur.moveToFirst()) {
+                int rows = cur.getCount();
+                if (rows != 1) {
+                    Log.e(LOG_TAG, String.format("There are %d schedule types for stop id %d. Expected no more than 1", rows, stopId));
+                }
                 String val = cur.getString(cur.getColumnIndex(COLUMN_SCHEDULE_TYPE));
                 return ScheduleType.valueOf(val);
             }
@@ -263,13 +267,12 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
     public void saveSchedule(Schedule schedule) {
         Log.d(LOG_TAG, String.format("saveSchedule('%s')", schedule.toString()));
 
-        // TODO: 1/28/2018 remove existing schedule first
-
-        ScheduleType type = schedule.getScheduleType();
-
         Stop stop = schedule.getStop();
         int stopId = getSavedStopId(stop);
 
+        removeSchedule(stopId);
+
+        ScheduleType type = schedule.getScheduleType();
         saveScheduleType(type, stopId);
 
         switch (type) {
@@ -306,6 +309,57 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
         }
 
         Log.d(LOG_TAG, String.format("Saved %d timepoints", timepoints.size()));
+    }
+
+    private void removeSchedule(int stopId) {
+        Log.d(LOG_TAG, String.format("removeSchedule(%d)", stopId));
+
+        ScheduleType type = getScheduleType(stopId);
+
+        if (type == null) {
+            Log.d(LOG_TAG, "There are no saved schedules for this stop");
+            return;
+        }
+
+        switch(type) {
+            case TIMEPOINTS:
+                removeTimetableSchedule(stopId);
+                break;
+            case INTERVALS:
+                throw new UnsupportedOperationException("Intervals aren't yet supported");
+        }
+
+        removeScheduleType(stopId);
+    }
+
+    private void removeScheduleType(int stopId) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        String whereClause = COLUMN_SAVED_STOP_ID + " = ?";
+        String[] whereArgs = new String[] {
+                String.valueOf(stopId)
+        };
+
+        int affectedRows = db.delete(TABLE_SCHEDULE_TYPES, whereClause, whereArgs);
+
+        Log.d(LOG_TAG, String.format("Affected rows after removing schedule type: %d", affectedRows));
+
+        if (affectedRows != 1) {
+            Log.w(LOG_TAG, "Expected only 1 row to be affected");
+        }
+    }
+
+    private void removeTimetableSchedule(int stopId) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        String whereClause = COLUMN_SAVED_STOP_ID + " = ?";
+        String[] whereArgs = new String[] {
+                String.valueOf(stopId)
+        };
+
+        int affectedRows = db.delete(TABLE_TIMETABLES, whereClause, whereArgs);
+
+        Log.d(LOG_TAG, String.format("Affected rows after removing schedule: %d", affectedRows));
     }
 
     private boolean isAddedToMainMenu(Stop stop) {
