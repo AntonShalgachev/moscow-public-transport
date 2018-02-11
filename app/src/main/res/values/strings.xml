@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">Транспорт Москвы</string>
     <string name="action_settings">Настройки</string>
+    <string name="action_remove">Удалить</string>
+    <string name="action_select_all">Выделить всё</string>
+
+    <string name="action_mode_title">Выделено %d</string>
 
     <string name="type_bus_name">Автобус</string>
     <string name="type_trolley_name">Троллейбус</string>

@@ -4,12 +4,14 @@ import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.view.ViewGroup;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 import com.shalgachev.moscowpublictransport.fragments.SavedStopFragment;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -19,16 +21,33 @@ import java.util.List;
 public class SavedStopPagerAdapter extends FragmentPagerAdapter {
     private final List<TransportType> TRANSPORT_TYPES = Arrays.asList(TransportType.BUS, TransportType.TROLLEY, TransportType.TRAM);
 
+    private HashMap<Integer, SavedStopFragment> mFragments;
     private Context mContext;
 
     public SavedStopPagerAdapter(FragmentManager fragmentManager, Context context) {
         super(fragmentManager);
         mContext = context;
+        mFragments = new HashMap<>();
     }
 
     @Override
     public Fragment getItem(int position) {
         return SavedStopFragment.newInstance(TRANSPORT_TYPES.get(position));
+    }
+
+    public SavedStopFragment getFragment(int position) {
+        if (mFragments.containsKey(position))
+            return mFragments.get(position);
+        return null;
+    }
+
+    @Override
+    public Object instantiateItem(ViewGroup container, int position) {
+        Fragment createdFragment = (Fragment) super.instantiateItem(container, position);
+
+        mFragments.put(position, (SavedStopFragment)createdFragment);
+
+        return createdFragment;
     }
 
     @Override

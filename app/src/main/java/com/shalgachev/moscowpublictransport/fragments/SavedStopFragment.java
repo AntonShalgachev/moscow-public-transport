@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -23,17 +24,15 @@ import java.util.List;
 
 /**
  * A fragment representing a list of Items.
- * <p/>
- * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
- * interface.
  */
 public class SavedStopFragment extends Fragment {
 
     private static final String ARG_TRANSPORT_TYPE = "transport_type";
 
     private TransportType mTransportType;
-    private OnListFragmentInteractionListener mListener;
+    private SavedStopRecyclerViewAdapter.ViewHolder.ItemIterationListener mListener;
     private RecyclerView mRecycleView;
+    private SavedStopRecyclerViewAdapter mRecyclerAdapter;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -72,10 +71,14 @@ public class SavedStopFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_saved_stop_list, container, false);
         Context context = rootView.getContext();
 
-        mRecycleView = (RecyclerView) rootView.findViewById(R.id.list);
+        mRecycleView = rootView.findViewById(R.id.list);
+        mRecycleView.setItemAnimator(new DefaultItemAnimator());
         mRecycleView.setLayoutManager(new LinearLayoutManager(context));
 
-        FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
+        mRecyclerAdapter = new SavedStopRecyclerViewAdapter(mListener, getActivity());
+        mRecycleView.setAdapter(mRecyclerAdapter);
+
+        FloatingActionButton fab = rootView.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -89,12 +92,24 @@ public class SavedStopFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        try {
+            mListener = (SavedStopRecyclerViewAdapter.ViewHolder.ItemIterationListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + " must implement ItemIterationListener");
+        }
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
     }
 
-    void updateStops() {
+    public void updateStops() {
         if (mRecycleView == null)
             return;
 
@@ -103,10 +118,10 @@ public class SavedStopFragment extends Fragment {
         List<Stop> stops = db.getStopsOnMainMenu(mTransportType);
         db.close();
 
-        mRecycleView.setAdapter(new SavedStopRecyclerViewAdapter(stops, mListener, getActivity()));
+        mRecyclerAdapter.updateStops(stops);
     }
 
-    public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(Stop item);
+    public SavedStopRecyclerViewAdapter getRecyclerAdapter() {
+        return mRecyclerAdapter;
     }
 }

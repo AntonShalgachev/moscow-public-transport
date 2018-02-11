@@ -214,6 +214,7 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
         final String DIRECTION_PARAM = "direction";
         final String WAYPOINT_PARAM = "waypoint";
 
+        // TODO: 2/11/2018 Properly handle Russian letters, which need to be encoded in windows-1251
         return Uri.parse(BASE_SCHEDULE_URL).buildUpon()
                 .appendQueryParameter(TRANSPORT_TYPE_PARAM, getTransportTypeId(stop.transportType))
                 .appendQueryParameter(ROUTE_PARAM, stop.route.toString())

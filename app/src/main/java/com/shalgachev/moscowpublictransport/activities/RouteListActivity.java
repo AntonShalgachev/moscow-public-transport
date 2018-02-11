@@ -1,18 +1,37 @@
 package com.shalgachev.moscowpublictransport.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.adapters.SavedStopPagerAdapter;
+import com.shalgachev.moscowpublictransport.adapters.SavedStopRecyclerViewAdapter;
+import com.shalgachev.moscowpublictransport.data.Stop;
+import com.shalgachev.moscowpublictransport.data.db.SavedStopsSQLiteHelper;
+import com.shalgachev.moscowpublictransport.fragments.SavedStopFragment;
+import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
+import com.shalgachev.moscowpublictransport.helpers.ToastHelper;
 
-public class RouteListActivity extends AppCompatActivity {
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class RouteListActivity extends AppCompatActivity implements SavedStopRecyclerViewAdapter.ViewHolder.ItemIterationListener {
+    private ActionModeCallback mActionModeCallback = new ActionModeCallback();
+    private ActionMode mActionMode;
+
+    ViewPager mViewPager;
+    SavedStopPagerAdapter mPagerAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,18 +41,29 @@ public class RouteListActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        SavedStopPagerAdapter sectionsPagerAdapter = new SavedStopPagerAdapter(getSupportFragmentManager(), this);
+        mPagerAdapter = new SavedStopPagerAdapter(getSupportFragmentManager(), this);
 
-        ViewPager viewPager = findViewById(R.id.container);
-        viewPager.setAdapter(sectionsPagerAdapter);
+        mViewPager = findViewById(R.id.container);
+        mViewPager.setAdapter(mPagerAdapter);
 
         TabLayout tabLayout = findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
+        tabLayout.setupWithViewPager(mViewPager);
+
+        mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+
+                Log.d("Temp", String.format("On page selected: %d", position));
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                }
+            }
+        });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_route_list, menu);
         return true;
     }
@@ -48,5 +78,127 @@ public class RouteListActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onItemClicked(Stop stop, int position) {
+        if (mActionMode != null) {
+            toggleSelection(stop, position);
+        } else {
+            Intent intent = new Intent(this, ScheduleActivity.class);
+            intent.putExtra(ExtraHelper.STOP_EXTRA, stop);
+
+            startActivity(intent);
+        }
+    }
+
+    @Override
+    public void onItemLongClicked(Stop stop, int position) {
+        if (mActionMode == null) {
+            mActionMode = startSupportActionMode(mActionModeCallback);
+
+            SavedStopRecyclerViewAdapter adapter = getCurrentRecyclerAdapter();
+            if (adapter != null)
+                adapter.enableSelecting(true);
+        }
+
+        toggleSelection(stop, position);
+    }
+
+    private void toggleSelection(Stop stop, int position) {
+        SavedStopRecyclerViewAdapter adapter = getCurrentRecyclerAdapter();
+        if (adapter == null)
+            return;
+
+        adapter.toggleSelection(position);
+        updateActionMode();
+    }
+
+    private class ActionModeCallback implements ActionMode.Callback {
+        @SuppressWarnings("unused")
+        private final String TAG = ActionModeCallback.class.getSimpleName();
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            mode.getMenuInflater().inflate (R.menu.menu_route_list_selection, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            SavedStopRecyclerViewAdapter adapter = getCurrentRecyclerAdapter();
+            switch (item.getItemId()) {
+                case R.id.action_remove:
+                    if (adapter != null) {
+                        List<Stop> selectedStops = getCurrentRecyclerAdapter().getSelectedStops();
+                        Log.d(TAG, String.format("Removing %d saved stops", selectedStops.size()));
+
+                        SavedStopsSQLiteHelper db = new SavedStopsSQLiteHelper(RouteListActivity.this);
+                        // TODO: 2/11/2018 Delete list of stops in one call
+                        for (Stop stop : selectedStops) {
+                            db.removeFromMainMenu(stop);
+                        }
+                        db.close();
+
+                        getCurrentRecyclerFragment().updateStops();
+
+                        ToastHelper.showStopDeltaToast(RouteListActivity.this, 0, selectedStops.size());
+                    }
+
+                    mActionMode.finish();
+                    return true;
+
+                case R.id.action_select_all:
+                    if (adapter != null) {
+                        adapter.selectAll();
+                    }
+                    updateActionMode();
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            SavedStopRecyclerViewAdapter adapter = getCurrentRecyclerAdapter();
+            if (adapter != null)
+                adapter.enableSelecting(false);
+
+            mActionMode = null;
+        }
+    }
+
+    SavedStopFragment getCurrentRecyclerFragment() {
+        return mPagerAdapter.getFragment(mViewPager.getCurrentItem());
+    }
+
+    SavedStopRecyclerViewAdapter getCurrentRecyclerAdapter()
+    {
+        SavedStopFragment fragment = getCurrentRecyclerFragment();
+        if (fragment == null)
+            return null;
+
+        return fragment.getRecyclerAdapter();
+    }
+
+    void updateActionMode() {
+        SavedStopRecyclerViewAdapter adapter = getCurrentRecyclerAdapter();
+        if (adapter == null)
+            return;
+
+        int count = adapter.getSelectedItemCount();
+        if (count == 0) {
+            mActionMode.finish();
+        } else {
+            mActionMode.setTitle(getString(R.string.action_mode_title, count));
+            mActionMode.invalidate();
+        }
     }
 }

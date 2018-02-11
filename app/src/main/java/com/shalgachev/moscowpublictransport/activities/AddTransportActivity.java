@@ -31,6 +31,7 @@ import com.shalgachev.moscowpublictransport.data.TransportType;
 import com.shalgachev.moscowpublictransport.data.db.SavedStopsSQLiteHelper;
 import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
 import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
+import com.shalgachev.moscowpublictransport.helpers.ToastHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -122,19 +123,7 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
 
         db.close();
 
-        if (stopsSaved > 0 || stopsDeleted > 0) {
-            StringBuilder text = new StringBuilder();
-            String prefix = "";
-            if (stopsSaved > 0) {
-                text.append(prefix).append(getString(R.string.toast_stops_saved, stopsSaved));
-                prefix = "\n";
-            }
-            if (stopsDeleted > 0) {
-                text.append(prefix).append(getString(R.string.toast_stops_deleted, stopsDeleted));
-                prefix = "\n";
-            }
-            Toast.makeText(this, text.toString(), Toast.LENGTH_LONG).show();
-        }
+        ToastHelper.showStopDeltaToast(this, stopsSaved, stopsDeleted);
     }
 
     private void initActivity() {

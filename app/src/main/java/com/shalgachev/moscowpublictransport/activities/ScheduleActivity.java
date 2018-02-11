@@ -43,8 +43,10 @@ public class ScheduleActivity extends AppCompatActivity {
             }
         });
 
-        if (getSupportActionBar() != null)
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+        }
 
         initActivity();
         loadData();
