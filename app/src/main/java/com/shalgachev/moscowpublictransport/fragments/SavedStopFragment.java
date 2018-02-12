@@ -78,13 +78,26 @@ public class SavedStopFragment extends Fragment {
         mRecyclerAdapter = new SavedStopRecyclerViewAdapter(mListener, getActivity());
         mRecycleView.setAdapter(mRecyclerAdapter);
 
-        FloatingActionButton fab = rootView.findViewById(R.id.fab);
+        final FloatingActionButton fab = rootView.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), AddTransportActivity.class);
                 intent.putExtra(ExtraHelper.TRANSPORT_TYPE_EXTRA, mTransportType);
                 startActivity(intent);
+            }
+        });
+
+        mRecycleView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                if (dy > 0 && fab.getVisibility() == View.VISIBLE) {
+                    fab.hide();
+                } else if (dy < 0 && fab.getVisibility() != View.VISIBLE) {
+                    fab.show();
+                }
             }
         });
 

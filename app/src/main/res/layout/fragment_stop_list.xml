@@ -9,6 +9,7 @@
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
     android:background="?android:attr/selectableItemBackground"
+    android:scrollbars="vertical"
     app:layoutManager="LinearLayoutManager"
     tools:context="com.shalgachev.moscowpublictransport.fragments.StopListFragment"
     tools:listitem="@layout/fragment_stop_list_item" />
