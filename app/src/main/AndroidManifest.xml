@@ -14,15 +14,21 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".activities.RouteListActivity"
+            android:launchMode="singleTop"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.AddTransportActivity" />
+        <activity
+            android:name=".activities.AddTransportActivity"
+            android:parentActivityName=".activities.RouteListActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.shalgachev.moscowpublictransport.activities.RouteListActivity" />
+        </activity>
         <activity
             android:name=".activities.ScheduleActivity"
             android:label="@string/title_activity_schedule"
