@@ -4,10 +4,8 @@ import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.style.TtsSpan;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -34,15 +32,6 @@ public class ScheduleActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
@@ -64,7 +53,7 @@ public class ScheduleActivity extends AppCompatActivity {
         setTitle(mStop.route);
 
         AppBarLayout appBar = findViewById(R.id.app_bar);
-        ImageView image = appBar.findViewById(R.id.image);
+        ImageView image = appBar.findViewById(R.id.transport_image);
 
         switch (mStop.transportType) {
             case BUS:
@@ -77,10 +66,6 @@ public class ScheduleActivity extends AppCompatActivity {
                 image.setImageResource(R.drawable.tram);
                 break;
         }
-
-        // TODO: 1/9/2018 Remove this
-        TextView tempTitle = appBar.findViewById(R.id.temp_title);
-        tempTitle.setText(mStop.providerId);
     }
 
     private void loadData()
