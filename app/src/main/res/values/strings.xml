@@ -66,9 +66,12 @@
     <string name="loading">Загрузка</string>
     <string name="loading_routes">Загрузка маршрутов</string>
     <string name="loading_stops">Загрузка остановок</string>
+    <string name="loading_schedule">Загрузка расписания</string>
 
-    <string name="error_title">Внутренняя ошибка</string>
+    <string name="error_title">Ошибка</string>
     <string name="error_loading_stops">Невозможно загрузить остановки</string>
+    <string name="error_loading_schedule">Невозможно загрузить расписание</string>
+    <string name="retry">Повторить</string>
 
     <string name="toast_stops_saved">Добавлено остановок: %d</string>
     <string name="toast_stops_deleted">Удалено остановок: %d</string>

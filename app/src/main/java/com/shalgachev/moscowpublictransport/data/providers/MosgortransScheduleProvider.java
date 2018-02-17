@@ -98,10 +98,8 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
     }
 
     private static Schedule getSchedule(Stop stop) {
-//        HashMap<Integer, SortedSet<Integer>> timepoints = new HashMap<>();
-//        timepoints.put(9, new TreeSet<>(Arrays.asList(10, 16, 28, 49, 59)));
-//        timepoints.put(10, new TreeSet<>(Arrays.asList(2, 14, 30, 50, 58)));
-//        timepoints.put(11, new TreeSet<>(Arrays.asList(0, 10, 20, 30, 40, 50)));
+        if (stop == null)
+            return null;
 
         List<Schedule.Timepoint> timepoints = new ArrayList<>();
 
@@ -110,6 +108,11 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
 
         try {
             Document doc = Jsoup.connect(url).get();
+
+            Element warning = doc.selectFirst("td[class=warning]");
+            if (warning != null)
+                return null;
+
             Elements timeTags = doc.select("span[class~=(?:hour|minute)]");
 
             int hour = -1;
@@ -133,7 +136,12 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
             }
         } catch (IOException e) {
             e.printStackTrace();
+
+            return null;
         }
+
+        if (timepoints.isEmpty())
+            return null;
 
         Schedule schedule = new Schedule();
         schedule.setAsTimepoints(stop, timepoints);
