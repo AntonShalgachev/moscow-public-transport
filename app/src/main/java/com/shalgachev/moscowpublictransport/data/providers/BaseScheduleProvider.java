@@ -1,5 +1,8 @@
 package com.shalgachev.moscowpublictransport.data.providers;
 
+import android.content.Context;
+
+import com.shalgachev.moscowpublictransport.data.Route;
 import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
 import com.shalgachev.moscowpublictransport.data.ScheduleTask;
@@ -61,6 +64,7 @@ public abstract class BaseScheduleProvider {
     public abstract Result run();
 
     public abstract CharSequence getProviderId();
+    public abstract CharSequence getProviderName(Context context);
 
     public enum OperationType {
         TYPES,
@@ -72,7 +76,7 @@ public abstract class BaseScheduleProvider {
     public class Result {
         public OperationType operationType;
         public List<TransportType> transportTypes;
-        public List<CharSequence> routes;
+        public List<Route> routes;
         public List<Stop> stops;
         public Schedule schedule;
     }

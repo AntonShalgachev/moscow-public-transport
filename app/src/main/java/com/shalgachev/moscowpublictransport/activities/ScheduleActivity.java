@@ -59,7 +59,7 @@ public class ScheduleActivity extends AppCompatActivity {
 
         mTempContent.setText(mStop.toString());
 
-        setTitle(mStop.route);
+        setTitle(mStop.route.name);
 
         AppBarLayout appBar = findViewById(R.id.app_bar);
         ImageView image = appBar.findViewById(R.id.transport_image);

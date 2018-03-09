@@ -26,11 +26,14 @@ import java.util.List;
 import java.util.Set;
 
 public class RouteListActivity extends AppCompatActivity implements SavedStopRecyclerViewAdapter.ViewHolder.ItemIterationListener {
+    static final String LOG_TAG = "RouteListActivity";
     private ActionModeCallback mActionModeCallback = new ActionModeCallback();
     private ActionMode mActionMode;
 
     ViewPager mViewPager;
     SavedStopPagerAdapter mPagerAdapter;
+
+    int mCurrentPage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +48,7 @@ public class RouteListActivity extends AppCompatActivity implements SavedStopRec
 
         mViewPager = findViewById(R.id.container);
         mViewPager.setAdapter(mPagerAdapter);
+        mCurrentPage = mViewPager.getCurrentItem();
 
         TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
@@ -52,12 +56,12 @@ public class RouteListActivity extends AppCompatActivity implements SavedStopRec
         mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
-                super.onPageSelected(position);
-
-                Log.d("Temp", String.format("On page selected: %d", position));
+                Log.d(LOG_TAG, String.format("Page selected: %d", position));
                 if (mActionMode != null) {
                     mActionMode.finish();
                 }
+
+                mCurrentPage = position;
             }
         });
     }
@@ -176,7 +180,7 @@ public class RouteListActivity extends AppCompatActivity implements SavedStopRec
     }
 
     SavedStopFragment getCurrentRecyclerFragment() {
-        return mPagerAdapter.getFragment(mViewPager.getCurrentItem());
+        return mPagerAdapter.getFragment(mCurrentPage);
     }
 
     SavedStopRecyclerViewAdapter getCurrentRecyclerAdapter()

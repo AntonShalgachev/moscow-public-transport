@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/route_input_done"
+        android:icon="@drawable/ic_done_white_48dp"
+        android:title="@string/menu_done"
+        app:showAsAction="always|withText" />
+</menu>

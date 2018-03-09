@@ -2,8 +2,11 @@ package com.shalgachev.moscowpublictransport.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +24,23 @@ import java.util.List;
 
 public class SavedStopRecyclerViewAdapter extends SelectableAdapter<SavedStopRecyclerViewAdapter.ViewHolder> {
 
+    static private class Payload
+    {
+        public enum ActionType
+        {
+            CheckboxVisibility,
+            CheckboxIsChecked,
+        }
+
+        public ActionType actionType;
+        public boolean value;
+
+        @Override
+        public String toString() {
+            return actionType.toString() + " (" + String.valueOf(value) + ")";
+        }
+    }
+
     static private final String LOG_TAG = "SavedStopAdapter";
 
     private List<Stop> mItems;
@@ -31,6 +51,26 @@ public class SavedStopRecyclerViewAdapter extends SelectableAdapter<SavedStopRec
         mListener = listener;
         mContext = context;
         mItems = new ArrayList<>();
+    }
+
+    @Override
+    protected Object getSelectionEnabledPayload(boolean enabled) {
+        Payload payload = new Payload();
+
+        payload.actionType = Payload.ActionType.CheckboxVisibility;
+        payload.value = enabled;
+
+        return payload;
+    }
+
+    @Override
+    protected Object getItemSelectedPayload(boolean selected) {
+        Payload payload = new Payload();
+
+        payload.actionType = Payload.ActionType.CheckboxIsChecked;
+        payload.value = selected;
+
+        return payload;
     }
 
     public void updateStops(final List<Stop> items) {
@@ -73,15 +113,6 @@ public class SavedStopRecyclerViewAdapter extends SelectableAdapter<SavedStopRec
         return selectedStops;
     }
 
-//    public void onSelectedRemoved() {
-//        if (isSelectingEnabled()) {
-//            List<Integer> selectedPositions = getSelectedItems();
-//            for (int position : selectedPositions) {
-//                notifyItemRemoved(position);
-//            }
-//        }
-//    }
-
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
@@ -90,16 +121,40 @@ public class SavedStopRecyclerViewAdapter extends SelectableAdapter<SavedStopRec
     }
 
     @Override
+    public void onBindViewHolder(ViewHolder holder, int position, List<Object> payloads) {
+        if (!payloads.isEmpty()) {
+            Log.d("SavedStopAdapter", String.format("Received %d payloads on item %d:", payloads.size(), position));
+            List<String> payloadsStr = new ArrayList<>();
+            for (Object p : payloads) {
+                Payload payload = (Payload) p;
+                payloadsStr.add(payload.toString());
+
+                switch (payload.actionType) {
+                    case CheckboxVisibility:
+                        holder.mIsSelectedView.setVisibility(payload.value ? View.VISIBLE : View.GONE);
+                        break;
+                    case CheckboxIsChecked:
+                        holder.mIsSelectedView.setChecked(payload.value);
+                        break;
+                }
+            }
+            Log.d("SavedStopAdapter", String.format("\t%s", TextUtils.join(", ", payloadsStr)));
+        } else {
+            onBindViewHolder(holder, position);
+        }
+    }
+
+    @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         final Stop stop = mItems.get(position);
 
         holder.item = stop;
-        holder.mRouteView.setText(stop.route);
+        holder.mRouteView.setText(stop.route.name);
         holder.mDaysView.setText(ScheduleUtils.daysMaskToString(mContext, stop.daysMask, true));
         holder.mNameView.setText(stop.name);
         holder.mDirectionView.setText(mContext.getString(R.string.saved_stop_direction, stop.direction.getFrom(), stop.direction.getTo()));
 
-        holder.mIsSelectedView.setVisibility(isSelectingEnabled() ? View.VISIBLE : View.INVISIBLE);
+        holder.mIsSelectedView.setVisibility(isSelectingEnabled() ? View.VISIBLE : View.GONE);
         holder.mIsSelectedView.setChecked(isSelected(position));
     }
 

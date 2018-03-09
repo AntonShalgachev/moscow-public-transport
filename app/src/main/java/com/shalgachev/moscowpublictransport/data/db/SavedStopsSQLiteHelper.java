@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.shalgachev.moscowpublictransport.data.Direction;
+import com.shalgachev.moscowpublictransport.data.Route;
 import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.ScheduleType;
 import com.shalgachev.moscowpublictransport.data.Stop;
@@ -445,9 +446,9 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(COLUMN_PROVIDER_ID, stop.providerId.toString());
+        values.put(COLUMN_PROVIDER_ID, stop.route.providerId.toString());
         values.put(COLUMN_TRANSPORT_TYPE, transportTypeToString(stop.transportType));
-        values.put(COLUMN_ROUTE, stop.route.toString());
+        values.put(COLUMN_ROUTE, stop.route.name.toString());
         values.put(COLUMN_DAYS_ROUTE, stop.daysMask.toString());
         values.put(COLUMN_DIRECTION_ID, stop.direction.getId().toString());
         values.put(COLUMN_DIRECTION_FROM, stop.direction.getFrom().toString());
@@ -519,9 +520,9 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
 
     private String[] getStopWhereArgs(Stop stop) {
         return new String[]{
-                stop.providerId.toString(),
+                stop.route.providerId.toString(),
                 transportTypeToString(stop.transportType),
-                stop.route.toString(),
+                stop.route.name.toString(),
                 stop.daysMask.toString(),
                 stop.direction.getId().toString(),
                 stop.name.toString(),
@@ -541,7 +542,7 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
         int stop_id = c.getInt(c.getColumnIndex(COLUMN_STOP_ID));
 
         Direction direction = new Direction(direction_id, direction_from, direction_to);
-        return new Stop(provider_id, stringToTransportType(transport_type), route, days_mask, direction, name, stop_id);
+        return new Stop(stringToTransportType(transport_type), new Route(route, provider_id), days_mask, direction, name, stop_id);
     }
 
     private String transportTypeToString(TransportType transportType) {

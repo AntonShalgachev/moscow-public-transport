@@ -1,6 +1,8 @@
 package com.shalgachev.moscowpublictransport.activities;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.DrawableRes;
@@ -9,20 +11,18 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.KeyEvent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.adapters.StopListPagerAdapter;
 import com.shalgachev.moscowpublictransport.data.Direction;
+import com.shalgachev.moscowpublictransport.data.Route;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
 import com.shalgachev.moscowpublictransport.data.ScheduleTask;
 import com.shalgachev.moscowpublictransport.data.Stop;
@@ -41,13 +41,15 @@ import java.util.Map;
 import java.util.Set;
 
 public class AddTransportActivity extends AppCompatActivity implements ScheduleTask.IScheduleReceiver {
+    private static final String LOG_TAG = "AddTransportActivity";
+    private static int REQUEST_ROUTE = 1;
+
     private TransportType mTransportType;
     private BaseScheduleProvider mScheduleProvider;
-    private AutoCompleteTextView mRouteTextView;
     private TextView mDirectionFromTextView;
     private TextView mDirectionToTextView;
-    private List<CharSequence> mRoutes;
-    private CharSequence mRoute;
+    private Button mChooseRouteButton;
+    private Route mRoute;
     private ArrayList<Direction> mDirections;
     private int mDirectionIdx;
     private List<Stop> mStops;
@@ -65,7 +67,10 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
-        mTransportType = (TransportType) getIntent().getExtras().getSerializable(ExtraHelper.TRANSPORT_TYPE_EXTRA);
+        Bundle extras = getIntent().getExtras();
+        if (extras != null)
+            mTransportType = (TransportType) extras.getSerializable(ExtraHelper.TRANSPORT_TYPE_EXTRA);
+
         if (mTransportType == null)
             throw new IllegalArgumentException("Transport transportType is null");
 
@@ -74,7 +79,31 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
 
         initActivity();
 
-        loadRoutes();
+        startRouteInputActivity();
+    }
+
+    private void startRouteInputActivity() {
+        startActivityForResult(RouteInputActivity.createIntent(this, mTransportType), REQUEST_ROUTE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_ROUTE) {
+            Log.d(LOG_TAG, "Route input finished");
+            if (resultCode == Activity.RESULT_OK) {
+                Route route = RouteInputActivity.extractRoute(data);
+
+                if (route == null)
+                    throw new AssertionError("Route shouldn't be null");
+
+                Log.d(LOG_TAG, String.format("Selected route: '%s'", route.toString()));
+
+                mRoute = route;
+                mChooseRouteButton.setText(mRoute.name);
+
+                loadStops();
+            }
+        }
     }
 
     @Override
@@ -142,9 +171,10 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
         TabLayout tabLayout = findViewById(R.id.days_tabs);
         tabLayout.setupWithViewPager(viewPager);
 
-        mRouteTextView = findViewById(R.id.text_route);
         mDirectionFromTextView = findViewById(R.id.text_direction_from);
         mDirectionToTextView = findViewById(R.id.text_direction_to);
+
+        mChooseRouteButton = findViewById(R.id.input_route_button);
     }
 
     public void executeScheduleProvider(@StringRes int loadingStringId) {
@@ -157,6 +187,7 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
 
     @Override
     public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
+        // TODO: 3/6/2018 remove this shit; use anonymous callback instead
         if (mProgressDialog != null)
             mProgressDialog.dismiss();
 
@@ -164,8 +195,9 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
             case TYPES:
                 break;
             case ROUTES:
-                mRoutes = result.routes;
-                onRoutesAvailable();
+                // TODO: 3/6/2018 remove
+//                mRoutes = result.routes;
+//                onRoutesAvailable();
                 break;
             case STOPS:
                 mStops = result.stops;
@@ -176,25 +208,27 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
         }
     }
 
+    // TODO: 3/6/2018 Not needed
     private void onRoutesAvailable() {
-        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, mRoutes);
-        mRouteTextView.setAdapter(adapter);
-
-        mRouteTextView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    mRoute = mRouteTextView.getText().toString();
-
-                    loadStops();
-                }
-                return false;
-            }
-        });
+//        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, mRoutes);
+//        mRouteTextView.setAdapter(adapter);
+//
+//        mRouteTextView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+//            @Override
+//            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+//                if (actionId == EditorInfo.IME_ACTION_DONE) {
+//                    mRoute = mRouteTextView.getText().toString();
+//
+//                    loadStops();
+//                }
+//                return false;
+//            }
+//        });
     }
 
     private void onStopsAvailable() {
         if (mStops.isEmpty()) {
+            Log.e(LOG_TAG, "Failed to load stops: stops are empty");
             showErrorMessage(R.string.error_loading_stops);
             return;
         }
@@ -223,10 +257,10 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
         updateStops();
     }
 
-    private void loadRoutes() {
-        mScheduleProvider.setArgs(ScheduleArgs.asRoutesArgs(mTransportType));
-        executeScheduleProvider(R.string.loading_routes);
-    }
+//    private void loadRoutes() {
+//        mScheduleProvider.setArgs(ScheduleArgs.asRoutesArgs(mTransportType));
+//        executeScheduleProvider(R.string.loading_routes);
+//    }
 
     private void loadStops() {
         mScheduleProvider.setArgs(ScheduleArgs.asStopsArgs(mTransportType, mRoute));
@@ -241,6 +275,10 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
 
         updateDirection();
         updateStops();
+    }
+
+    public void onClickRouteInput(View view) {
+        startRouteInputActivity();
     }
 
     private Direction getCurrentDirection() {

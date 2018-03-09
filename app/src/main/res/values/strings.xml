@@ -76,6 +76,10 @@
     <string name="toast_stops_saved">Добавлено остановок: %d</string>
     <string name="toast_stops_deleted">Удалено остановок: %d</string>
 
-    <string name="title_activity_schedule">ScheduleActivity</string>
-    <string name="large_text">SOMELARGETEXT</string>
+    <string name="schedule_activity_title">Расписание</string>
+    <string name="route_input_activity_title">Выберите маршрут</string>
+    <string name="choose_route_button_title">Маршрут не выбран</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

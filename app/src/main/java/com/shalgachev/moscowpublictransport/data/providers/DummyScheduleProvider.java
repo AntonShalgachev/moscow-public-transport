@@ -1,8 +1,11 @@
 package com.shalgachev.moscowpublictransport.data.providers;
 
+import android.content.Context;
 import android.util.Log;
 
+import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.Direction;
+import com.shalgachev.moscowpublictransport.data.Route;
 import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.TransportType;
@@ -58,8 +61,8 @@ public class DummyScheduleProvider extends BaseScheduleProvider {
         ));
     }
 
-    private List<CharSequence> getRoutes() {
-        return new ArrayList<CharSequence>(Arrays.asList("268", "268К", "5Э"));
+    private List<Route> getRoutes() {
+        return new ArrayList<>(Arrays.asList(new Route("268", getProviderId()), new Route("268К", getProviderId()), new Route("5Э", getProviderId())));
     }
 
     private List<CharSequence> getDaysMasks() {
@@ -89,7 +92,7 @@ public class DummyScheduleProvider extends BaseScheduleProvider {
 
         List<Stop> stops = new ArrayList<>();
         for (int i = 0; i < stopNames.size(); i++) {
-            Stop stop = new Stop(getProviderId(), getArgs().transportType, route, daysMask, direction, stopNames.get(i), i);
+            Stop stop = new Stop(getArgs().transportType, new Route(route, getProviderId()), daysMask, direction, stopNames.get(i), i);
             stops.add(stop);
         }
 
@@ -97,13 +100,14 @@ public class DummyScheduleProvider extends BaseScheduleProvider {
     }
 
     private List<Stop> getStops() {
-        CharSequence route = getArgs().route;
+        Route route = getArgs().route;
 
         List<Stop> stops = new ArrayList<>();
-        for (CharSequence mask : getDaysMasks()) {
-            for (Direction direction : getDirections()) {
-                for (Stop stop : getStops(route, mask, direction)) {
-                    stops.add(stop);
+
+        if (route.providerId.equals(getProviderId())) {
+            for (CharSequence mask : getDaysMasks()) {
+                for (Direction direction : getDirections()) {
+                    stops.addAll(getStops(route.name, mask, direction));
                 }
             }
         }
@@ -120,5 +124,10 @@ public class DummyScheduleProvider extends BaseScheduleProvider {
 
     public CharSequence getProviderId() {
         return "dummy";
+    }
+
+    @Override
+    public CharSequence getProviderName(Context context) {
+        return context.getString(R.string.provider_name_dummy);
     }
 }

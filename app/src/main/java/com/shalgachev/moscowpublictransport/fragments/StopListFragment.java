@@ -24,7 +24,7 @@ import java.util.ArrayList;
  */
 public class StopListFragment extends Fragment {
 
-    private static final String ARG_STOP_LIST_ITEMS = "column-count";
+    private static final String ARG_STOP_LIST_ITEMS = "LIST_ITEMS";
     ArrayList<StopListItem> mItems;
     private OnListFragmentInteractionListener mListener;
 

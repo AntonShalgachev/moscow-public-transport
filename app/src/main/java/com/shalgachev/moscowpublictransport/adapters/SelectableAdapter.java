@@ -18,11 +18,23 @@ public abstract class SelectableAdapter<VH extends RecyclerView.ViewHolder> exte
         mSelectedItems = new SparseBooleanArray();
     }
 
+    protected Object getSelectionEnabledPayload(boolean enabled)
+    {
+        return null;
+    }
+    protected Object getItemSelectedPayload(boolean selected)
+    {
+        return null;
+    }
+
     public void enableSelecting(boolean enable) {
         mIsSelectingActive = enable;
-        mSelectedItems.clear();
 
-        notifyItemRangeChanged(0, getItemCount());
+        if (!enable)
+            clearSelection();
+
+        Object payload = getSelectionEnabledPayload(enable);
+        notifyItemRangeChanged(0, getItemCount(), payload);
     }
 
     public boolean isSelectingEnabled() {
@@ -44,7 +56,7 @@ public abstract class SelectableAdapter<VH extends RecyclerView.ViewHolder> exte
             mSelectedItems.put(i, true);
         }
 
-        notifyItemRangeChanged(0, size);
+        notifyItemRangeChanged(0, size, getItemSelectedPayload(true));
     }
 
     /**
@@ -52,12 +64,15 @@ public abstract class SelectableAdapter<VH extends RecyclerView.ViewHolder> exte
      * @param position Position of the item to toggle the selection status for
      */
     public void toggleSelection(int position) {
+        boolean selecting;
         if (mSelectedItems.get(position, false)) {
             mSelectedItems.delete(position);
+            selecting = false;
         } else {
             mSelectedItems.put(position, true);
+            selecting = true;
         }
-        notifyItemChanged(position);
+        notifyItemChanged(position, getItemSelectedPayload(selecting));
     }
 
     /**
@@ -67,7 +82,7 @@ public abstract class SelectableAdapter<VH extends RecyclerView.ViewHolder> exte
         List<Integer> selection = getSelectedItems();
         mSelectedItems.clear();
         for (Integer i : selection) {
-            notifyItemChanged(i);
+            notifyItemChanged(i, getItemSelectedPayload(false));
         }
     }
 

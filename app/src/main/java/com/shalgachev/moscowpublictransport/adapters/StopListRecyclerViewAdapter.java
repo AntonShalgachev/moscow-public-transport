@@ -76,9 +76,9 @@ public class StopListRecyclerViewAdapter extends RecyclerView.Adapter<StopListRe
         public ViewHolder(View view) {
             super(view);
             this.view = view;
-            stop = (TextView) view.findViewById(R.id.stop_item_name);
-            nextIn = (TextView) view.findViewById(R.id.stop_item_next);
-            checkBox = (CheckBox) view.findViewById(R.id.stop_item_checkbox);
+            stop = view.findViewById(R.id.stop_item_name);
+            nextIn = view.findViewById(R.id.stop_item_next);
+            checkBox = view.findViewById(R.id.stop_item_checkbox);
         }
     }
 }

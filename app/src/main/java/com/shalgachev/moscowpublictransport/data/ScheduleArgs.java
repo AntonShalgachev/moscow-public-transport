@@ -8,7 +8,7 @@ import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
 public class ScheduleArgs {
     public BaseScheduleProvider.OperationType operationType;
     public TransportType transportType;
-    public CharSequence route;
+    public Route route;
     public CharSequence daysMask;
     public Direction direction;
 
@@ -22,7 +22,7 @@ public class ScheduleArgs {
         return args;
     }
 
-    public static ScheduleArgs asStopsArgs(TransportType type, CharSequence route) {
+    public static ScheduleArgs asStopsArgs(TransportType type, Route route) {
         ScheduleArgs args = new ScheduleArgs();
         args.operationType = BaseScheduleProvider.OperationType.STOPS;
         args.transportType = type;

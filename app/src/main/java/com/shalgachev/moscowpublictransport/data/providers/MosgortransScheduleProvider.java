@@ -1,9 +1,12 @@
 package com.shalgachev.moscowpublictransport.data.providers;
 
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
+import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.Direction;
+import com.shalgachev.moscowpublictransport.data.Route;
 import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.TransportType;
@@ -20,6 +23,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -34,21 +38,50 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
     private static final String BASE_METADATA_URL = "http://www.mosgortrans.org/pass3/request.ajax.php?";
     private static final String BASE_SCHEDULE_URL = "http://www.mosgortrans.org/pass3/shedule.printable.php?";
 
-    private static List<CharSequence> getRoutes(TransportType transportType) {
+    private List<Route> getRoutes(TransportType transportType) {
         String url = constructMetadataUrl(MetadataListType.ROUTES, transportType);
         Log.i(LOG_TAG, String.format("getRoutes: Fetching '%s'", url));
 
-        return Utils.fetchUrlAsList(url);
+        List<CharSequence> routeNames = Utils.fetchUrlAsList(url);
+        List<Route> routes = new ArrayList<>();
+
+        Map<Character, Integer> freqMap = new HashMap<>();
+
+        for (CharSequence name : routeNames) {
+            Route route = new Route(name, getProviderId());
+            routes.add(route);
+
+            for (int i = 0; i < name.length(); i++) {
+                char c = name.charAt(i);
+
+                if (Character.isDigit(c))
+                    continue;
+                if (Character.isLetter(c) && Character.isLowerCase(c))
+                    continue;
+
+                if (!freqMap.containsKey(c))
+                    freqMap.put(c, 0);
+
+                int freq = freqMap.get(c);
+                freqMap.put(c, freq + 1);
+            }
+        }
+
+        for (Map.Entry<Character, Integer> entry : freqMap.entrySet()) {
+            Log.d("Temp", String.format("%s: %d", entry.getKey(), entry.getValue()));
+        }
+
+        return routes;
     }
 
-    private static List<CharSequence> getDaysMasks(TransportType transportType, CharSequence route) {
+    private List<CharSequence> getDaysMasks(TransportType transportType, CharSequence route) {
         String url = constructMetadataUrl(MetadataListType.DAYS_MASKS, transportType, route);
         Log.i(LOG_TAG, String.format("getDaysMasks: Fetching '%s'", url));
 
         return Utils.fetchUrlAsList(url);
     }
 
-    private static List<Direction> getDirections(TransportType transportType, CharSequence route, CharSequence daysMask) {
+    private List<Direction> getDirections(TransportType transportType, CharSequence route, CharSequence daysMask) {
         // TODO: 6/25/2017 return just 2 directions without query
 
         String url = constructMetadataUrl(MetadataListType.DIRECTIONS, transportType, route, daysMask);
@@ -69,35 +102,41 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
         return directions;
     }
 
-    private static List<Stop> getStops(TransportType transportType, CharSequence route, CharSequence daysMask, Direction direction) {
+    private List<Stop> getStops(TransportType transportType, CharSequence route, CharSequence daysMask, Direction direction) {
         String url = constructMetadataUrl(MetadataListType.STOPS, transportType, route, daysMask, direction);
         Log.i(LOG_TAG, String.format("getStops: Fetching '%s'", url));
         List<CharSequence> stopList = Utils.fetchUrlAsList(url);
 
         List<Stop> stops = new ArrayList<>();
         for (int i = 0; i < stopList.size(); i++) {
-            Stop stop = new Stop(PROVIDER_ID, transportType, route, daysMask, direction, stopList.get(i), i);
+            Stop stop = new Stop(transportType, new Route(route, getProviderId()), daysMask, direction, stopList.get(i), i);
             stops.add(stop);
         }
 
         return stops;
     }
 
-    private static List<Stop> getStops(TransportType transportType, CharSequence route) {
+    private List<Stop> getStops(TransportType transportType, Route route) {
+        Log.i(LOG_TAG, "Loading stops for route " + route.toString());
         List<Stop> allStops = new ArrayList<>();
-        for (CharSequence mask : getDaysMasks(transportType, route)) {
-            for (Direction direction : getDirections(transportType, route, mask)) {
-                List<Stop> stops = getStops(transportType, route, mask, direction);
-                direction.setEndpoints(stops.get(0).name, stops.get(stops.size() - 1).name);
 
-                allStops.addAll(stops);
+        if (route.providerId.equals(getProviderId())) {
+            for (CharSequence mask : getDaysMasks(transportType, route.name)) {
+                for (Direction direction : getDirections(transportType, route.name, mask)) {
+                    List<Stop> stops = getStops(transportType, route.name, mask, direction);
+                    direction.setEndpoints(stops.get(0).name, stops.get(stops.size() - 1).name);
+
+                    allStops.addAll(stops);
+                }
             }
+        } else {
+            Log.e(LOG_TAG, "Attempt to retrieve stops of unknown provider");
         }
 
         return allStops;
     }
 
-    private static Schedule getSchedule(Stop stop) {
+    private Schedule getSchedule(Stop stop) {
         if (stop == null)
             return null;
 
@@ -234,6 +273,7 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
 
     @Override
     public Result run() {
+        Log.d(LOG_TAG, "Running task");
         Result result = new Result();
 
         switch (getArgs().operationType) {
@@ -251,6 +291,8 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
                 break;
         }
 
+        Log.d(LOG_TAG, "Finished running task");
+
         return result;
     }
 
@@ -264,6 +306,11 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
 
     public CharSequence getProviderId() {
         return PROVIDER_ID;
+    }
+
+    @Override
+    public CharSequence getProviderName(Context context) {
+        return context.getString(R.string.provider_name_mosgortrans);
     }
 
     private enum MetadataListType {
