@@ -80,6 +80,6 @@
     <string name="route_input_activity_title">Выберите маршрут</string>
     <string name="choose_route_button_title">Маршрут не выбран</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="button_title_goto_alpha">АБВ→</string>
+    <string name="button_title_goto_digits">←123</string>
 </resources>

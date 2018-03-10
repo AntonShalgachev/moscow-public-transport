@@ -36,8 +36,7 @@ public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.View
         mRoutes = new ArrayList<>(routes);
         notifyDataSetChanged();
 
-        if (mListener != null)
-            mListener.onFilterApplied();
+        filter("");
     }
 
     public void setListener(Listener listener)
@@ -69,6 +68,25 @@ public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.View
         });
 
         diffResult.dispatchUpdatesTo(this);
+
+        mFilteredRoutes = new ArrayList<>(routes);
+    }
+
+    public void filter(CharSequence filter) {
+        List<SelectableRoute> filteredRoutes = new ArrayList<>();
+        for (SelectableRoute route : mRoutes) {
+            if (routeMatchesFilter(route, filter))
+                filteredRoutes.add(route);
+        }
+
+        updateRoutes(filteredRoutes);
+
+        if (mListener != null)
+            mListener.onFilterApplied();
+    }
+
+    private boolean routeMatchesFilter(Route route, CharSequence filter) {
+        return route.name.toString().contains(filter);
     }
 
     public Route getSelectedRoute() {

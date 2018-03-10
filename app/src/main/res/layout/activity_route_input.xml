@@ -52,17 +52,20 @@
             android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-            android:textSize="30sp" />
+            android:textSize="30sp"
+            android:textStyle="bold" />
 
         <ImageButton
             android:id="@+id/delete"
+            style="@android:style/Widget.DeviceDefault.Button.Borderless"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
             android:layout_weight="2"
+            android:onClick="onCharacterDelete"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_delete_black_48dp" />
+            android:src="@drawable/ic_backspace_black_48dp" />
     </LinearLayout>
 
     <ProgressBar

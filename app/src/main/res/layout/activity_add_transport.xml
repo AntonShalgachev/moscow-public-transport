@@ -113,7 +113,7 @@
         android:layout_marginTop="8dp"
         android:onClick="onClickRouteInput"
         android:text="@string/choose_route_button_title"
-        android:textSize="18sp"
+        android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="@+id/image_transport_icon"
         app:layout_constraintEnd_toStartOf="@+id/image_transport_icon"
         app:layout_constraintStart_toStartOf="parent"

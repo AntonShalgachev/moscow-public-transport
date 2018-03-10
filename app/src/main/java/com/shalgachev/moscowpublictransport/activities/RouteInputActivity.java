@@ -2,6 +2,8 @@ package com.shalgachev.moscowpublictransport.activities;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.support.annotation.AnimRes;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -10,8 +12,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.adapters.RouteListAdapter;
@@ -21,20 +23,23 @@ import com.shalgachev.moscowpublictransport.data.ScheduleTask;
 import com.shalgachev.moscowpublictransport.data.SelectableRoute;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
+import com.shalgachev.moscowpublictransport.fragments.ButtonsFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RouteInputActivity extends AppCompatActivity {
+public class RouteInputActivity extends AppCompatActivity implements ButtonsFragment.OnFragmentInteractionListener {
     private static String EXTRA_TRANSPORT_TYPE = "com.shalgachev.moscowpublictransport.intent.TRANSPORT_TYPE";
     private static String EXTRA_ROUTE = "com.shalgachev.moscowpublictransport.intent.ROUTE";
 
     TransportType mTransportType;
     ProgressBar mProgressBar;
     RecyclerView mRouteList;
-    FrameLayout mButtonsFrame;
+    TextView mRouteTextView;
 
     RouteListAdapter mRouteListAdapter;
+
+    String mRouteInput = "";
 
     public static Intent createIntent(Activity activity, TransportType type) {
         Intent intent = new Intent(activity, RouteInputActivity.class);
@@ -89,7 +94,7 @@ public class RouteInputActivity extends AppCompatActivity {
 
         mProgressBar = findViewById(R.id.progress);
         mRouteList = findViewById(R.id.route_list);
-        mButtonsFrame = findViewById(R.id.buttons);
+        mRouteTextView = findViewById(R.id.route_input);
 
         mRouteList.setItemAnimator(new DefaultItemAnimator());
         mRouteList.setLayoutManager(new LinearLayoutManager(this));
@@ -108,7 +113,9 @@ public class RouteInputActivity extends AppCompatActivity {
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
+        addButtons();
         loadRoutes();
+        onInputChanged();
     }
 
     @Override
@@ -120,7 +127,9 @@ public class RouteInputActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.route_input_done).setEnabled(mRouteListAdapter.getSelectedRoute() != null);
+        // TODO: 3/9/2018 do something more intuitive
+        boolean hasSelectedRoute = mRouteListAdapter.getSelectedRoute() != null;
+        menu.findItem(R.id.route_input_done).setVisible(hasSelectedRoute);
 
         return true;
     }
@@ -164,5 +173,58 @@ public class RouteInputActivity extends AppCompatActivity {
         task.execute();
 
         mProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    void addButtons() {
+        ButtonsFragment fragment = ButtonsFragment.newInstance(ButtonsFragment.Type.Digits);
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.add(R.id.buttons, fragment);
+        transaction.commit();
+    }
+
+    void onInputChanged() {
+        mRouteTextView.setText(mRouteInput);
+        mRouteListAdapter.filter(mRouteInput);
+    }
+
+    @Override
+    public void onCharacterInput(CharSequence str) {
+        mRouteInput += str;
+        onInputChanged();
+    }
+
+    public void onCharacterDelete(View view) {
+        if (mRouteInput.length() > 0) {
+            mRouteInput = mRouteInput.substring(0, mRouteInput.length() - 1);
+            onInputChanged();
+        }
+    }
+
+    @Override
+    public void onTransitionRequested(ButtonsFragment.Type currentType) {
+        ButtonsFragment.Type nextType = ButtonsFragment.Type.Alpha;
+        @AnimRes int enterAnim = R.anim.slide_in_left;
+        @AnimRes int exitAnim = R.anim.slide_out_right;
+
+        switch(currentType) {
+            case Digits:
+                nextType = ButtonsFragment.Type.Alpha;
+                enterAnim = R.anim.slide_in_right;
+                exitAnim = R.anim.slide_out_left;
+                break;
+            case Alpha:
+                nextType = ButtonsFragment.Type.Digits;
+                enterAnim = R.anim.slide_in_left;
+                exitAnim = R.anim.slide_out_right;
+                break;
+        }
+
+        ButtonsFragment fragment = ButtonsFragment.newInstance(nextType);
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(enterAnim, exitAnim);
+        transaction.replace(R.id.buttons, fragment);
+        transaction.commit();
     }
 }

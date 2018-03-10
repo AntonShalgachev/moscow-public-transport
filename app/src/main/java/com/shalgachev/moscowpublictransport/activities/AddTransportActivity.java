@@ -12,6 +12,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -100,6 +101,8 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
 
                 mRoute = route;
                 mChooseRouteButton.setText(mRoute.name);
+                float size = getResources().getDimension(R.dimen.route_button_selected_text_size);
+                mChooseRouteButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
 
                 loadStops();
             }
@@ -241,7 +244,8 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
         for (Stop stop : mStops) {
             directions.add(stop.direction);
 
-            StopListItem item = new StopListItem(stop, "Neva", false);
+            // TODO: 3/10/2018 implement next stop indicator
+            StopListItem item = new StopListItem(stop, "<CHANGE ME PLZ>", false);
             mStopListItems.add(item);
 
             if (savedStops.contains(stop))
