@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class AddTransportActivity extends AppCompatActivity implements ScheduleTask.IScheduleReceiver {
+public class AddTransportActivity extends AppCompatActivity {
     private static final String LOG_TAG = "AddTransportActivity";
     private static int REQUEST_ROUTE = 1;
 
@@ -182,51 +182,24 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
 
     public void executeScheduleProvider(@StringRes int loadingStringId) {
         ScheduleTask task = mScheduleProvider.createTask();
-        task.setReceiver(this);
+        task.setReceiver(new ScheduleTask.IScheduleReceiver() {
+            @Override
+            public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
+                if (mProgressDialog != null)
+                    mProgressDialog.dismiss();
+
+                if (result.operationType == BaseScheduleProvider.OperationType.STOPS) {
+                    mStops = result.stops;
+                    onStopsAvailable();
+                } else {
+                    Log.e(LOG_TAG, "Unexpected result type");
+                }
+            }
+        });
         task.execute();
 
+        // TODO: 3/10/2018 remove progress dialog; use progress bar
         mProgressDialog = ProgressDialog.show(this, getString(R.string.loading), getString(loadingStringId));
-    }
-
-    @Override
-    public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
-        // TODO: 3/6/2018 remove this shit; use anonymous callback instead
-        if (mProgressDialog != null)
-            mProgressDialog.dismiss();
-
-        switch (result.operationType) {
-            case TYPES:
-                break;
-            case ROUTES:
-                // TODO: 3/6/2018 remove
-//                mRoutes = result.routes;
-//                onRoutesAvailable();
-                break;
-            case STOPS:
-                mStops = result.stops;
-                onStopsAvailable();
-                break;
-            case SCHEDULE:
-                break;
-        }
-    }
-
-    // TODO: 3/6/2018 Not needed
-    private void onRoutesAvailable() {
-//        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, mRoutes);
-//        mRouteTextView.setAdapter(adapter);
-//
-//        mRouteTextView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-//            @Override
-//            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-//                if (actionId == EditorInfo.IME_ACTION_DONE) {
-//                    mRoute = mRouteTextView.getText().toString();
-//
-//                    loadStops();
-//                }
-//                return false;
-//            }
-//        });
     }
 
     private void onStopsAvailable() {
@@ -260,11 +233,6 @@ public class AddTransportActivity extends AppCompatActivity implements ScheduleT
         updateDirection();
         updateStops();
     }
-
-//    private void loadRoutes() {
-//        mScheduleProvider.setArgs(ScheduleArgs.asRoutesArgs(mTransportType));
-//        executeScheduleProvider(R.string.loading_routes);
-//    }
 
     private void loadStops() {
         mScheduleProvider.setArgs(ScheduleArgs.asStopsArgs(mTransportType, mRoute));
