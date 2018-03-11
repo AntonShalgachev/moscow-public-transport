@@ -96,4 +96,18 @@ public class Utils {
 
         return strings;
     }
+
+    @Nullable
+    public static List<String> fetchUrlAsStringList(String url) {
+        List<CharSequence> lines = fetchUrlAsList(url);
+
+        if (lines == null)
+            return null;
+
+        List<String> strings = new ArrayList<>();
+        for (CharSequence line : lines)
+            strings.add(line.toString());
+
+        return strings;
+    }
 }

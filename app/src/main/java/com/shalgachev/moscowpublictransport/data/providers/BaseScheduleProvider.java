@@ -76,8 +76,8 @@ public abstract class BaseScheduleProvider {
 
     public abstract Result run();
 
-    public abstract CharSequence getProviderId();
-    public abstract CharSequence getProviderName(Context context);
+    public abstract String getProviderId();
+    public abstract String getProviderName(Context context);
 
     public enum OperationType {
         TYPES,

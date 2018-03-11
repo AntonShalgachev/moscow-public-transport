@@ -9,12 +9,12 @@ import java.io.Serializable;
 public class Stop implements Serializable {
     public TransportType transportType;
     public Route route;
-    public CharSequence daysMask;
+    public String daysMask;
     public Direction direction;
-    public CharSequence name;
+    public String name;
     public int id;
 
-    public Stop(TransportType transportType, Route route, CharSequence daysMask, Direction direction, CharSequence name, int id) {
+    public Stop(TransportType transportType, Route route, String daysMask, Direction direction, String name, int id) {
         this.transportType = transportType;
         this.route = route;
         this.daysMask = daysMask;

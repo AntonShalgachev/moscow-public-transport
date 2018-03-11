@@ -9,17 +9,17 @@ import java.io.Serializable;
  */
 
 public class Direction implements Comparable<Direction>, Serializable {
-    private CharSequence mId;
-    private CharSequence mFrom;
-    private CharSequence mTo;
+    private String mId;
+    private String mFrom;
+    private String mTo;
 
-    public Direction(CharSequence id, CharSequence from, CharSequence to) {
+    public Direction(String id, String from, String to) {
         mId = id;
         mFrom = from;
         mTo = to;
     }
 
-    public Direction(CharSequence id) {
+    public Direction(String id) {
         mId = id;
     }
 
@@ -44,20 +44,20 @@ public class Direction implements Comparable<Direction>, Serializable {
         return other.getId().toString().compareTo(other.toString());
     }
 
-    public void setEndpoints(CharSequence from, CharSequence to) {
+    public void setEndpoints(String from, String to) {
         mFrom = from;
         mTo = to;
     }
 
-    public CharSequence getFrom() {
+    public String getFrom() {
         return mFrom;
     }
 
-    public CharSequence getTo() {
+    public String getTo() {
         return mTo;
     }
 
-    public CharSequence getId() {
+    public String getId() {
         return mId;
     }
 }

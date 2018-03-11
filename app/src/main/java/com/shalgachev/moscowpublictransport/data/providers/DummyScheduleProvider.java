@@ -65,28 +65,28 @@ public class DummyScheduleProvider extends BaseScheduleProvider {
         return new ArrayList<>(Arrays.asList(new Route("268", getProviderId()), new Route("268К", getProviderId()), new Route("5Э", getProviderId())));
     }
 
-    private List<CharSequence> getDaysMasks() {
-        return new ArrayList<CharSequence>(Arrays.asList("1111100", "0000011"));
+    private List<String> getDaysMasks() {
+        return new ArrayList<>(Arrays.asList("1111100", "0000011"));
     }
 
     private List<Direction> getDirections() {
         return new ArrayList<>(Arrays.asList(new Direction("1", "Нижние подзалупки", "Верхние подзалупки"), new Direction("2", "Верхние подзалупки", "Нижние подзалупки")));
     }
 
-    private List<Stop> getStops(CharSequence route, CharSequence daysMask, Direction direction) {
-        List<CharSequence> stopNames;
+    private List<Stop> getStops(String route, String daysMask, Direction direction) {
+        List<String> stopNames;
 
         if (daysMask.equals("1111100")) {
             if (direction.getId().equals("1")) {
-                stopNames = new ArrayList<CharSequence>(Arrays.asList("Нижние подзалупки", "Дратути", "Берлин", "Карманово", "WTF", "Верхние подзалупки"));
+                stopNames = new ArrayList<>(Arrays.asList("Нижние подзалупки", "Дратути", "Берлин", "Карманово", "WTF", "Верхние подзалупки"));
             } else {
-                stopNames = new ArrayList<CharSequence>(Arrays.asList("Верхние подзалупки", "WTF", "Карманово", "Берлин", "Дратути", "Нижние подзалупки"));
+                stopNames = new ArrayList<>(Arrays.asList("Верхние подзалупки", "WTF", "Карманово", "Берлин", "Дратути", "Нижние подзалупки"));
             }
         } else {
             if (direction.getId().equals("1")) {
-                stopNames = new ArrayList<CharSequence>(Arrays.asList("Нижние подзалупки (вых)", "Дратути (вых)", "Берлин (вых)", "Карманово (вых)", "WTF (вых)", "Верхние подзалупки (вых)"));
+                stopNames = new ArrayList<>(Arrays.asList("Нижние подзалупки (вых)", "Дратути (вых)", "Берлин (вых)", "Карманово (вых)", "WTF (вых)", "Верхние подзалупки (вых)"));
             } else {
-                stopNames = new ArrayList<CharSequence>(Arrays.asList("Верхние подзалупки (вых)", "WTF (вых)", "Карманово (вых)", "Берлин (вых)", "Дратути (вых)", "Нижние подзалупки (вых)"));
+                stopNames = new ArrayList<>(Arrays.asList("Верхние подзалупки (вых)", "WTF (вых)", "Карманово (вых)", "Берлин (вых)", "Дратути (вых)", "Нижние подзалупки (вых)"));
             }
         }
 
@@ -105,7 +105,7 @@ public class DummyScheduleProvider extends BaseScheduleProvider {
         List<Stop> stops = new ArrayList<>();
 
         if (route.providerId.equals(getProviderId())) {
-            for (CharSequence mask : getDaysMasks()) {
+            for (String mask : getDaysMasks()) {
                 for (Direction direction : getDirections()) {
                     stops.addAll(getStops(route.name, mask, direction));
                 }
@@ -122,12 +122,13 @@ public class DummyScheduleProvider extends BaseScheduleProvider {
         return schedule;
     }
 
-    public CharSequence getProviderId() {
+    @Override
+    public String getProviderId() {
         return "dummy";
     }
 
     @Override
-    public CharSequence getProviderName(Context context) {
+    public String getProviderName(Context context) {
         return context.getString(R.string.provider_name_dummy);
     }
 }

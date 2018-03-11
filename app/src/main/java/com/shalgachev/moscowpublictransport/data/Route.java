@@ -7,14 +7,14 @@ import java.io.Serializable;
  */
 
 public class Route implements Serializable {
-    public CharSequence providerId;
-    public CharSequence name;
+    public String providerId;
+    public String name;
 
-    public Route(CharSequence name)
+    public Route(String name)
     {
         this.name = name;
     }
-    public Route(CharSequence name, CharSequence providerId)
+    public Route(String name, String providerId)
     {
         this.providerId = providerId;
         this.name = name;
@@ -25,7 +25,7 @@ public class Route implements Serializable {
         this.name = route.name;
     }
 
-    public void setProviderId(CharSequence providerId)
+    public void setProviderId(String providerId)
     {
         this.providerId = providerId;
     }
