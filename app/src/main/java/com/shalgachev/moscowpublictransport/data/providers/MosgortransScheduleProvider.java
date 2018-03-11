@@ -39,6 +39,14 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
     private static final String BASE_METADATA_URL = "http://www.mosgortrans.org/pass3/request.ajax.php?";
     private static final String BASE_SCHEDULE_URL = "http://www.mosgortrans.org/pass3/shedule.printable.php?";
 
+    // for some reason Mosgortrans sends these strings in a list of routes
+    private static final List<String> EXCLUDED_ROUTE_NAMES = Arrays.asList("route", "stations", "streets");
+
+    // Mosgortrans for some reason mangles '№' into 'в„–' in stop names
+    private static String fixStopName(String route) {
+        return route.replace("в„–", "№");
+    }
+
     @NonNull
     private List<Route> getRoutes(TransportType transportType) throws ScheduleProviderException {
         if (!InternetUtils.isInternetAvailable()) {
@@ -55,31 +63,9 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
 
         List<Route> routes = new ArrayList<>();
 
-        Map<Character, Integer> freqMap = new HashMap<>();
-
-        for (String name : routeNames) {
-            Route route = new Route(name, getProviderId());
-            routes.add(route);
-
-            for (int i = 0; i < name.length(); i++) {
-                char c = name.charAt(i);
-
-                if (Character.isDigit(c))
-                    continue;
-                if (Character.isLetter(c) && Character.isLowerCase(c))
-                    continue;
-
-                if (!freqMap.containsKey(c))
-                    freqMap.put(c, 0);
-
-                int freq = freqMap.get(c);
-                freqMap.put(c, freq + 1);
-            }
-        }
-
-        for (Map.Entry<Character, Integer> entry : freqMap.entrySet()) {
-            Log.d("Temp", String.format("%s: %d", entry.getKey(), entry.getValue()));
-        }
+        for (String name : routeNames)
+            if (!EXCLUDED_ROUTE_NAMES.contains(name))
+                routes.add(new Route(name, getProviderId()));
 
         return routes;
     }
@@ -132,12 +118,12 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
     }
 
     @NonNull
-    private List<Stop> getStops(TransportType transportType, String route, String daysMask, Direction direction) throws ScheduleProviderException {
+    private List<Stop> getStops(TransportType transportType, Route route, String daysMask, Direction direction) throws ScheduleProviderException {
         if (!InternetUtils.isInternetAvailable()) {
             throw new ScheduleProviderException(ScheduleError.ErrorCode.INTERNET_NOT_AVAILABLE);
         }
 
-        String url = constructMetadataUrl(MetadataListType.STOPS, transportType, route, daysMask, direction);
+        String url = constructMetadataUrl(MetadataListType.STOPS, transportType, route.name, daysMask, direction);
         Log.i(LOG_TAG, String.format("getStops: Fetching '%s'", url));
         List<String> stopList = InternetUtils.fetchUrlAsStringList(url);
 
@@ -146,7 +132,8 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
 
         List<Stop> stops = new ArrayList<>();
         for (int i = 0; i < stopList.size(); i++) {
-            Stop stop = new Stop(transportType, new Route(route, getProviderId()), daysMask, direction, stopList.get(i), i);
+            String stopName = fixStopName(stopList.get(i));
+            Stop stop = new Stop(transportType, route, daysMask, direction, stopName, i);
             stops.add(stop);
         }
 
@@ -161,7 +148,7 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
         if (route.providerId.equals(getProviderId())) {
             for (String mask : getDaysMasks(transportType, route.name)) {
                 for (Direction direction : getDirections(transportType, route.name, mask)) {
-                    List<Stop> stops = getStops(transportType, route.name, mask, direction);
+                    List<Stop> stops = getStops(transportType, route, mask, direction);
                     direction.setEndpoints(stops.get(0).name, stops.get(stops.size() - 1).name);
 
                     allStops.addAll(stops);
