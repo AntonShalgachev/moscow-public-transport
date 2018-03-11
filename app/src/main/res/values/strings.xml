@@ -68,10 +68,14 @@
     <string name="loading_stops">Загрузка остановок</string>
     <string name="loading_schedule">Загрузка расписания</string>
 
+    <!--Errors-->
     <string name="error_title">Ошибка</string>
     <string name="error_loading_stops">Невозможно загрузить остановки</string>
-    <string name="error_loading_schedule">Невозможно загрузить расписание</string>
     <string name="retry">Повторить</string>
+
+    <!--Schedule errors-->
+    <string name="schedule_error_unknown">Неизвестная ошибка (%s)</string>
+    <string name="schedule_error_internet_not_available">Нет соединения с интернетом</string>
 
     <string name="toast_stops_saved">Добавлено остановок: %d</string>
     <string name="toast_stops_deleted">Удалено остановок: %d</string>

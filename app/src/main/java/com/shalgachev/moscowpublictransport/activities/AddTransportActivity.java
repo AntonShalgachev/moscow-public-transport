@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.StringRes;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -25,6 +26,7 @@ import com.shalgachev.moscowpublictransport.adapters.StopListPagerAdapter;
 import com.shalgachev.moscowpublictransport.data.Direction;
 import com.shalgachev.moscowpublictransport.data.Route;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
+import com.shalgachev.moscowpublictransport.data.ScheduleError;
 import com.shalgachev.moscowpublictransport.data.ScheduleTask;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.StopListItem;
@@ -163,7 +165,7 @@ public class AddTransportActivity extends AppCompatActivity {
         transportIcon.setBackgroundResource(transportData.iconBackgroundResource);
         transportIcon.setImageResource(transportData.iconImageResource);
 
-        ViewPager viewPager = findViewById(R.id.container);
+        ViewPager viewPager = findViewById(R.id.stops_container);
         mPagerAdapter = new StopListPagerAdapter(getSupportFragmentManager(), this);
         viewPager.setAdapter(mPagerAdapter);
 
@@ -176,32 +178,20 @@ public class AddTransportActivity extends AppCompatActivity {
         mChooseRouteButton = findViewById(R.id.input_route_button);
     }
 
-    public void executeScheduleTask(ScheduleTask task, @StringRes int loadingStringId) {
-        task.setReceiver(new ScheduleTask.IScheduleReceiver() {
+    private void onProviderError(ScheduleError error) {
+        Snackbar snackbar = Snackbar.make(findViewById(R.id.container), error.localizedDescription(this), Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction(R.string.retry, new View.OnClickListener() {
             @Override
-            public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
-                if (mProgressDialog != null)
-                    mProgressDialog.dismiss();
-
-                if (result.operationType == BaseScheduleProvider.OperationType.STOPS) {
-                    mStops = result.stops;
-                    onStopsAvailable();
-                } else {
-                    Log.e(LOG_TAG, "Unexpected result type");
-                }
+            public void onClick(View v) {
+                loadStops();
             }
         });
-        task.execute();
-
-        // TODO: 3/10/2018 remove progress dialog; use progress bar
-        mProgressDialog = ProgressDialog.show(this, getString(R.string.loading), getString(loadingStringId));
+        snackbar.show();
     }
 
     private void onStopsAvailable() {
         if (mStops.isEmpty()) {
             Log.e(LOG_TAG, "Failed to load stops: stops are empty");
-            showErrorMessage(R.string.error_loading_stops);
-            return;
         }
 
         SavedStopsSQLiteHelper db = new SavedStopsSQLiteHelper(this);
@@ -241,11 +231,11 @@ public class AddTransportActivity extends AppCompatActivity {
                         if (mProgressDialog != null)
                             mProgressDialog.dismiss();
 
-                        if (result.operationType == BaseScheduleProvider.OperationType.STOPS) {
+                        if (result.error == null) {
                             mStops = result.stops;
                             onStopsAvailable();
                         } else {
-                            Log.e(LOG_TAG, "Unexpected result type");
+                            onProviderError(result.error);
                         }
                     }
                 }
@@ -268,6 +258,8 @@ public class AddTransportActivity extends AppCompatActivity {
 
     private Direction getCurrentDirection() {
         if (mDirections == null)
+            return null;
+        if (mDirectionIdx >= mDirections.size())
             return null;
 
         return mDirections.get(mDirectionIdx);
@@ -328,21 +320,6 @@ public class AddTransportActivity extends AppCompatActivity {
         }
 
         return transportData;
-    }
-
-    private void showErrorMessage(@StringRes int messageId) {
-        AlertDialog.Builder builder;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Light_Dialog_NoActionBar);
-        } else {
-            builder = new AlertDialog.Builder(this);
-        }
-
-        builder.setTitle(R.string.error_title)
-                .setMessage(messageId)
-                .setPositiveButton(android.R.string.ok, null)
-                .setIcon(R.drawable.ic_error_black_48dp)
-                .show();
     }
 
     private class TransportData {

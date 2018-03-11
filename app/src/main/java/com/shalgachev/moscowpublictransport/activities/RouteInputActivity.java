@@ -3,6 +3,7 @@ package com.shalgachev.moscowpublictransport.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.AnimRes;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.adapters.RouteListAdapter;
 import com.shalgachev.moscowpublictransport.data.Route;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
+import com.shalgachev.moscowpublictransport.data.ScheduleError;
 import com.shalgachev.moscowpublictransport.data.ScheduleTask;
 import com.shalgachev.moscowpublictransport.data.SelectableRoute;
 import com.shalgachev.moscowpublictransport.data.TransportType;
@@ -158,18 +160,29 @@ public class RouteInputActivity extends AppCompatActivity implements ButtonsFrag
                     public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
                         mProgressBar.setVisibility(View.GONE);
 
-                        // TODO: 3/11/2018 Handle error
-
-                        List<SelectableRoute> routes = new ArrayList<>();
-
-                        for (Route route : result.routes) {
-                            routes.add(new SelectableRoute(route));
+                        if (result.error == null) {
+                            onRoutesAvailable(result.routes);
+                        } else {
+                            onProviderError(result.error);
                         }
-
-                        mRouteListAdapter.setAvailableRoutes(routes);
                     }
                 }
         );
+    }
+
+    void onProviderError(ScheduleError error) {
+        Snackbar snackbar = Snackbar.make(findViewById(R.id.container), error.localizedDescription(this), Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction(R.string.retry, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadRoutes();
+            }
+        });
+        snackbar.show();
+    }
+
+    void onRoutesAvailable(List<Route> routes) {
+        mRouteListAdapter.setAvailableRoutes(routes);
     }
 
     void addButtons() {

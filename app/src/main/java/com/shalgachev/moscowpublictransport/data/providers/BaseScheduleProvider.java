@@ -1,10 +1,12 @@
 package com.shalgachev.moscowpublictransport.data.providers;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.shalgachev.moscowpublictransport.data.Route;
 import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
+import com.shalgachev.moscowpublictransport.data.ScheduleError;
 import com.shalgachev.moscowpublictransport.data.ScheduleTask;
 import com.shalgachev.moscowpublictransport.data.ScheduleType;
 import com.shalgachev.moscowpublictransport.data.Stop;
@@ -22,18 +24,39 @@ import java.util.Set;
 
 public abstract class BaseScheduleProvider {
     protected static class ScheduleProviderException extends Exception {
-        private Result.ErrorCode mError;
+        private ScheduleError mError;
 
-        public ScheduleProviderException(Result.ErrorCode error) {
-            super("Schedule provider exception");
+        public ScheduleProviderException(ScheduleError error) {
             mError = error;
         }
 
-        public Result.ErrorCode getError() {
+        public ScheduleProviderException(ScheduleError.ErrorCode errorCode) {
+            mError = new ScheduleError(errorCode);
+        }
+
+        public ScheduleError getError() {
             return mError;
         }
     }
 
+    public enum OperationType {
+        TYPES,
+        ROUTES,
+        STOPS,
+        SCHEDULE
+    }
+
+    public static class Result {
+        public OperationType operationType;
+        public List<TransportType> transportTypes;
+        public List<Route> routes;
+        public List<Stop> stops;
+        public Schedule schedule;
+
+        public ScheduleError error;
+    }
+
+    private static final String LOG_TAG = "BaseScheduleProvider";
     private static Map<CharSequence, BaseScheduleProvider> mScheduleProviders;
 
     private static void createScheduleProviders() {
@@ -75,35 +98,23 @@ public abstract class BaseScheduleProvider {
         return new ScheduleTask(this);
     }
 
-    public abstract Result run(ScheduleArgs args);
+    public final Result run(ScheduleArgs args) {
+        try {
+            Log.d(LOG_TAG, "Running schedule task");
+            Result result = runProvider(args);
+            Log.d(LOG_TAG, "Finished running task");
+            return result;
+        } catch (ScheduleProviderException e) {
+            Log.e(LOG_TAG, String.format("Error was encountered: '%s'", e.getError().code));
+            e.printStackTrace();
+
+            Result result = new Result();
+            result.error = e.getError();
+            return result;
+        }
+    }
+    public abstract Result runProvider(ScheduleArgs args) throws ScheduleProviderException;
 
     public abstract String getProviderId();
     public abstract String getProviderName(Context context);
-
-    public enum OperationType {
-        TYPES,
-        ROUTES,
-        STOPS,
-        SCHEDULE
-    }
-
-    public static class Result {
-        public enum ErrorCode {
-            NONE,
-            INTERNET_NOT_AVAILABLE,
-            URL_FETCH_FAILED,
-            INVALID_STOP,
-            INVALID_SCHEDULE_URL,
-            EMPTY_SCHEDULE,
-            INTERNAL_ERROR,
-        }
-
-        public OperationType operationType;
-        public List<TransportType> transportTypes;
-        public List<Route> routes;
-        public List<Stop> stops;
-        public Schedule schedule;
-
-        public ErrorCode errorCode = ErrorCode.NONE;
-    }
 }

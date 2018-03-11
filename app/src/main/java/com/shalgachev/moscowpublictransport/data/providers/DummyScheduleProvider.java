@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 public class DummyScheduleProvider extends BaseScheduleProvider {
     @Override
-    public Result run(ScheduleArgs args) {
+    public Result runProvider(ScheduleArgs args) throws ScheduleProviderException {
         Result result = new Result();
 
         try {

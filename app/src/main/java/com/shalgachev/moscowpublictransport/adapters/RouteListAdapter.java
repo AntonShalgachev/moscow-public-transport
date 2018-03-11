@@ -31,9 +31,12 @@ public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.View
         this.mContext = context;
     }
 
-    public void setAvailableRoutes(final List<SelectableRoute> routes) {
-        mFilteredRoutes = new ArrayList<>(routes);
-        mRoutes = new ArrayList<>(routes);
+    public void setAvailableRoutes(final List<Route> routes) {
+        mRoutes = new ArrayList<>();
+        for (Route route : routes)
+            mRoutes.add(new SelectableRoute(route));
+
+        mFilteredRoutes = new ArrayList<>(mRoutes);
         notifyDataSetChanged();
 
         filter("");

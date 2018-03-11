@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
+import com.shalgachev.moscowpublictransport.data.ScheduleError;
 import com.shalgachev.moscowpublictransport.data.ScheduleTask;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.db.SavedStopsSQLiteHelper;
@@ -96,11 +97,11 @@ public class ScheduleActivity extends AppCompatActivity {
                         if (mProgressDialog != null)
                             mProgressDialog.dismiss();
 
-                        if (result.errorCode == BaseScheduleProvider.Result.ErrorCode.NONE) {
+                        if (result.error == null) {
                             onScheduleAvailable(result.schedule);
                             db.saveSchedule(result.schedule);
                         } else {
-                            onScheduleError();
+                            onScheduleError(result.error);
                         }
                         db.close();
                     }
@@ -119,13 +120,14 @@ public class ScheduleActivity extends AppCompatActivity {
         mTempContent.setText(builder.toString());
     }
 
-    private void onScheduleError() {
+    private void onScheduleError(ScheduleError error) {
         Log.e(LOG_TAG, "Failed to retrieve schedule");
 
-        Snackbar snackbar = Snackbar.make(mTempContent, R.string.error_loading_schedule, Snackbar.LENGTH_INDEFINITE);
+        Snackbar snackbar = Snackbar.make(mTempContent, error.localizedDescription(this), Snackbar.LENGTH_INDEFINITE);
         snackbar.setAction(R.string.retry, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // TODO: 3/11/2018 load only from net upon retry
                 loadData();
             }
         });

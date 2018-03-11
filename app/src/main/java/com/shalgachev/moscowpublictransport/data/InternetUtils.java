@@ -18,8 +18,8 @@ import java.util.List;
  * Created by anton on 6/24/2017.
  */
 
-public class Utils {
-    private static String LOG_TAG = "Utils";
+public class InternetUtils {
+    private static String LOG_TAG = "InternetUtils";
 
     @Nullable
     public static String getCharset(String contentType) {
