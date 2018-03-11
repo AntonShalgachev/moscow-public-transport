@@ -149,7 +149,7 @@ public class RouteInputActivity extends AppCompatActivity implements ButtonsFrag
     }
 
     private void loadRoutes() {
-        BaseScheduleProvider scheduleProvider = BaseScheduleProvider.getTestScheduleProvider();
+        BaseScheduleProvider scheduleProvider = BaseScheduleProvider.getInstance();
         scheduleProvider.setArgs(ScheduleArgs.asRoutesArgs(mTransportType));
         executeScheduleProvider(scheduleProvider);
     }

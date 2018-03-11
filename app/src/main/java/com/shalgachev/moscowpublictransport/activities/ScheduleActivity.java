@@ -1,14 +1,10 @@
 package com.shalgachev.moscowpublictransport.activities;
 
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.StringRes;
 import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -28,7 +24,6 @@ import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
 public class ScheduleActivity extends AppCompatActivity {
     private static final String LOG_TAG = "ScheduleActivity";
     private Stop mStop;
-    private BaseScheduleProvider mScheduleProvider;
     private ProgressDialog mProgressDialog;
     private boolean mHasSchedule = false;
 
@@ -92,12 +87,11 @@ public class ScheduleActivity extends AppCompatActivity {
 
         Log.i(LOG_TAG, "Updating schedule from net");
 
-        // TODO: 1/8/2018 Test provider
-        mScheduleProvider = BaseScheduleProvider.getTestScheduleProvider();
+        // TODO: 3/11/2018 move args from provider to the task
+        BaseScheduleProvider provider = BaseScheduleProvider.getInstance();
 
-        // TODO: 1/9/2018 Test data
-        mScheduleProvider.setArgs(ScheduleArgs.asScheduleArgs(mStop));
-        ScheduleTask task = mScheduleProvider.createTask();
+        provider.setArgs(ScheduleArgs.asScheduleArgs(mStop));
+        ScheduleTask task = provider.createTask();
         task.setReceiver(new ScheduleTask.IScheduleReceiver() {
             @Override
             public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {

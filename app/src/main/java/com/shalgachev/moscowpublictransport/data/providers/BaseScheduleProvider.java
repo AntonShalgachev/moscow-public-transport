@@ -58,7 +58,7 @@ public abstract class BaseScheduleProvider {
     }
 
     // TODO: 1/9/2018 Remove this
-    public static BaseScheduleProvider getTestScheduleProvider() {
+    public static BaseScheduleProvider getInstance() {
         return getScheduleProvider("mosgortrans");
     }
 

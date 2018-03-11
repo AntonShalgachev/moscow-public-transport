@@ -75,8 +75,7 @@ public class AddTransportActivity extends AppCompatActivity {
         if (mTransportType == null)
             throw new IllegalArgumentException("Transport transportType is null");
 
-        // TODO: 1/8/2018 Test provider
-        mScheduleProvider = BaseScheduleProvider.getTestScheduleProvider();
+        mScheduleProvider = BaseScheduleProvider.getInstance();
 
         initActivity();
 

@@ -27,11 +27,8 @@ public class ButtonsFragment extends Fragment {
         Alpha,
     }
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_TYPE = "type";
 
-    // TODO: Rename and change types of parameters
     private Type mType;
 
     private OnFragmentInteractionListener mListener;
@@ -65,7 +62,6 @@ public class ButtonsFragment extends Fragment {
                 root = inflater.inflate(R.layout.fragment_buttons_digits, container, false);
                 break;
             case Alpha:
-                // TODO: 3/10/2018 remove this
                 root = inflater.inflate(R.layout.fragment_buttons_alpha, container, false);
                 break;
         }

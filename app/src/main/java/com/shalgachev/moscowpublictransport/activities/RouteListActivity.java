@@ -144,6 +144,7 @@ public class RouteListActivity extends AppCompatActivity implements SavedStopRec
 
                         SavedStopsSQLiteHelper db = new SavedStopsSQLiteHelper(RouteListActivity.this);
                         // TODO: 2/11/2018 Delete list of stops in one call
+                        // TODO: 3/11/2018 Perform db operations in a separate thread
                         for (Stop stop : selectedStops) {
                             db.removeFromMainMenu(stop);
                         }
