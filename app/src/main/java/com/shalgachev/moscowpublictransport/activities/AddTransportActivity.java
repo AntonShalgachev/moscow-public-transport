@@ -230,10 +230,26 @@ public class AddTransportActivity extends AppCompatActivity {
     }
 
     private void loadStops() {
-        BaseScheduleProvider provider = BaseScheduleProvider.getInstance();
-        ScheduleTask task = provider.createTask();
-        task.setArgs(ScheduleArgs.asStopsArgs(mTransportType, mRoute));
-        executeScheduleTask(task, R.string.loading_stops);
+        // TODO: 3/10/2018 remove progress dialog; use progress bar
+        mProgressDialog = ProgressDialog.show(this, getString(R.string.loading), getString(R.string.loading_stops));
+
+        BaseScheduleProvider.getUnitedProvider().createAndRunTask(
+                ScheduleArgs.asStopsArgs(mTransportType, mRoute),
+                new ScheduleTask.IScheduleReceiver() {
+                    @Override
+                    public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
+                        if (mProgressDialog != null)
+                            mProgressDialog.dismiss();
+
+                        if (result.operationType == BaseScheduleProvider.OperationType.STOPS) {
+                            mStops = result.stops;
+                            onStopsAvailable();
+                        } else {
+                            Log.e(LOG_TAG, "Unexpected result type");
+                        }
+                    }
+                }
+        );
     }
 
     public void onClickSwapDirections(View view) {

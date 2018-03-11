@@ -24,6 +24,7 @@ import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
 public class ScheduleActivity extends AppCompatActivity {
     private static final String LOG_TAG = "ScheduleActivity";
     private Stop mStop;
+    // TODO: 3/11/2018 use progress bar
     private ProgressDialog mProgressDialog;
     private boolean mHasSchedule = false;
 
@@ -87,26 +88,24 @@ public class ScheduleActivity extends AppCompatActivity {
 
         Log.i(LOG_TAG, "Updating schedule from net");
 
-        BaseScheduleProvider provider = BaseScheduleProvider.getInstance();
+        BaseScheduleProvider.getUnitedProvider().createAndRunTask(
+                ScheduleArgs.asScheduleArgs(mStop),
+                new ScheduleTask.IScheduleReceiver() {
+                    @Override
+                    public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
+                        if (mProgressDialog != null)
+                            mProgressDialog.dismiss();
 
-        ScheduleTask task = provider.createTask();
-        task.setArgs(ScheduleArgs.asScheduleArgs(mStop));
-        task.setReceiver(new ScheduleTask.IScheduleReceiver() {
-            @Override
-            public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
-                if (mProgressDialog != null)
-                    mProgressDialog.dismiss();
-
-                if (result.errorCode == BaseScheduleProvider.Result.ErrorCode.NONE) {
-                    onScheduleAvailable(result.schedule);
-                    db.saveSchedule(result.schedule);
-                } else {
-                    onScheduleError();
+                        if (result.errorCode == BaseScheduleProvider.Result.ErrorCode.NONE) {
+                            onScheduleAvailable(result.schedule);
+                            db.saveSchedule(result.schedule);
+                        } else {
+                            onScheduleError();
+                        }
+                        db.close();
+                    }
                 }
-                db.close();
-            }
-        });
-        task.execute();
+        );
     }
 
     private void onScheduleAvailable(Schedule schedule) {

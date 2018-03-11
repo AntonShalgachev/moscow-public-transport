@@ -149,32 +149,27 @@ public class RouteInputActivity extends AppCompatActivity implements ButtonsFrag
     }
 
     private void loadRoutes() {
-        BaseScheduleProvider provider = BaseScheduleProvider.getInstance();
-        ScheduleTask task = provider.createTask();
-        task.setArgs(ScheduleArgs.asRoutesArgs(mTransportType));
-        executeScheduleTask(task);
-    }
-
-    public void executeScheduleTask(ScheduleTask task) {
-        task.setReceiver(new ScheduleTask.IScheduleReceiver() {
-            @Override
-            public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
-                mProgressBar.setVisibility(View.GONE);
-
-                // TODO: 3/11/2018 Handle error
-
-                List<SelectableRoute> routes = new ArrayList<>();
-
-                for (Route route : result.routes) {
-                    routes.add(new SelectableRoute(route));
-                }
-
-                mRouteListAdapter.setAvailableRoutes(routes);
-            }
-        });
-        task.execute();
-
         mProgressBar.setVisibility(View.VISIBLE);
+
+        BaseScheduleProvider.getUnitedProvider().createAndRunTask(
+                ScheduleArgs.asRoutesArgs(mTransportType),
+                new ScheduleTask.IScheduleReceiver() {
+                    @Override
+                    public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
+                        mProgressBar.setVisibility(View.GONE);
+
+                        // TODO: 3/11/2018 Handle error
+
+                        List<SelectableRoute> routes = new ArrayList<>();
+
+                        for (Route route : result.routes) {
+                            routes.add(new SelectableRoute(route));
+                        }
+
+                        mRouteListAdapter.setAvailableRoutes(routes);
+                    }
+                }
+        );
     }
 
     void addButtons() {
