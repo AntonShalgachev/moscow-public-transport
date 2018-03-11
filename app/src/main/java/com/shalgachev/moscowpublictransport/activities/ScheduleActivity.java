@@ -87,18 +87,17 @@ public class ScheduleActivity extends AppCompatActivity {
 
         Log.i(LOG_TAG, "Updating schedule from net");
 
-        // TODO: 3/11/2018 move args from provider to the task
         BaseScheduleProvider provider = BaseScheduleProvider.getInstance();
 
-        provider.setArgs(ScheduleArgs.asScheduleArgs(mStop));
         ScheduleTask task = provider.createTask();
+        task.setArgs(ScheduleArgs.asScheduleArgs(mStop));
         task.setReceiver(new ScheduleTask.IScheduleReceiver() {
             @Override
             public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
                 if (mProgressDialog != null)
                     mProgressDialog.dismiss();
 
-                if (result != null && result.schedule != null) {
+                if (result.errorCode == BaseScheduleProvider.Result.ErrorCode.NONE) {
                     onScheduleAvailable(result.schedule);
                     db.saveSchedule(result.schedule);
                 } else {

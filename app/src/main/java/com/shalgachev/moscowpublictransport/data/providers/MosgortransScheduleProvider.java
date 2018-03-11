@@ -9,6 +9,7 @@ import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.Direction;
 import com.shalgachev.moscowpublictransport.data.Route;
 import com.shalgachev.moscowpublictransport.data.Schedule;
+import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 import com.shalgachev.moscowpublictransport.data.Utils;
@@ -234,8 +235,6 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
         return schedule;
     }
 
-
-
     private static String getTransportTypeId(TransportType type) {
         switch (type) {
             case BUS:
@@ -316,23 +315,23 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
     }
 
     @Override
-    public Result run() {
+    public Result run(ScheduleArgs args) {
         Log.d(LOG_TAG, "Running task");
         Result result = new Result();
 
         try {
-            switch (getArgs().operationType) {
+            switch (args.operationType) {
                 case TYPES:
                     result.transportTypes = getTransportTypes();
                     break;
                 case ROUTES:
-                    result.routes = getRoutes(getArgs().transportType);
+                    result.routes = getRoutes(args.transportType);
                     break;
                 case STOPS:
-                    result.stops = getStops(getArgs().transportType, getArgs().route);
+                    result.stops = getStops(args.transportType, args.route);
                     break;
                 case SCHEDULE:
-                    result.schedule = getSchedule(getArgs().stop);
+                    result.schedule = getSchedule(args.stop);
                     break;
             }
         } catch (ScheduleProviderException e) {

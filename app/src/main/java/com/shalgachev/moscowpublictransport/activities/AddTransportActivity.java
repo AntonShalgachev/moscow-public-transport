@@ -46,7 +46,6 @@ public class AddTransportActivity extends AppCompatActivity {
     private static int REQUEST_ROUTE = 1;
 
     private TransportType mTransportType;
-    private BaseScheduleProvider mScheduleProvider;
     private TextView mDirectionFromTextView;
     private TextView mDirectionToTextView;
     private Button mChooseRouteButton;
@@ -74,8 +73,6 @@ public class AddTransportActivity extends AppCompatActivity {
 
         if (mTransportType == null)
             throw new IllegalArgumentException("Transport transportType is null");
-
-        mScheduleProvider = BaseScheduleProvider.getInstance();
 
         initActivity();
 
@@ -179,8 +176,7 @@ public class AddTransportActivity extends AppCompatActivity {
         mChooseRouteButton = findViewById(R.id.input_route_button);
     }
 
-    public void executeScheduleProvider(@StringRes int loadingStringId) {
-        ScheduleTask task = mScheduleProvider.createTask();
+    public void executeScheduleTask(ScheduleTask task, @StringRes int loadingStringId) {
         task.setReceiver(new ScheduleTask.IScheduleReceiver() {
             @Override
             public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
@@ -234,8 +230,10 @@ public class AddTransportActivity extends AppCompatActivity {
     }
 
     private void loadStops() {
-        mScheduleProvider.setArgs(ScheduleArgs.asStopsArgs(mTransportType, mRoute));
-        executeScheduleProvider(R.string.loading_stops);
+        BaseScheduleProvider provider = BaseScheduleProvider.getInstance();
+        ScheduleTask task = provider.createTask();
+        task.setArgs(ScheduleArgs.asStopsArgs(mTransportType, mRoute));
+        executeScheduleTask(task, R.string.loading_stops);
     }
 
     public void onClickSwapDirections(View view) {

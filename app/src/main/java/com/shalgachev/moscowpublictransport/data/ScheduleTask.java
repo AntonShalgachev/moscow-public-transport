@@ -11,6 +11,7 @@ import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
 public class ScheduleTask extends AsyncTask<Void, Void, BaseScheduleProvider.Result> {
     private BaseScheduleProvider mProvider;
     private IScheduleReceiver mReceiver;
+    private ScheduleArgs mArgs;
 
     public ScheduleTask(BaseScheduleProvider provider) {
         mProvider = provider;
@@ -18,6 +19,14 @@ public class ScheduleTask extends AsyncTask<Void, Void, BaseScheduleProvider.Res
 
     public void setReceiver(IScheduleReceiver receiver) {
         mReceiver = receiver;
+    }
+
+    public ScheduleArgs getArgs() {
+        return mArgs;
+    }
+
+    public void setArgs(ScheduleArgs args) {
+        mArgs = args;
     }
 
     @Override
@@ -48,8 +57,8 @@ public class ScheduleTask extends AsyncTask<Void, Void, BaseScheduleProvider.Res
 
     @Override
     protected BaseScheduleProvider.Result doInBackground(Void... params) {
-        BaseScheduleProvider.Result result = mProvider.run();
-        result.operationType = mProvider.getArgs().operationType;
+        BaseScheduleProvider.Result result = mProvider.run(mArgs);
+        result.operationType = mArgs.operationType;
         return result;
     }
     public interface IScheduleReceiver {
