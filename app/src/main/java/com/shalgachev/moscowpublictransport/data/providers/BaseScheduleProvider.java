@@ -20,6 +20,19 @@ import java.util.Set;
  */
 
 public abstract class BaseScheduleProvider {
+    protected static class ScheduleProviderException extends Exception {
+        private Result.ErrorCode mError;
+
+        public ScheduleProviderException(Result.ErrorCode error) {
+            super("Schedule provider exception");
+            mError = error;
+        }
+
+        public Result.ErrorCode getError() {
+            return mError;
+        }
+    }
+
     private static Map<CharSequence, BaseScheduleProvider> mScheduleProviders;
     private ScheduleArgs mArgs;
 
@@ -73,11 +86,23 @@ public abstract class BaseScheduleProvider {
         SCHEDULE
     }
 
-    public class Result {
+    public static class Result {
+        enum ErrorCode {
+            NONE,
+            INTERNET_NOT_AVAILABLE,
+            URL_FETCH_FAILED,
+            INVALID_STOP,
+            INVALID_SCHEDULE_URL,
+            EMPTY_SCHEDULE,
+            INTERNAL_ERROR,
+        }
+
         public OperationType operationType;
         public List<TransportType> transportTypes;
         public List<Route> routes;
         public List<Stop> stops;
         public Schedule schedule;
+
+        public ErrorCode errorCode = ErrorCode.NONE;
     }
 }

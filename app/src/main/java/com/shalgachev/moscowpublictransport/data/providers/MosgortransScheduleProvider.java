@@ -2,6 +2,7 @@ package com.shalgachev.moscowpublictransport.data.providers;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.shalgachev.moscowpublictransport.R;
@@ -21,12 +22,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * Created by anton on 6/25/2017.
@@ -38,11 +35,19 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
     private static final String BASE_METADATA_URL = "http://www.mosgortrans.org/pass3/request.ajax.php?";
     private static final String BASE_SCHEDULE_URL = "http://www.mosgortrans.org/pass3/shedule.printable.php?";
 
-    private List<Route> getRoutes(TransportType transportType) {
+    private List<Route> getRoutes(TransportType transportType) throws ScheduleProviderException {
+        if (!Utils.isInternetAvailable()) {
+            throw new ScheduleProviderException(Result.ErrorCode.INTERNET_NOT_AVAILABLE);
+        }
+
         String url = constructMetadataUrl(MetadataListType.ROUTES, transportType);
         Log.i(LOG_TAG, String.format("getRoutes: Fetching '%s'", url));
 
         List<CharSequence> routeNames = Utils.fetchUrlAsList(url);
+
+        if (routeNames == null)
+            throw new ScheduleProviderException(Result.ErrorCode.URL_FETCH_FAILED);
+
         List<Route> routes = new ArrayList<>();
 
         Map<Character, Integer> freqMap = new HashMap<>();
@@ -74,22 +79,39 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
         return routes;
     }
 
-    private List<CharSequence> getDaysMasks(TransportType transportType, CharSequence route) {
+    private List<CharSequence> getDaysMasks(TransportType transportType, CharSequence route) throws ScheduleProviderException {
+        if (!Utils.isInternetAvailable()) {
+            throw new ScheduleProviderException(Result.ErrorCode.INTERNET_NOT_AVAILABLE);
+        }
+
         String url = constructMetadataUrl(MetadataListType.DAYS_MASKS, transportType, route);
         Log.i(LOG_TAG, String.format("getDaysMasks: Fetching '%s'", url));
 
-        return Utils.fetchUrlAsList(url);
+        List<CharSequence> masks = Utils.fetchUrlAsList(url);
+
+        if (masks == null)
+            throw new ScheduleProviderException(Result.ErrorCode.URL_FETCH_FAILED);
+
+        return masks;
     }
 
-    private List<Direction> getDirections(TransportType transportType, CharSequence route, CharSequence daysMask) {
+    private List<Direction> getDirections(TransportType transportType, CharSequence route, CharSequence daysMask) throws ScheduleProviderException {
+        if (!Utils.isInternetAvailable()) {
+            throw new ScheduleProviderException(Result.ErrorCode.INTERNET_NOT_AVAILABLE);
+        }
+
         // TODO: 6/25/2017 return just 2 directions without query
 
         String url = constructMetadataUrl(MetadataListType.DIRECTIONS, transportType, route, daysMask);
         Log.i(LOG_TAG, String.format("getDirections: Fetching '%s'", url));
 
         List<CharSequence> directionList = Utils.fetchUrlAsList(url);
+
+        if (directionList == null)
+            throw new ScheduleProviderException(Result.ErrorCode.URL_FETCH_FAILED);
+
         if (directionList.size() != 2) {
-            Log.w(LOG_TAG, String.format("getDirections(%s, %s, %s): Unusual direction list: has %d items, expected 2", transportType.name(), route, daysMask, directionList.size()));
+            Log.e(LOG_TAG, String.format("getDirections(%s, %s, %s): Unusual direction list: has %d items, expected 2", transportType.name(), route, daysMask, directionList.size()));
         }
 
         List<Direction> directions = new ArrayList<>();
@@ -102,10 +124,17 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
         return directions;
     }
 
-    private List<Stop> getStops(TransportType transportType, CharSequence route, CharSequence daysMask, Direction direction) {
+    private List<Stop> getStops(TransportType transportType, CharSequence route, CharSequence daysMask, Direction direction) throws ScheduleProviderException {
+        if (!Utils.isInternetAvailable()) {
+            throw new ScheduleProviderException(Result.ErrorCode.INTERNET_NOT_AVAILABLE);
+        }
+
         String url = constructMetadataUrl(MetadataListType.STOPS, transportType, route, daysMask, direction);
         Log.i(LOG_TAG, String.format("getStops: Fetching '%s'", url));
         List<CharSequence> stopList = Utils.fetchUrlAsList(url);
+
+        if (stopList == null)
+            throw new ScheduleProviderException(Result.ErrorCode.URL_FETCH_FAILED);
 
         List<Stop> stops = new ArrayList<>();
         for (int i = 0; i < stopList.size(); i++) {
@@ -116,7 +145,7 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
         return stops;
     }
 
-    private List<Stop> getStops(TransportType transportType, Route route) {
+    private List<Stop> getStops(TransportType transportType, Route route) throws ScheduleProviderException {
         Log.i(LOG_TAG, "Loading stops for route " + route.toString());
         List<Stop> allStops = new ArrayList<>();
 
@@ -136,9 +165,15 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
         return allStops;
     }
 
-    private Schedule getSchedule(Stop stop) {
-        if (stop == null)
-            return null;
+    @NonNull
+    private Schedule getSchedule(Stop stop) throws ScheduleProviderException {
+        if (stop == null) {
+            throw new ScheduleProviderException(Result.ErrorCode.INVALID_STOP);
+        }
+
+        if (!Utils.isInternetAvailable()) {
+            throw new ScheduleProviderException(Result.ErrorCode.INTERNET_NOT_AVAILABLE);
+        }
 
         List<Schedule.Timepoint> timepoints = new ArrayList<>();
 
@@ -150,7 +185,7 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
 
             Element warning = doc.selectFirst("td[class=warning]");
             if (warning != null)
-                return null;
+                throw new ScheduleProviderException(Result.ErrorCode.INVALID_SCHEDULE_URL);
 
             Elements timeTags = doc.select("span[class~=(?:hour|minute)]");
 
@@ -163,24 +198,30 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
                 try {
                     value = Integer.parseInt(tagText);
                 } catch (NumberFormatException e) {
-                    Log.e(LOG_TAG, String.format("Failed to parse data '%s'", tagText));
+                    Log.w(LOG_TAG, String.format("Failed to parse data '%s'", tagText));
                     continue;
                 }
 
-                if (tagClass.equals("hour")) {
-                    hour = value;
-                } else if (tagClass.equals("minute")) {
-                    timepoints.add(new Schedule.Timepoint(hour,value));
+                switch (tagClass) {
+                    case "hour":
+                        hour = value;
+                        break;
+                    case "minute":
+                        timepoints.add(new Schedule.Timepoint(hour,value));
+                        break;
+
+                    default:
+                        Log.e(LOG_TAG, String.format("Unknown tag class '%s'", tagClass));
+                        break;
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
-
-            return null;
+            throw new ScheduleProviderException(Result.ErrorCode.INTERNAL_ERROR);
         }
 
         if (timepoints.isEmpty())
-            return null;
+            throw new ScheduleProviderException(Result.ErrorCode.EMPTY_SCHEDULE);
 
         Schedule schedule = new Schedule();
         schedule.setAsTimepoints(stop, timepoints);
@@ -276,19 +317,24 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
         Log.d(LOG_TAG, "Running task");
         Result result = new Result();
 
-        switch (getArgs().operationType) {
-            case TYPES:
-                result.transportTypes = getTransportTypes();
-                break;
-            case ROUTES:
-                result.routes = getRoutes(getArgs().transportType);
-                break;
-            case STOPS:
-                result.stops = getStops(getArgs().transportType, getArgs().route);
-                break;
-            case SCHEDULE:
-                result.schedule = getSchedule(getArgs().stop);
-                break;
+        try {
+            switch (getArgs().operationType) {
+                case TYPES:
+                    result.transportTypes = getTransportTypes();
+                    break;
+                case ROUTES:
+                    result.routes = getRoutes(getArgs().transportType);
+                    break;
+                case STOPS:
+                    result.stops = getStops(getArgs().transportType, getArgs().route);
+                    break;
+                case SCHEDULE:
+                    result.schedule = getSchedule(getArgs().stop);
+                    break;
+            }
+        } catch (ScheduleProviderException e) {
+            e.printStackTrace();
+            result.errorCode = e.getError();
         }
 
         Log.d(LOG_TAG, "Finished running task");

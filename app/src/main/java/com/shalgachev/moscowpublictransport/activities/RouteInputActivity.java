@@ -161,6 +161,8 @@ public class RouteInputActivity extends AppCompatActivity implements ButtonsFrag
             public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
                 mProgressBar.setVisibility(View.GONE);
 
+                // TODO: 3/11/2018 Handle error
+
                 List<SelectableRoute> routes = new ArrayList<>();
 
                 for (Route route : result.routes) {
