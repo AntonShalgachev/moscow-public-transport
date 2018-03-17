@@ -6,6 +6,8 @@ import android.support.annotation.StringRes;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -13,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.shalgachev.moscowpublictransport.R;
+import com.shalgachev.moscowpublictransport.adapters.ScheduleHourAdapter;
 import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
 import com.shalgachev.moscowpublictransport.data.ScheduleError;
@@ -29,8 +32,9 @@ public class ScheduleActivity extends AppCompatActivity {
     private ProgressDialog mProgressDialog;
     private boolean mHasSchedule = false;
 
-    // TODO: 2/18/2018 remove this
-    private TextView mTempContent;
+    private RecyclerView mContentRecyclerView;
+    private ScheduleHourAdapter mScheduleHourAdapter;
+    private LinearLayoutManager mLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +43,13 @@ public class ScheduleActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mTempContent = findViewById(R.id.temp_content);
+        mContentRecyclerView = findViewById(R.id.schedule_container);
+
+        mScheduleHourAdapter = new ScheduleHourAdapter();
+        mContentRecyclerView.setAdapter(mScheduleHourAdapter);
+
+        mLayoutManager = new LinearLayoutManager(this);
+        mContentRecyclerView.setLayoutManager(mLayoutManager);
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -53,8 +63,6 @@ public class ScheduleActivity extends AppCompatActivity {
     private void initActivity()
     {
         mStop = (Stop) getIntent().getSerializableExtra(ExtraHelper.STOP_EXTRA);
-
-        mTempContent.setText(mStop.toString());
 
         setTitle(mStop.route.name);
 
@@ -112,18 +120,13 @@ public class ScheduleActivity extends AppCompatActivity {
     private void onScheduleAvailable(Schedule schedule) {
         mHasSchedule = true;
 
-        StringBuilder builder = new StringBuilder();
-
-        for (Schedule.Timepoint timepoint : schedule.getTimepoints())
-            builder.append(timepoint.hour).append(":").append(timepoint.minute).append("\n");
-
-        mTempContent.setText(builder.toString());
+        mScheduleHourAdapter.setSchedule(schedule);
     }
 
     private void onScheduleError(ScheduleError error) {
         Log.e(LOG_TAG, "Failed to retrieve schedule");
 
-        Snackbar snackbar = Snackbar.make(mTempContent, error.localizedDescription(this), Snackbar.LENGTH_INDEFINITE);
+        Snackbar snackbar = Snackbar.make(mContentRecyclerView, error.localizedDescription(this), Snackbar.LENGTH_INDEFINITE);
         snackbar.setAction(R.string.retry, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
