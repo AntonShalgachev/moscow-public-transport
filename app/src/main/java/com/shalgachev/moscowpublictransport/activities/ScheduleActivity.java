@@ -88,7 +88,7 @@ public class ScheduleActivity extends AppCompatActivity {
         Log.i(LOG_TAG, "Trying to fetch schedule from the database");
         showProgressDialog(R.string.loading_schedule);
 
-        ScheduleUtils.requestSchedule(this, mStop, new ScheduleUtils.IScheduleResultListener() {
+        ScheduleUtils.requestSchedule(getApplicationContext(), mStop, new ScheduleUtils.IScheduleResultListener() {
             @Override
             public void onCachedSchedule(Schedule schedule) {
                 if (mProgressDialog != null)

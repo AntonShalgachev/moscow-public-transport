@@ -113,13 +113,7 @@ public class ScheduleUtils {
                                     if (listener != null)
                                         listener.onFreshSchedule(result.schedule);
 
-                                    // TODO: 3/18/2018 for some reason this task blocks UI if we finish activity during it 
-                                    new ScheduleCacheTask(context, ScheduleCacheTask.Args.saveSchedule(result.schedule), new ScheduleCacheTask.IScheduleReceiver() {
-                                        @Override
-                                        public void onResult(ScheduleCacheTask.Result result) {
-                                            Log.i(LOG_TAG, "Schedule saved");
-                                        }
-                                    }).execute();
+                                    new ScheduleCacheTask(context, ScheduleCacheTask.Args.saveSchedule(result.schedule), null).execute();
 
                                 } else {
                                     Log.e(LOG_TAG, "Error while refreshing schedule");
