@@ -51,7 +51,7 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
         int hour = mTimepoints.getNthHour(position);
         List<Integer> minutes = mTimepoints.getHoursMap().get(hour);
         holder.mHourView.setText(String.valueOf(hour));
-        holder.mMinutesRecyclerView.setAdapter(new ScheduleMinutesAdapter(hour, minutes));
+        holder.mMinutesRecyclerView.setAdapter(new ScheduleMinutesAdapter(mSchedule, hour, minutes));
     }
 
     @Override

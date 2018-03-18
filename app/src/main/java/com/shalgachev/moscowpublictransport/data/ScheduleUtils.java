@@ -86,6 +86,18 @@ public class ScheduleUtils {
         return result;
     }
 
+    public static String formatShortTimeInterval(Context context, long minutes) {
+        if (minutes < 0)
+            return "";
+
+        if (minutes < 60) {
+            return context.getString(R.string.interval_min, minutes);
+        } else {
+            long hours = minutes / 60;
+            return context.getString(R.string.interval_hour, hours);
+        }
+    };
+
     public static void requestSchedule(final Context context, final Stop stop, final IScheduleResultListener listener) {
         Log.i(LOG_TAG, String.format("Requested schedule for stop '%s'", stop.toString()));
         Log.i(LOG_TAG, String.format("Context: '%s'", context.toString()));

@@ -63,12 +63,13 @@ public class Schedule {
         private List<Timepoint> mTimepoints;
         private TreeMap<Integer, List<Integer>> mHours;
         private Integer[] mSortedHours;
+        // TODO: 3/18/2018 get first hour of the day from the schedule provider
+        private int mFirstHour = 5;
 
         Timepoints(List<Timepoint> timepoints) {
             mTimepoints = new ArrayList<>(timepoints);
 
-            // TODO: 3/18/2018 get first hour of the day from the schedule provider
-            mHours = new TreeMap<>(new HourComparator(5));
+            mHours = new TreeMap<>(new HourComparator(mFirstHour));
 
             for (Schedule.Timepoint timepoint : timepoints) {
                 int hour = timepoint.hour;
@@ -92,6 +93,10 @@ public class Schedule {
 
         public int getNthHour(int pos) {
             return mSortedHours[pos];
+        }
+
+        public int getFirstHour() {
+            return mFirstHour;
         }
     }
 
