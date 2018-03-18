@@ -88,11 +88,10 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
                 color = R.color.next_in_far_color;
 
             holder.mCountdownView.setTextColor(context.getResources().getColor(color));
-            holder.mMinuteView.setEnabled(true);
         } else {
             holder.mCountdownView.setVisibility(View.GONE);
-            holder.mMinuteView.setEnabled(false);
         }
+        holder.mMinuteView.setEnabled(isDiffPositive);
     }
 
     @Override
