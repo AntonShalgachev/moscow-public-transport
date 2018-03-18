@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.StringRes;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.math.MathUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -56,6 +57,35 @@ public class ScheduleActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
+
+        mContentRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                for (int i = 0; i < recyclerView.getChildCount(); i++) {
+                    View child = recyclerView.getChildAt(i);
+                    View hour = child.findViewById(R.id.schedule_item_hour);
+
+                    float verticalOffset = 0.0f;
+
+                    if (i == 0) {
+                        float y = child.getY();
+                        float cardHeight = child.getHeight();
+                        float hourHeight = hour.getHeight();
+
+                        float verticalMargin = getResources().getDimensionPixelSize(R.dimen.schedule_item_hour_vertical_margin);
+                        float maxOffset = cardHeight - 2 * verticalMargin - hourHeight;
+                        verticalOffset = MathUtils.clamp(-y, 0.0f, maxOffset);
+                    }
+
+                    hour.setTranslationY(verticalOffset);
+                }
+            }
+        });
 
         initActivity();
         loadData();

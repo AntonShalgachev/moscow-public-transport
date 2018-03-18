@@ -17,8 +17,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
-            android:layout_marginTop="24dp"
-            android:textSize="30sp"
+            android:layout_marginTop="@dimen/schedule_item_hour_vertical_margin"
+            android:textSize="@dimen/schedule_item_hour_text_size"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -27,7 +27,7 @@
         <Space
             android:id="@+id/hour_space"
             android:layout_width="0dp"
-            android:layout_height="24dp"
+            android:layout_height="@dimen/schedule_item_hour_vertical_margin"
             app:layout_constraintEnd_toEndOf="@+id/schedule_item_hour"
             app:layout_constraintStart_toStartOf="@+id/schedule_item_hour"
             app:layout_constraintTop_toBottomOf="@+id/schedule_item_hour" />
@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="80dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/schedule_item_minutes_vertical_margin"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -47,7 +47,7 @@
         <Space
             android:id="@+id/minutes_space"
             android:layout_width="0dp"
-            android:layout_height="8dp"
+            android:layout_height="@dimen/schedule_item_minutes_vertical_margin"
             app:layout_constraintEnd_toEndOf="@+id/schedule_item_minutes_container"
             app:layout_constraintStart_toStartOf="@+id/schedule_item_minutes_container"
             app:layout_constraintTop_toBottomOf="@+id/schedule_item_minutes_container" />
