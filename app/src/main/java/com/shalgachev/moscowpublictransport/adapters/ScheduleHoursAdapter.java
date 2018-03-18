@@ -21,7 +21,7 @@ import java.util.TreeMap;
  * Created by anton on 3/17/2018.
  */
 
-public class ScheduleHourAdapter extends RecyclerView.Adapter<ScheduleHourAdapter.ViewHolder> {
+public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdapter.ViewHolder> {
     // TODO: 3/18/2018 move this comparator logic to the Schedule Provider
     class HourComparator implements Comparator<Integer> {
         @Override
@@ -41,7 +41,7 @@ public class ScheduleHourAdapter extends RecyclerView.Adapter<ScheduleHourAdapte
     private Schedule mSchedule;
     private TreeMap<Integer, List<Integer>> mHoursMap;
 
-    public ScheduleHourAdapter(Context context) {
+    public ScheduleHoursAdapter(Context context) {
         mContext = context;
     }
 

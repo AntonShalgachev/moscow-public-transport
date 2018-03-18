@@ -12,10 +12,9 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.shalgachev.moscowpublictransport.R;
-import com.shalgachev.moscowpublictransport.adapters.ScheduleHourAdapter;
+import com.shalgachev.moscowpublictransport.adapters.ScheduleHoursAdapter;
 import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
 import com.shalgachev.moscowpublictransport.data.ScheduleError;
@@ -33,7 +32,7 @@ public class ScheduleActivity extends AppCompatActivity {
     private boolean mHasSchedule = false;
 
     private RecyclerView mContentRecyclerView;
-    private ScheduleHourAdapter mScheduleHourAdapter;
+    private ScheduleHoursAdapter mScheduleHoursAdapter;
     private LinearLayoutManager mLayoutManager;
 
     @Override
@@ -45,8 +44,8 @@ public class ScheduleActivity extends AppCompatActivity {
 
         mContentRecyclerView = findViewById(R.id.schedule_container);
 
-        mScheduleHourAdapter = new ScheduleHourAdapter(this);
-        mContentRecyclerView.setAdapter(mScheduleHourAdapter);
+        mScheduleHoursAdapter = new ScheduleHoursAdapter(this);
+        mContentRecyclerView.setAdapter(mScheduleHoursAdapter);
 
         mLayoutManager = new LinearLayoutManager(this);
         mContentRecyclerView.setLayoutManager(mLayoutManager);
@@ -120,7 +119,7 @@ public class ScheduleActivity extends AppCompatActivity {
     private void onScheduleAvailable(Schedule schedule) {
         mHasSchedule = true;
 
-        mScheduleHourAdapter.setSchedule(schedule);
+        mScheduleHoursAdapter.setSchedule(schedule);
     }
 
     private void onScheduleError(ScheduleError error) {
