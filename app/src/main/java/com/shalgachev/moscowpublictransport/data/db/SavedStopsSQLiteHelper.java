@@ -299,7 +299,7 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
         Log.d(LOG_TAG, String.format("saveTimetableSchedule('%s', %d)", schedule.toString(), stopId));
         SQLiteDatabase db = getWritableDatabase();
 
-        List<Schedule.Timepoint> timepoints = schedule.getTimepoints();
+        List<Schedule.Timepoint> timepoints = schedule.getTimepoints().getTimepoints();
 
         for (Schedule.Timepoint timepoint : timepoints) {
             ContentValues values = new ContentValues();

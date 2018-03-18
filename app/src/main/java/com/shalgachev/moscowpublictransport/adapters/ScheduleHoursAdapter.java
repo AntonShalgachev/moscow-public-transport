@@ -22,24 +22,10 @@ import java.util.TreeMap;
  */
 
 public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdapter.ViewHolder> {
-    // TODO: 3/18/2018 move this comparator logic to the Schedule Provider
-    class HourComparator implements Comparator<Integer> {
-        @Override
-        public int compare(Integer o1, Integer o2) {
-            return normalize(o1) - normalize(o2);
-        }
-
-        private int normalize(int hour) {
-            int val = hour - 5;
-            if (val < 0)
-                val += 24;
-            return val;
-        }
-    }
 
     private Context mContext;
     private Schedule mSchedule;
-    private TreeMap<Integer, List<Integer>> mHoursMap;
+    private Schedule.Timepoints mTimepoints;
 
     public ScheduleHoursAdapter(Context context) {
         mContext = context;
@@ -47,16 +33,7 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
 
     public void setSchedule(Schedule schedule) {
         mSchedule = schedule;
-        mHoursMap = new TreeMap<>(new HourComparator());
-
-        for (Schedule.Timepoint timepoint : schedule.getTimepoints()) {
-            int hour = timepoint.hour;
-            int minute = timepoint.minute;
-
-            if (!mHoursMap.containsKey(hour))
-                mHoursMap.put(hour, new ArrayList<Integer>());
-            mHoursMap.get(hour).add(minute);
-        }
+        mTimepoints = schedule.getTimepoints();
 
         notifyDataSetChanged();
     }
@@ -71,15 +48,15 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        int hour = (int) mHoursMap.keySet().toArray()[position];
-        List<Integer> minutes = mHoursMap.get(hour);
+        int hour = mTimepoints.getNthHour(position);
+        List<Integer> minutes = mTimepoints.getHoursMap().get(hour);
         holder.mHourView.setText(String.valueOf(hour));
         holder.mMinutesRecyclerView.setAdapter(new ScheduleMinutesAdapter(hour, minutes));
     }
 
     @Override
     public int getItemCount() {
-        return mHoursMap != null ? mHoursMap.size() : 0;
+        return mTimepoints != null ? mTimepoints.getHoursMap().size() : 0;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

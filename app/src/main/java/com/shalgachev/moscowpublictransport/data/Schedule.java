@@ -1,17 +1,10 @@
 package com.shalgachev.moscowpublictransport.data;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.TreeMap;
 
 /**
  * Created by anton on 5/28/2017.
@@ -45,14 +38,71 @@ public class Schedule {
         public int minute;
     }
 
+    private class HourComparator implements Comparator<Integer> {
+        private int mDayFirstHour;
+
+        public HourComparator(int dayFirstHour) {
+            mDayFirstHour = dayFirstHour;
+        }
+
+        @Override
+        public int compare(Integer o1, Integer o2) {
+            return normalize(o1) - normalize(o2);
+        }
+
+        private int normalize(int hour) {
+            int val = hour - mDayFirstHour;
+            if (val < 0)
+                val += 24;
+            return val;
+        }
+    }
+
+    public class Timepoints
+    {
+        private List<Timepoint> mTimepoints;
+        private TreeMap<Integer, List<Integer>> mHours;
+        private Integer[] mSortedHours;
+
+        Timepoints(List<Timepoint> timepoints) {
+            mTimepoints = new ArrayList<>(timepoints);
+
+            // TODO: 3/18/2018 get first hour of the day from the schedule provider
+            mHours = new TreeMap<>(new HourComparator(5));
+
+            for (Schedule.Timepoint timepoint : timepoints) {
+                int hour = timepoint.hour;
+                int minute = timepoint.minute;
+
+                if (!mHours.containsKey(hour))
+                    mHours.put(hour, new ArrayList<Integer>());
+                mHours.get(hour).add(minute);
+            }
+
+            mSortedHours = mHours.navigableKeySet().toArray(new Integer[]{});
+        }
+
+        public List<Timepoint> getTimepoints() {
+            return mTimepoints;
+        }
+
+        public TreeMap<Integer, List<Integer>> getHoursMap() {
+            return mHours;
+        }
+
+        public int getNthHour(int pos) {
+            return mSortedHours[pos];
+        }
+    }
+
     private ScheduleType mScheduleType;
     private Stop mStop;
-    private List<Timepoint> mTimepoints;
+    private Timepoints mTimepoints;
 
     public void setAsTimepoints(Stop stop, List<Timepoint> timepoints) {
         mScheduleType = ScheduleType.TIMEPOINTS;
         mStop = stop;
-        mTimepoints = new ArrayList<>(timepoints);
+        mTimepoints = new Timepoints(timepoints);
     }
 
     public ScheduleType getScheduleType() {
@@ -63,7 +113,7 @@ public class Schedule {
         return mStop;
     }
 
-    public List<Timepoint> getTimepoints() {
-        return new ArrayList<>(mTimepoints);
+    public Timepoints getTimepoints() {
+        return mTimepoints;
     }
 }
