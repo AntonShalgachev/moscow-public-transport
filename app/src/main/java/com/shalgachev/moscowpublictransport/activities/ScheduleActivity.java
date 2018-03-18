@@ -45,7 +45,7 @@ public class ScheduleActivity extends AppCompatActivity {
 
         mContentRecyclerView = findViewById(R.id.schedule_container);
 
-        mScheduleHourAdapter = new ScheduleHourAdapter();
+        mScheduleHourAdapter = new ScheduleHourAdapter(this);
         mContentRecyclerView.setAdapter(mScheduleHourAdapter);
 
         mLayoutManager = new LinearLayoutManager(this);
