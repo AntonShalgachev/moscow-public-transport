@@ -24,6 +24,7 @@ import com.shalgachev.moscowpublictransport.adapters.StopListPagerAdapter;
 import com.shalgachev.moscowpublictransport.data.Direction;
 import com.shalgachev.moscowpublictransport.data.Route;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
+import com.shalgachev.moscowpublictransport.data.ScheduleCacheTask;
 import com.shalgachev.moscowpublictransport.data.ScheduleError;
 import com.shalgachev.moscowpublictransport.data.ScheduleProviderTask;
 import com.shalgachev.moscowpublictransport.data.Stop;
@@ -119,39 +120,24 @@ public class AddTransportActivity extends AppCompatActivity {
                 finish();
                 break;
             case R.id.add_transport_done:
-                saveStops();
-                finish();
+                saveStopsAndFinish();
                 break;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void saveStops() {
+    private void saveStopsAndFinish() {
         if (mStopListItems == null)
             return;
 
-        ScheduleCacheSQLiteHelper db = new ScheduleCacheSQLiteHelper(this);
-        List<Stop> savedStops = db.getStopsOnMainMenu();
-
-        int stopsSaved = 0;
-        int stopsDeleted = 0;
-
-        for (StopListItem stopListItem : mStopListItems) {
-            Stop stop = stopListItem.stop;
-            boolean isStopSaved = savedStops.contains(stop);
-            if (stopListItem.selected && !isStopSaved) {
-                db.addToMainMenu(stop);
-                stopsSaved++;
-            } else if (!stopListItem.selected && isStopSaved) {
-                db.removeFromMainMenu(stop);
-                stopsDeleted++;
+        new ScheduleCacheTask(getApplicationContext(), ScheduleCacheTask.Args.synchronizeStopsOnMainMenu(mStopListItems), new ScheduleCacheTask.IScheduleReceiver() {
+            @Override
+            public void onResult(ScheduleCacheTask.Result result) {
+                ToastHelper.showStopDeltaToast(getApplicationContext(), result.stopsSaved, result.stopsDeleted);
+                finish();
             }
-        }
-
-        db.close();
-
-        ToastHelper.showStopDeltaToast(this, stopsSaved, stopsDeleted);
+        }).execute();
     }
 
     private void initActivity() {
@@ -177,6 +163,9 @@ public class AddTransportActivity extends AppCompatActivity {
     }
 
     private void onProviderError(ScheduleError error) {
+        if (mProgressDialog != null)
+            mProgressDialog.dismiss();
+
         Snackbar snackbar = Snackbar.make(findViewById(R.id.container), error.localizedDescription(this), Snackbar.LENGTH_INDEFINITE);
         snackbar.setAction(R.string.retry, new View.OnClickListener() {
             @Override
@@ -192,29 +181,34 @@ public class AddTransportActivity extends AppCompatActivity {
             Log.e(LOG_TAG, "Failed to load stops: stops are empty");
         }
 
-        ScheduleCacheSQLiteHelper db = new ScheduleCacheSQLiteHelper(this);
-        List<Stop> savedStops = db.getStopsOnMainMenu();
+        new ScheduleCacheTask(getApplicationContext(), ScheduleCacheTask.Args.getStopsOnMainMenu(mTransportType), new ScheduleCacheTask.IScheduleReceiver() {
+            @Override
+            public void onResult(ScheduleCacheTask.Result result) {
+                if (mProgressDialog != null)
+                    mProgressDialog.dismiss();
 
-        Set<Direction> directions = new HashSet<>();
-        mStopListItems = new ArrayList<>();
-        for (Stop stop : mStops) {
-            directions.add(stop.direction);
+                // TODO: 3/18/2018 handle errors
 
-            // TODO: 3/10/2018 implement next stop indicator
-            StopListItem item = new StopListItem(stop, "<CHANGE ME PLZ>", false);
-            mStopListItems.add(item);
+                Set<Direction> directions = new HashSet<>();
+                mStopListItems = new ArrayList<>();
+                for (Stop stop : mStops) {
+                    directions.add(stop.direction);
 
-            if (savedStops.contains(stop))
-                item.selected = true;
-        }
+                    // TODO: 3/10/2018 implement next stop indicator
+                    StopListItem item = new StopListItem(stop, "<CHANGE ME PLZ>", false);
+                    mStopListItems.add(item);
 
-        mDirections = new ArrayList<>(directions);
-        mDirectionIdx = 0;
+                    if (result.stops.contains(stop))
+                        item.selected = true;
+                }
 
-        db.close();
+                mDirections = new ArrayList<>(directions);
+                mDirectionIdx = 0;
 
-        updateDirection();
-        updateStops();
+                updateDirection();
+                updateStops();
+            }
+        }).execute();
     }
 
     private void loadStops() {
@@ -226,9 +220,6 @@ public class AddTransportActivity extends AppCompatActivity {
                 new ScheduleProviderTask.IScheduleReceiver() {
                     @Override
                     public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
-                        if (mProgressDialog != null)
-                            mProgressDialog.dismiss();
-
                         if (result.error == null) {
                             mStops = result.stops;
                             onStopsAvailable();
@@ -277,6 +268,7 @@ public class AddTransportActivity extends AppCompatActivity {
         if (currentDirection == null)
             return;
 
+        // TODO: 3/18/2018 optimize this logic, it takes a lot of time and blocks UI
         Map<CharSequence, ArrayList<StopListItem>> stopMap = new HashMap<>();
         for (StopListItem item : mStopListItems) {
             if (currentDirection.equals(item.stop.direction)) {

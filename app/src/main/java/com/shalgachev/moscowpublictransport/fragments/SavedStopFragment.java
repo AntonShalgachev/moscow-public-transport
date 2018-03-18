@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.activities.AddTransportActivity;
 import com.shalgachev.moscowpublictransport.adapters.SavedStopRecyclerViewAdapter;
+import com.shalgachev.moscowpublictransport.data.ScheduleCacheTask;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 import com.shalgachev.moscowpublictransport.data.db.ScheduleCacheSQLiteHelper;
@@ -33,6 +34,8 @@ public class SavedStopFragment extends Fragment {
     private SavedStopRecyclerViewAdapter.ViewHolder.ItemIterationListener mListener;
     private RecyclerView mRecycleView;
     private SavedStopRecyclerViewAdapter mRecyclerAdapter;
+
+    FloatingActionButton mFab;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -78,8 +81,8 @@ public class SavedStopFragment extends Fragment {
         mRecyclerAdapter = new SavedStopRecyclerViewAdapter(mListener, getActivity());
         mRecycleView.setAdapter(mRecyclerAdapter);
 
-        final FloatingActionButton fab = rootView.findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        mFab = rootView.findViewById(R.id.fab);
+        mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), AddTransportActivity.class);
@@ -93,11 +96,10 @@ public class SavedStopFragment extends Fragment {
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                if (dy > 0 && fab.getVisibility() == View.VISIBLE) {
-                    fab.hide();
-                } else if (dy < 0 && fab.getVisibility() != View.VISIBLE) {
-                    fab.show();
-                }
+                if (dy > 0)
+                    mFab.hide();
+                else if (dy < 0)
+                    mFab.show();
             }
         });
 
@@ -126,12 +128,15 @@ public class SavedStopFragment extends Fragment {
         if (mRecycleView == null)
             return;
 
-        ScheduleCacheSQLiteHelper db = new ScheduleCacheSQLiteHelper(getActivity());
+        // TODO: 3/18/2018 progress indicator
+        new ScheduleCacheTask(getActivity(), ScheduleCacheTask.Args.getStopsOnMainMenu(mTransportType), new ScheduleCacheTask.IScheduleReceiver() {
+            @Override
+            public void onResult(ScheduleCacheTask.Result result) {
+                mRecyclerAdapter.updateStops(result.stops);
+            }
+        }).execute();
 
-        List<Stop> stops = db.getStopsOnMainMenu(mTransportType);
-        db.close();
-
-        mRecyclerAdapter.updateStops(stops);
+        mFab.show();
     }
 
     public SavedStopRecyclerViewAdapter getRecyclerAdapter() {

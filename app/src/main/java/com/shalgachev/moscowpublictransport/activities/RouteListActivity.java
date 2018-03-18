@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.adapters.SavedStopPagerAdapter;
 import com.shalgachev.moscowpublictransport.adapters.SavedStopRecyclerViewAdapter;
+import com.shalgachev.moscowpublictransport.data.ScheduleCacheTask;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.db.ScheduleCacheSQLiteHelper;
 import com.shalgachev.moscowpublictransport.fragments.SavedStopFragment;
@@ -137,23 +138,22 @@ public class RouteListActivity extends AppCompatActivity implements SavedStopRec
             switch (item.getItemId()) {
                 case R.id.action_remove:
                     if (adapter != null) {
-                        List<Stop> selectedStops = getCurrentRecyclerAdapter().getSelectedStops();
+                        final List<Stop> selectedStops = getCurrentRecyclerAdapter().getSelectedStops();
                         Log.d(TAG, String.format("Removing %d saved stops", selectedStops.size()));
 
-                        ScheduleCacheSQLiteHelper db = new ScheduleCacheSQLiteHelper(RouteListActivity.this);
-                        // TODO: 2/11/2018 Delete list of stops in one call
-                        // TODO: 3/11/2018 Perform db operations in a separate thread
-                        for (Stop stop : selectedStops) {
-                            db.removeFromMainMenu(stop);
-                        }
-                        db.close();
+                        new ScheduleCacheTask(getApplicationContext(), ScheduleCacheTask.Args.removeFromMainMenu(selectedStops), new ScheduleCacheTask.IScheduleReceiver() {
+                            @Override
+                            public void onResult(ScheduleCacheTask.Result result) {
+                                getCurrentRecyclerFragment().updateStops();
 
-                        getCurrentRecyclerFragment().updateStops();
+                                ToastHelper.showStopDeltaToast(getApplicationContext(), 0, selectedStops.size());
+                            }
+                        }).execute();
 
-                        ToastHelper.showStopDeltaToast(RouteListActivity.this, 0, selectedStops.size());
+                        // TODO: 3/18/2018 WARNING this breaks animations in the stop list
+                        mActionMode.finish();
                     }
 
-                    mActionMode.finish();
                     return true;
 
                 case R.id.action_select_all:
@@ -171,6 +171,7 @@ public class RouteListActivity extends AppCompatActivity implements SavedStopRec
         @Override
         public void onDestroyActionMode(ActionMode mode) {
             SavedStopRecyclerViewAdapter adapter = getCurrentRecyclerAdapter();
+            // TODO: 3/18/2018 WARNING this breaks animations in the stop list
             if (adapter != null)
                 adapter.enableSelecting(false);
 

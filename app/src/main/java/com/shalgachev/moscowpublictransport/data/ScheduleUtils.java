@@ -88,6 +88,7 @@ public class ScheduleUtils {
 
     public static void requestSchedule(final Context context, final Stop stop, final IScheduleResultListener listener) {
         Log.i(LOG_TAG, String.format("Requested schedule for stop '%s'", stop.toString()));
+        Log.i(LOG_TAG, String.format("Context: '%s'", context.toString()));
 
         new ScheduleCacheTask(context, ScheduleCacheTask.Args.getSchedule(stop), new ScheduleCacheTask.IScheduleReceiver() {
             @Override
@@ -113,7 +114,12 @@ public class ScheduleUtils {
                                     if (listener != null)
                                         listener.onFreshSchedule(result.schedule);
 
-                                    new ScheduleCacheTask(context, ScheduleCacheTask.Args.saveSchedule(result.schedule), null).execute();
+                                    new ScheduleCacheTask(context, ScheduleCacheTask.Args.saveSchedule(result.schedule), new ScheduleCacheTask.IScheduleReceiver() {
+                                        @Override
+                                        public void onResult(ScheduleCacheTask.Result result) {
+                                            Log.i(LOG_TAG, "Schedule saved");
+                                        }
+                                    }).execute();
 
                                 } else {
                                     Log.e(LOG_TAG, "Error while refreshing schedule");

@@ -74,6 +74,7 @@ public class SavedStopRecyclerViewAdapter extends SelectableAdapter<SavedStopRec
     }
 
     public void updateStops(final List<Stop> items) {
+        Log.d(LOG_TAG, "Updating stops");
         final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
             @Override
             public int getOldListSize() {
