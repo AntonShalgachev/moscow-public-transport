@@ -12,10 +12,7 @@ import android.widget.TextView;
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.Schedule;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.TreeMap;
 
 /**
  * Created by anton on 3/17/2018.
@@ -61,19 +58,33 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private class SpacesItemDecoration extends RecyclerView.ItemDecoration {
-            private int space;
+            private int mHorizontalSpace;
+            private int mVerticalSpace;
+            private int mVerticalOffset;
+            private int mCols;
 
-            public SpacesItemDecoration(int space) {
-                this.space = space;
+            public SpacesItemDecoration(int horizontalSpace, int verticalSpace, int verticalOffset, int cols) {
+                this.mHorizontalSpace = horizontalSpace;
+                this.mVerticalSpace = verticalSpace;
+                this.mVerticalOffset = verticalOffset;
+                this.mCols = cols;
             }
 
             @Override
             public void getItemOffsets(Rect outRect, View view,
                                        RecyclerView parent, RecyclerView.State state) {
-                outRect.left = space;
-                outRect.right = space;
-                outRect.bottom = space / 2;
-                outRect.top = space / 2;
+                int rows = (parent.getAdapter().getItemCount() + mCols - 1) / mCols;
+                int row = parent.getChildLayoutPosition(view) / mCols;
+
+                outRect.left = mHorizontalSpace;
+                outRect.right = mHorizontalSpace;
+                outRect.bottom = mVerticalSpace;
+                outRect.top = mVerticalSpace;
+
+                if (row == 0)
+                    outRect.top += mVerticalOffset;
+                if (row == rows - 1)
+                    outRect.bottom += mVerticalOffset;
             }
         }
 
@@ -93,7 +104,8 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
 
         private void setupRecyclerView(Context context) {
             // TODO: 3/18/2018 change number of columns
-            GridLayoutManager layoutManager = new GridLayoutManager(context, 8) {
+            int columns = 8;
+            GridLayoutManager layoutManager = new GridLayoutManager(context, columns) {
                 @Override
                 public boolean canScrollVertically() {
                     return false;
@@ -102,7 +114,11 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
             mMinutesRecyclerView.setLayoutManager(layoutManager);
             mMinutesRecyclerView.setNestedScrollingEnabled(false);
 
-            SpacesItemDecoration decoration = new SpacesItemDecoration(context.getResources().getDimensionPixelSize(R.dimen.minutes_spacing));
+            SpacesItemDecoration decoration = new SpacesItemDecoration(
+                    context.getResources().getDimensionPixelSize(R.dimen.minutes_horizontal_spacing),
+                    context.getResources().getDimensionPixelSize(R.dimen.minutes_vertical_spacing),
+                    context.getResources().getDimensionPixelSize(R.dimen.minutes_vertical_offset),
+                    columns);
             mMinutesRecyclerView.addItemDecoration(decoration);
         }
     }

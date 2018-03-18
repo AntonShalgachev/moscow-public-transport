@@ -1,13 +1,16 @@
 package com.shalgachev.moscowpublictransport.adapters;
 
 import android.content.Context;
+import android.os.Debug;
 import android.support.annotation.ColorRes;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.shalgachev.moscowpublictransport.BuildConfig;
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
@@ -45,6 +48,8 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        Context context = holder.view.getContext();
+
         int minute = mMinutes.get(position);
         holder.mMinuteView.setText(String.format(Locale.US, "%02d", minute));
 
@@ -76,7 +81,6 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
         int closeThreshold = maxDiff / 3;
         int mediumThreshold = 2 * maxDiff / 3;
         if (isDiffPositive && diffInMinutes >= 0 && diffInMinutes < maxDiff) {
-            Context context = holder.view.getContext();
             String intervalStr = ScheduleUtils.formatShortTimeInterval(context, diffInMinutes);
             holder.mCountdownView.setText(context.getString(R.string.schedule_next_in, intervalStr));
             @ColorRes int color;
@@ -91,7 +95,12 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
         } else {
             holder.mCountdownView.setVisibility(View.GONE);
         }
+
         holder.mMinuteView.setEnabled(isDiffPositive);
+
+        float enabledElevation = context.getResources().getDimensionPixelSize(R.dimen.minute_card_enabled_elevation);
+        float disabledElevation = context.getResources().getDimensionPixelSize(R.dimen.minute_card_disabled_elevation);
+        holder.mCard.setCardElevation(isDiffPositive ? enabledElevation : disabledElevation);
     }
 
     @Override
@@ -101,12 +110,14 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public View view;
+        public CardView mCard;
         public TextView mMinuteView;
         public TextView mCountdownView;
 
         public ViewHolder(View view) {
             super(view);
             this.view = view;
+            mCard = view.findViewById(R.id.schedule_item_minute_card);
             mMinuteView = view.findViewById(R.id.schedule_item_minute);
             mCountdownView = view.findViewById(R.id.schedule_item_countdown);
         }
