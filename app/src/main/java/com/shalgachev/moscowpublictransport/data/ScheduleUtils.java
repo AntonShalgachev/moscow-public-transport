@@ -2,8 +2,10 @@ package com.shalgachev.moscowpublictransport.data;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.shalgachev.moscowpublictransport.R;
+import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +15,8 @@ import java.util.List;
  */
 
 public class ScheduleUtils {
+    private static final String LOG_TAG = "ScheduleUtils";
+
     public static CharSequence daysMaskToString(Context context, CharSequence mask, boolean shortDays) {
         CharSequence result;
         if (mask.equals("1111111")) {
@@ -80,5 +84,58 @@ public class ScheduleUtils {
 
         // TODO: 6/3/2017 Capitalize first letter
         return result;
+    }
+
+    public static void requestSchedule(final Context context, final Stop stop, final IScheduleResultListener listener) {
+        Log.i(LOG_TAG, String.format("Requested schedule for stop '%s'", stop.toString()));
+
+        new ScheduleCacheTask(context, ScheduleCacheTask.Args.getSchedule(stop), new ScheduleCacheTask.IScheduleReceiver() {
+            @Override
+            public void onResult(ScheduleCacheTask.Result result) {
+                // TODO: 3/18/2018 use error codes instead
+                if (result.schedule != null) {
+                    Log.i(LOG_TAG, "Found saved schedule");
+                    if (listener != null)
+                        listener.onCachedSchedule(result.schedule);
+                } else {
+                    Log.i(LOG_TAG, "Schedule isn't saved");
+                }
+
+                Log.i(LOG_TAG, "Fetching schedule from net");
+
+                BaseScheduleProvider.getUnitedProvider().createAndRunTask(
+                        ScheduleArgs.asScheduleArgs(stop),
+                        new ScheduleProviderTask.IScheduleReceiver() {
+                            @Override
+                            public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
+                                if (result.error == null) {
+                                    Log.i(LOG_TAG, "Schedule fetched");
+                                    if (listener != null)
+                                        listener.onFreshSchedule(result.schedule);
+
+                                    // TODO: 3/18/2018 for some reason this task blocks UI if we finish activity during it 
+                                    new ScheduleCacheTask(context, ScheduleCacheTask.Args.saveSchedule(result.schedule), new ScheduleCacheTask.IScheduleReceiver() {
+                                        @Override
+                                        public void onResult(ScheduleCacheTask.Result result) {
+                                            Log.i(LOG_TAG, "Schedule saved");
+                                        }
+                                    }).execute();
+
+                                } else {
+                                    Log.e(LOG_TAG, "Error while refreshing schedule");
+                                    if (listener != null)
+                                        listener.onError(result.error);
+                                }
+                            }
+                        }
+                );
+            }
+        }).execute();
+    }
+
+    public interface IScheduleResultListener {
+        void onCachedSchedule(Schedule schedule);
+        void onFreshSchedule(Schedule schedule);
+        void onError(ScheduleError error);
     }
 }

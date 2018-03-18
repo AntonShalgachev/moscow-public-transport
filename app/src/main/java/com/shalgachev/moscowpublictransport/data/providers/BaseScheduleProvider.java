@@ -7,8 +7,7 @@ import com.shalgachev.moscowpublictransport.data.Route;
 import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
 import com.shalgachev.moscowpublictransport.data.ScheduleError;
-import com.shalgachev.moscowpublictransport.data.ScheduleTask;
-import com.shalgachev.moscowpublictransport.data.ScheduleType;
+import com.shalgachev.moscowpublictransport.data.ScheduleProviderTask;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 
@@ -85,8 +84,8 @@ public abstract class BaseScheduleProvider {
         return getScheduleProvider("mosgortrans");
     }
 
-    public ScheduleTask createAndRunTask(ScheduleArgs args, ScheduleTask.IScheduleReceiver receiver) {
-        ScheduleTask task = createTask();
+    public ScheduleProviderTask createAndRunTask(ScheduleArgs args, ScheduleProviderTask.IScheduleReceiver receiver) {
+        ScheduleProviderTask task = createTask();
         task.setArgs(args);
         task.setReceiver(receiver);
         task.execute();
@@ -94,8 +93,8 @@ public abstract class BaseScheduleProvider {
         return task;
     }
 
-    public ScheduleTask createTask() {
-        return new ScheduleTask(this);
+    public ScheduleProviderTask createTask() {
+        return new ScheduleProviderTask(this);
     }
 
     public final Result run(ScheduleArgs args) {

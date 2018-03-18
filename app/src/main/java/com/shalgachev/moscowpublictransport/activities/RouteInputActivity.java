@@ -21,13 +21,11 @@ import com.shalgachev.moscowpublictransport.adapters.RouteListAdapter;
 import com.shalgachev.moscowpublictransport.data.Route;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
 import com.shalgachev.moscowpublictransport.data.ScheduleError;
-import com.shalgachev.moscowpublictransport.data.ScheduleTask;
-import com.shalgachev.moscowpublictransport.data.SelectableRoute;
+import com.shalgachev.moscowpublictransport.data.ScheduleProviderTask;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
 import com.shalgachev.moscowpublictransport.fragments.ButtonsFragment;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class RouteInputActivity extends AppCompatActivity implements ButtonsFragment.OnFragmentInteractionListener {
@@ -155,7 +153,7 @@ public class RouteInputActivity extends AppCompatActivity implements ButtonsFrag
 
         BaseScheduleProvider.getUnitedProvider().createAndRunTask(
                 ScheduleArgs.asRoutesArgs(mTransportType),
-                new ScheduleTask.IScheduleReceiver() {
+                new ScheduleProviderTask.IScheduleReceiver() {
                     @Override
                     public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
                         mProgressBar.setVisibility(View.GONE);

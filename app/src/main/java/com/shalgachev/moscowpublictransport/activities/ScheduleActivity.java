@@ -17,10 +17,12 @@ import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.adapters.ScheduleHoursAdapter;
 import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
+import com.shalgachev.moscowpublictransport.data.ScheduleCacheTask;
 import com.shalgachev.moscowpublictransport.data.ScheduleError;
-import com.shalgachev.moscowpublictransport.data.ScheduleTask;
+import com.shalgachev.moscowpublictransport.data.ScheduleProviderTask;
+import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
 import com.shalgachev.moscowpublictransport.data.Stop;
-import com.shalgachev.moscowpublictransport.data.db.SavedStopsSQLiteHelper;
+import com.shalgachev.moscowpublictransport.data.db.ScheduleCacheSQLiteHelper;
 import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
 import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
 
@@ -83,37 +85,34 @@ public class ScheduleActivity extends AppCompatActivity {
 
     private void loadData()
     {
-        final SavedStopsSQLiteHelper db = new SavedStopsSQLiteHelper(this);
         Log.i(LOG_TAG, "Trying to fetch schedule from the database");
-        Schedule schedule = db.getSchedule(mStop);
-        if (schedule != null) {
-            Log.i(LOG_TAG, "Found saved schedule");
-            onScheduleAvailable(schedule);
-        } else {
-            Log.i(LOG_TAG, "Schedule isn't saved");
-            showProgressDialog(R.string.loading_schedule);
-        }
+        showProgressDialog(R.string.loading_schedule);
 
-        Log.i(LOG_TAG, "Updating schedule from net");
+        ScheduleUtils.requestSchedule(this, mStop, new ScheduleUtils.IScheduleResultListener() {
+            @Override
+            public void onCachedSchedule(Schedule schedule) {
+                if (mProgressDialog != null)
+                    mProgressDialog.dismiss();
 
-        BaseScheduleProvider.getUnitedProvider().createAndRunTask(
-                ScheduleArgs.asScheduleArgs(mStop),
-                new ScheduleTask.IScheduleReceiver() {
-                    @Override
-                    public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
-                        if (mProgressDialog != null)
-                            mProgressDialog.dismiss();
+                onScheduleAvailable(schedule);
+            }
 
-                        if (result.error == null) {
-                            onScheduleAvailable(result.schedule);
-                            db.saveSchedule(result.schedule);
-                        } else {
-                            onScheduleError(result.error);
-                        }
-                        db.close();
-                    }
-                }
-        );
+            @Override
+            public void onFreshSchedule(Schedule schedule) {
+                if (mProgressDialog != null)
+                    mProgressDialog.dismiss();
+
+                onScheduleAvailable(schedule);
+            }
+
+            @Override
+            public void onError(ScheduleError error) {
+                if (mProgressDialog != null)
+                    mProgressDialog.dismiss();
+
+                onScheduleError(error);
+            }
+        });
     }
 
     private void onScheduleAvailable(Schedule schedule) {

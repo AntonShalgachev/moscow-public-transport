@@ -17,7 +17,7 @@ import com.shalgachev.moscowpublictransport.activities.AddTransportActivity;
 import com.shalgachev.moscowpublictransport.adapters.SavedStopRecyclerViewAdapter;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.TransportType;
-import com.shalgachev.moscowpublictransport.data.db.SavedStopsSQLiteHelper;
+import com.shalgachev.moscowpublictransport.data.db.ScheduleCacheSQLiteHelper;
 import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
 
 import java.util.List;
@@ -126,7 +126,7 @@ public class SavedStopFragment extends Fragment {
         if (mRecycleView == null)
             return;
 
-        SavedStopsSQLiteHelper db = new SavedStopsSQLiteHelper(getActivity());
+        ScheduleCacheSQLiteHelper db = new ScheduleCacheSQLiteHelper(getActivity());
 
         List<Stop> stops = db.getStopsOnMainMenu(mTransportType);
         db.close();

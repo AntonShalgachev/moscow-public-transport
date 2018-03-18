@@ -3,14 +3,12 @@ package com.shalgachev.moscowpublictransport.activities;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.TypedValue;
@@ -27,11 +25,11 @@ import com.shalgachev.moscowpublictransport.data.Direction;
 import com.shalgachev.moscowpublictransport.data.Route;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
 import com.shalgachev.moscowpublictransport.data.ScheduleError;
-import com.shalgachev.moscowpublictransport.data.ScheduleTask;
+import com.shalgachev.moscowpublictransport.data.ScheduleProviderTask;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.StopListItem;
 import com.shalgachev.moscowpublictransport.data.TransportType;
-import com.shalgachev.moscowpublictransport.data.db.SavedStopsSQLiteHelper;
+import com.shalgachev.moscowpublictransport.data.db.ScheduleCacheSQLiteHelper;
 import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
 import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
 import com.shalgachev.moscowpublictransport.helpers.ToastHelper;
@@ -133,7 +131,7 @@ public class AddTransportActivity extends AppCompatActivity {
         if (mStopListItems == null)
             return;
 
-        SavedStopsSQLiteHelper db = new SavedStopsSQLiteHelper(this);
+        ScheduleCacheSQLiteHelper db = new ScheduleCacheSQLiteHelper(this);
         List<Stop> savedStops = db.getStopsOnMainMenu();
 
         int stopsSaved = 0;
@@ -194,7 +192,7 @@ public class AddTransportActivity extends AppCompatActivity {
             Log.e(LOG_TAG, "Failed to load stops: stops are empty");
         }
 
-        SavedStopsSQLiteHelper db = new SavedStopsSQLiteHelper(this);
+        ScheduleCacheSQLiteHelper db = new ScheduleCacheSQLiteHelper(this);
         List<Stop> savedStops = db.getStopsOnMainMenu();
 
         Set<Direction> directions = new HashSet<>();
@@ -225,7 +223,7 @@ public class AddTransportActivity extends AppCompatActivity {
 
         BaseScheduleProvider.getUnitedProvider().createAndRunTask(
                 ScheduleArgs.asStopsArgs(mTransportType, mRoute),
-                new ScheduleTask.IScheduleReceiver() {
+                new ScheduleProviderTask.IScheduleReceiver() {
                     @Override
                     public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
                         if (mProgressDialog != null)

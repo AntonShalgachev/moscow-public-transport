@@ -25,8 +25,8 @@ import java.util.Locale;
  * Created by anton on 7/2/2017.
  */
 
-public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
-    private static final String LOG_TAG = "SavedStopsSQLiteHelper";
+public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
+    private static final String LOG_TAG = "ScheduleCacheSQLiteHlpr";
     private static final boolean SQL_DEBUG = true;
 
     private static final String TABLE_SAVED_STOPS = "saved_stops";
@@ -51,7 +51,7 @@ public class SavedStopsSQLiteHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "saved_stops.db";
     private static final int DATABASE_VERSION = 7;
 
-    public SavedStopsSQLiteHelper(Context context) {
+    public ScheduleCacheSQLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 

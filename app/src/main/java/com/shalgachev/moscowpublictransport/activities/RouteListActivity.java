@@ -16,14 +16,12 @@ import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.adapters.SavedStopPagerAdapter;
 import com.shalgachev.moscowpublictransport.adapters.SavedStopRecyclerViewAdapter;
 import com.shalgachev.moscowpublictransport.data.Stop;
-import com.shalgachev.moscowpublictransport.data.db.SavedStopsSQLiteHelper;
+import com.shalgachev.moscowpublictransport.data.db.ScheduleCacheSQLiteHelper;
 import com.shalgachev.moscowpublictransport.fragments.SavedStopFragment;
 import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
 import com.shalgachev.moscowpublictransport.helpers.ToastHelper;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class RouteListActivity extends AppCompatActivity implements SavedStopRecyclerViewAdapter.ViewHolder.ItemIterationListener {
     static final String LOG_TAG = "RouteListActivity";
@@ -142,7 +140,7 @@ public class RouteListActivity extends AppCompatActivity implements SavedStopRec
                         List<Stop> selectedStops = getCurrentRecyclerAdapter().getSelectedStops();
                         Log.d(TAG, String.format("Removing %d saved stops", selectedStops.size()));
 
-                        SavedStopsSQLiteHelper db = new SavedStopsSQLiteHelper(RouteListActivity.this);
+                        ScheduleCacheSQLiteHelper db = new ScheduleCacheSQLiteHelper(RouteListActivity.this);
                         // TODO: 2/11/2018 Delete list of stops in one call
                         // TODO: 3/11/2018 Perform db operations in a separate thread
                         for (Stop stop : selectedStops) {
