@@ -21,25 +21,45 @@
             android:textSize="30sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="7" />
 
-        <FrameLayout
+        <Space
+            android:id="@+id/hour_space"
+            android:layout_width="0dp"
+            android:layout_height="24dp"
+            app:layout_constraintEnd_toEndOf="@+id/schedule_item_hour"
+            app:layout_constraintStart_toStartOf="@+id/schedule_item_hour"
+            app:layout_constraintTop_toBottomOf="@+id/schedule_item_hour" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/schedule_item_minutes_container"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="80dp"
             android:layout_marginTop="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            tools:listitem="@layout/fragment_schedule_minute_item" />
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/schedule_item_minutes_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                tools:listitem="@layout/fragment_schedule_minute_item" />
-        </FrameLayout>
+        <Space
+            android:id="@+id/minutes_space"
+            android:layout_width="0dp"
+            android:layout_height="8dp"
+            app:layout_constraintEnd_toEndOf="@+id/schedule_item_minutes_container"
+            app:layout_constraintStart_toStartOf="@+id/schedule_item_minutes_container"
+            app:layout_constraintTop_toBottomOf="@+id/schedule_item_minutes_container" />
+
+        <android.support.constraint.Barrier
+            android:id="@+id/barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="hour_space,minutes_space"
+            tools:layout_editor_absoluteX="350dp"
+            tools:layout_editor_absoluteY="64dp" />
+
     </android.support.constraint.ConstraintLayout>
 </android.support.v7.widget.CardView>
