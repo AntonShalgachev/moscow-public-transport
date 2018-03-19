@@ -59,7 +59,7 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
         // TODO: 3/18/2018 move this logic somewhere else?
         Calendar timepointCalendar = Calendar.getInstance();
 
-        int currentHour = timepointCalendar.get(Calendar.HOUR);
+        int currentHour = timepointCalendar.get(Calendar.HOUR_OF_DAY);
         int firstHour = mSchedule.getTimepoints().getFirstHour();
 
         int hourOffset = 0;
@@ -74,7 +74,7 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
 
         int hour = mHour + hourOffset;
 
-        timepointCalendar.set(Calendar.HOUR, 0);
+        timepointCalendar.set(Calendar.HOUR_OF_DAY, 0);
         timepointCalendar.set(Calendar.MINUTE, 0);
         timepointCalendar.set(Calendar.SECOND, 0);
         timepointCalendar.set(Calendar.MILLISECOND, 0);
