@@ -58,15 +58,26 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
     private long getMillisecondOffsetToMinute(int minute) {
         // TODO: 3/18/2018 move this logic somewhere else?
         Calendar timepointCalendar = Calendar.getInstance();
+
+        int currentHour = timepointCalendar.get(Calendar.HOUR);
+        int firstHour = mSchedule.getTimepoints().getFirstHour();
+
+        int hourOffset = 0;
+
+        // it's between 0 and 'firstHour' now, so the schedule should start a day before;
+        if (currentHour < firstHour)
+            hourOffset -= 24;
+
+        // hour is between 0 and 'firstHour', thus it's the next date
+        if (mHour < firstHour)
+            hourOffset += 24;
+
+        int hour = mHour + hourOffset;
+
         timepointCalendar.set(Calendar.HOUR, 0);
         timepointCalendar.set(Calendar.MINUTE, 0);
         timepointCalendar.set(Calendar.SECOND, 0);
         timepointCalendar.set(Calendar.MILLISECOND, 0);
-
-        int firstHour = mSchedule.getTimepoints().getFirstHour();
-        int hour = mHour;
-        if (hour < firstHour && timepointCalendar.get(Calendar.HOUR) >= firstHour)
-            hour += 24;
 
         timepointCalendar.add(Calendar.HOUR, hour);
         timepointCalendar.add(Calendar.MINUTE, minute+1);
