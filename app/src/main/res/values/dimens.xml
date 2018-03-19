@@ -9,13 +9,14 @@
 
     <dimen name="minutes_horizontal_spacing">4dp</dimen>
     <dimen name="minutes_vertical_spacing">2dp</dimen>
-    <dimen name="minutes_vertical_offset">8dp</dimen>
-    <dimen name="schedule_item_hour_vertical_margin">8dp</dimen>
+    <dimen name="minutes_vertical_offset">12dp</dimen>
+    <dimen name="schedule_item_hour_vertical_margin">0dp</dimen>
     <dimen name="schedule_item_minutes_vertical_margin">0dp</dimen>
+    <dimen name="schedule_item_minutes_left_margin">80dp</dimen>
     <dimen name="schedule_item_hour_text_size">30sp</dimen>
 
     <dimen name="minute_card_enabled_elevation">4dp</dimen>
     <dimen name="minute_card_disabled_elevation">1dp</dimen>
-    <dimen name="hour_card_enabled_elevation">3dp</dimen>
-    <dimen name="hour_card_disabled_elevation">1dp</dimen>
+    <dimen name="hour_card_enabled_elevation">0dp</dimen>
+    <dimen name="hour_card_disabled_elevation">0dp</dimen>
 </resources>

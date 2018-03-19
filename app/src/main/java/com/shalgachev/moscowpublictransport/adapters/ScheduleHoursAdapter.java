@@ -117,7 +117,7 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
 
         private void setupRecyclerView(Context context) {
             // TODO: 3/18/2018 change number of columns
-            int columns = 8;
+            int columns = 7;
             GridLayoutManager layoutManager = new GridLayoutManager(context, columns) {
                 @Override
                 public boolean canScrollVertically() {
