@@ -16,4 +16,6 @@
 
     <dimen name="minute_card_enabled_elevation">4dp</dimen>
     <dimen name="minute_card_disabled_elevation">1dp</dimen>
+    <dimen name="hour_card_enabled_elevation">3dp</dimen>
+    <dimen name="hour_card_disabled_elevation">1dp</dimen>
 </resources>

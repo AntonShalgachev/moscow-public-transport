@@ -46,13 +46,16 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
         return new ViewHolder(view);
     }
 
-    @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        Context context = holder.view.getContext();
+    public boolean hasEnabledMinutes() {
+        for (int minute : mMinutes) {
+            if (getMillisecondOffsetToMinute(minute) > 0)
+                return true;
+        }
 
-        int minute = mMinutes.get(position);
-        holder.mMinuteView.setText(String.format(Locale.US, "%02d", minute));
+        return false;
+    }
 
+    private long getMillisecondOffsetToMinute(int minute) {
         // TODO: 3/18/2018 move this logic somewhere else?
         Calendar timepointCalendar = Calendar.getInstance();
         timepointCalendar.set(Calendar.HOUR, 0);
@@ -71,16 +74,29 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
 
         Calendar nowCalendar = Calendar.getInstance();
 
-        long diffInMillis = timepointCalendar.getTimeInMillis() - nowCalendar.getTimeInMillis();
+        return timepointCalendar.getTimeInMillis() - nowCalendar.getTimeInMillis();
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        Context context = holder.view.getContext();
+
+        int minute = mMinutes.get(position);
+        holder.mMinuteView.setText(String.format(Locale.US, "%02d", minute));
+
+        long diffInMillis = getMillisecondOffsetToMinute(minute);
         long diffInMinutes = diffInMillis / 1000 / 60;
 
-        boolean isDiffPositive = diffInMillis > 0;
+        boolean isMinuteEnabled = diffInMillis > 0;
 
         // TODO: 3/19/2018 highlight only N next timepoints
-        int maxDiff = 90;
+        int maxDiff = 60;
+        boolean isCountdownEnabled = diffInMinutes >= 0 && diffInMinutes <= maxDiff;
+
         int closeThreshold = maxDiff / 3;
         int mediumThreshold = 2 * maxDiff / 3;
-        if (isDiffPositive && diffInMinutes >= 0 && diffInMinutes < maxDiff) {
+
+        if (isMinuteEnabled && isCountdownEnabled) {
             String intervalStr = ScheduleUtils.formatShortTimeInterval(context, diffInMinutes);
             holder.mCountdownView.setText(context.getString(R.string.schedule_next_in, intervalStr));
             @ColorRes int color;
@@ -96,11 +112,11 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
             holder.mCountdownView.setVisibility(View.GONE);
         }
 
-        holder.mMinuteView.setEnabled(isDiffPositive);
+        holder.mMinuteView.setEnabled(isMinuteEnabled);
 
         float enabledElevation = context.getResources().getDimensionPixelSize(R.dimen.minute_card_enabled_elevation);
         float disabledElevation = context.getResources().getDimensionPixelSize(R.dimen.minute_card_disabled_elevation);
-        holder.mCard.setCardElevation(isDiffPositive ? enabledElevation : disabledElevation);
+        holder.mCard.setCardElevation(isMinuteEnabled ? enabledElevation : disabledElevation);
     }
 
     @Override

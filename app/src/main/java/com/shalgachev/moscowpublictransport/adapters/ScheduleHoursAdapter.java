@@ -2,6 +2,7 @@ package com.shalgachev.moscowpublictransport.adapters;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -48,7 +49,17 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
         int hour = mTimepoints.getNthHour(position);
         List<Integer> minutes = mTimepoints.getHoursMap().get(hour);
         holder.mHourView.setText(String.valueOf(hour));
-        holder.mMinutesRecyclerView.setAdapter(new ScheduleMinutesAdapter(mSchedule, hour, minutes));
+
+        ScheduleMinutesAdapter adapter = new ScheduleMinutesAdapter(mSchedule, hour, minutes);
+        holder.mMinutesRecyclerView.setAdapter(adapter);
+
+        // TODO: 3/19/2018 update elevation dynamically
+        Context context = holder.view.getContext();
+        boolean isEnabled = adapter.hasEnabledMinutes();
+        float enabledElevation = context.getResources().getDimensionPixelSize(R.dimen.hour_card_enabled_elevation);
+        float disabledElevation = context.getResources().getDimensionPixelSize(R.dimen.hour_card_disabled_elevation);
+        holder.mCardView.setCardElevation(isEnabled ? enabledElevation : disabledElevation);
+        holder.mHourView.setEnabled(isEnabled);
     }
 
     @Override
@@ -90,12 +101,14 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
 
         // TODO: 3/18/2018 increase elevation of future timepoints
         public View view;
+        public CardView mCardView;
         public TextView mHourView;
         public RecyclerView mMinutesRecyclerView;
 
         public ViewHolder(View view, Context context) {
             super(view);
             this.view = view;
+            mCardView = view.findViewById(R.id.schedule_item_hour_card);
             mHourView = view.findViewById(R.id.schedule_item_hour);
             mMinutesRecyclerView = view.findViewById(R.id.schedule_item_minutes_container);
 
