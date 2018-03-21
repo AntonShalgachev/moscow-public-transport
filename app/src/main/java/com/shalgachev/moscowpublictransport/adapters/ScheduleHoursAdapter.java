@@ -12,7 +12,9 @@ import android.widget.TextView;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.Schedule;
+import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
 
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -33,6 +35,21 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
         mSchedule = schedule;
         mTimepoints = schedule.getTimepoints();
 
+        // TODO: 3/21/2018 extract this somewhere
+        final int maxCountdowns = 3;
+        int shownCountdowns = 0;
+        for (Schedule.Timepoint timepoint : mTimepoints.getTimepoints()) {
+            Calendar timepointCalendar = ScheduleUtils.getTimepointCalendar(timepoint, mSchedule.getTimepoints().getFirstHour());
+            Calendar nowCalendar = Calendar.getInstance();
+
+            timepoint.millisFromNow = (timepointCalendar.getTimeInMillis() - nowCalendar.getTimeInMillis());
+
+            if (shownCountdowns < maxCountdowns && timepoint.isEnabled()) {
+                timepoint.isCountdownShown = true;
+                shownCountdowns += 1;
+            }
+        }
+
         notifyDataSetChanged();
     }
 
@@ -47,15 +64,19 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         int hour = mTimepoints.getNthHour(position);
-        List<Integer> minutes = mTimepoints.getHoursMap().get(hour);
+        List<Schedule.Timepoint> timepoints = mTimepoints.getHoursMap().get(hour);
         holder.mHourView.setText(String.valueOf(hour));
 
-        ScheduleMinutesAdapter adapter = new ScheduleMinutesAdapter(mSchedule, hour, minutes);
+        ScheduleMinutesAdapter adapter = new ScheduleMinutesAdapter(mSchedule, hour, timepoints);
         holder.mMinutesRecyclerView.setAdapter(adapter);
 
         // TODO: 3/19/2018 update elevation dynamically
         Context context = holder.view.getContext();
-        boolean isEnabled = adapter.hasEnabledMinutes();
+        boolean isEnabled = false;
+        for (Schedule.Timepoint timepoint : timepoints)
+            if (timepoint.isEnabled())
+                isEnabled = true;
+
         float enabledElevation = context.getResources().getDimensionPixelSize(R.dimen.hour_card_enabled_elevation);
         float disabledElevation = context.getResources().getDimensionPixelSize(R.dimen.hour_card_disabled_elevation);
         holder.mCardView.setCardElevation(isEnabled ? enabledElevation : disabledElevation);

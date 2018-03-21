@@ -36,6 +36,14 @@ public class Schedule {
 
         public int hour;
         public int minute;
+
+        // used in schedule activity to notify remaining time
+        public long millisFromNow;
+        public boolean isCountdownShown;
+
+        public boolean isEnabled() {
+            return millisFromNow > 0;
+        }
     }
 
     private class HourComparator implements Comparator<Integer> {
@@ -61,7 +69,7 @@ public class Schedule {
     public class Timepoints
     {
         private List<Timepoint> mTimepoints;
-        private TreeMap<Integer, List<Integer>> mHours;
+        private TreeMap<Integer, List<Timepoint>> mHours;
         private Integer[] mSortedHours;
         // TODO: 3/18/2018 get first hour of the day from the schedule provider
         private int mFirstHour = 5;
@@ -71,13 +79,12 @@ public class Schedule {
 
             mHours = new TreeMap<>(new HourComparator(mFirstHour));
 
-            for (Schedule.Timepoint timepoint : timepoints) {
+            for (Timepoint timepoint : timepoints) {
                 int hour = timepoint.hour;
-                int minute = timepoint.minute;
 
                 if (!mHours.containsKey(hour))
-                    mHours.put(hour, new ArrayList<Integer>());
-                mHours.get(hour).add(minute);
+                    mHours.put(hour, new ArrayList<Timepoint>());
+                mHours.get(hour).add(timepoint);
             }
 
             mSortedHours = mHours.navigableKeySet().toArray(new Integer[]{});
@@ -87,7 +94,7 @@ public class Schedule {
             return mTimepoints;
         }
 
-        public TreeMap<Integer, List<Integer>> getHoursMap() {
+        public TreeMap<Integer, List<Timepoint>> getHoursMap() {
             return mHours;
         }
 

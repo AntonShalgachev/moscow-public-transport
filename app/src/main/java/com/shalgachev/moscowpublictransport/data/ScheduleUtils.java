@@ -8,6 +8,7 @@ import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -96,7 +97,37 @@ public class ScheduleUtils {
             long hours = minutes / 60;
             return context.getString(R.string.interval_hour, hours);
         }
-    };
+    }
+
+    public static Calendar getTimepointCalendar(Schedule.Timepoint timepoint, int firstHour) {
+        Calendar timepointCalendar = Calendar.getInstance();
+
+        int currentHour = timepointCalendar.get(Calendar.HOUR_OF_DAY);
+
+        int hourOffset = 0;
+
+        // it's between 0 and 'firstHour' now, so the schedule should start a day before;
+        if (currentHour < firstHour)
+            hourOffset -= 24;
+
+        // hour is between 0 and 'firstHour', thus it's the next day
+        if (timepoint.hour < firstHour)
+            hourOffset += 24;
+
+        int hour = timepoint.hour + hourOffset;
+        int minute = timepoint.minute;
+
+        timepointCalendar.set(Calendar.HOUR_OF_DAY, 0);
+        timepointCalendar.set(Calendar.MINUTE, 0);
+        timepointCalendar.set(Calendar.SECOND, 0);
+        timepointCalendar.set(Calendar.MILLISECOND, 0);
+
+        timepointCalendar.add(Calendar.HOUR, hour);
+        timepointCalendar.add(Calendar.MINUTE, minute+1);
+        timepointCalendar.add(Calendar.MILLISECOND, -1);
+
+        return timepointCalendar;
+    }
 
     public static void requestSchedule(final Context context, final Stop stop, final IScheduleResultListener listener) {
         Log.i(LOG_TAG, String.format("Requested schedule for stop '%s'", stop.toString()));
