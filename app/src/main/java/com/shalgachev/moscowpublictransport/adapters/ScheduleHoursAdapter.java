@@ -12,9 +12,6 @@ import android.widget.TextView;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.Schedule;
-import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
-
-import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -22,6 +19,7 @@ import java.util.List;
  */
 
 public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdapter.ViewHolder> {
+    private static final String LOG_TAG = "ScheduleHoursAdapter";
 
     private Context mContext;
     private Schedule mSchedule;
@@ -31,25 +29,11 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
         mContext = context;
     }
 
-    public void setSchedule(Schedule schedule) {
+    public void updateSchedule(Schedule schedule) {
         mSchedule = schedule;
         mTimepoints = schedule.getTimepoints();
 
-        // TODO: 3/21/2018 extract this somewhere
-        final int maxCountdowns = 3;
-        int shownCountdowns = 0;
-        for (Schedule.Timepoint timepoint : mTimepoints.getTimepoints()) {
-            Calendar timepointCalendar = ScheduleUtils.getTimepointCalendar(timepoint, mSchedule.getTimepoints().getFirstHour());
-            Calendar nowCalendar = Calendar.getInstance();
-
-            timepoint.millisFromNow = (timepointCalendar.getTimeInMillis() - nowCalendar.getTimeInMillis());
-
-            if (shownCountdowns < maxCountdowns && timepoint.isEnabled()) {
-                timepoint.isCountdownShown = true;
-                shownCountdowns += 1;
-            }
-        }
-
+        // TODO: 3/22/2018 change me plz
         notifyDataSetChanged();
     }
 

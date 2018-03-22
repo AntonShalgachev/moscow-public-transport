@@ -44,6 +44,9 @@ public class Schedule {
         public boolean isEnabled() {
             return millisFromNow > 0;
         }
+        public int secondsFromNow() {
+            return (int)(millisFromNow / 1000 / 60);
+        }
     }
 
     private class HourComparator implements Comparator<Integer> {

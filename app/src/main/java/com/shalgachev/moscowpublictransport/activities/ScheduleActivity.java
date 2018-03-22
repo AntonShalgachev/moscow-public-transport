@@ -1,20 +1,14 @@
 package com.shalgachev.moscowpublictransport.activities;
 
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
+import android.os.HandlerThread;
 import android.support.annotation.StringRes;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.math.MathUtils;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -24,30 +18,29 @@ import android.widget.ImageView;
 
 import com.shalgachev.moscowpublictransport.HourItemDividerDecoration;
 import com.shalgachev.moscowpublictransport.R;
+import com.shalgachev.moscowpublictransport.TimeUpdater;
 import com.shalgachev.moscowpublictransport.adapters.ScheduleHoursAdapter;
 import com.shalgachev.moscowpublictransport.data.Schedule;
-import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
-import com.shalgachev.moscowpublictransport.data.ScheduleCacheTask;
 import com.shalgachev.moscowpublictransport.data.ScheduleError;
-import com.shalgachev.moscowpublictransport.data.ScheduleProviderTask;
 import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
 import com.shalgachev.moscowpublictransport.data.Stop;
-import com.shalgachev.moscowpublictransport.data.db.ScheduleCacheSQLiteHelper;
-import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
 import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
-
-import java.util.Calendar;
 
 public class ScheduleActivity extends AppCompatActivity {
     private static final String LOG_TAG = "ScheduleActivity";
     private Stop mStop;
     // TODO: 3/11/2018 use progress bar
     private ProgressDialog mProgressDialog;
-    private boolean mHasSchedule = false;
 
     private RecyclerView mContentRecyclerView;
     private ScheduleHoursAdapter mScheduleHoursAdapter;
-    private LinearLayoutManager mLayoutManager;
+
+    Schedule mSchedule;
+
+    private Handler mUpdaterHandler;
+    private Handler mUIHandler;
+
+    private TimeUpdater mTimeUpdater;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,8 +54,7 @@ public class ScheduleActivity extends AppCompatActivity {
         mScheduleHoursAdapter = new ScheduleHoursAdapter(this);
         mContentRecyclerView.setAdapter(mScheduleHoursAdapter);
 
-        mLayoutManager = new LinearLayoutManager(this);
-        mContentRecyclerView.setLayoutManager(mLayoutManager);
+        mContentRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -102,6 +94,11 @@ public class ScheduleActivity extends AppCompatActivity {
 
         initActivity();
         loadData();
+
+        HandlerThread updaterThread = new HandlerThread("TimeUpdaterHandlerThread");
+        updaterThread.start();
+        mUpdaterHandler = new Handler(updaterThread.getLooper());
+        mUIHandler = new Handler();
     }
 
     private void initActivity()
@@ -159,9 +156,35 @@ public class ScheduleActivity extends AppCompatActivity {
     }
 
     private void onScheduleAvailable(Schedule schedule) {
-        mHasSchedule = true;
+        Log.d(LOG_TAG, "New schedule is now available");
+        mSchedule = schedule;
 
-        mScheduleHoursAdapter.setSchedule(schedule);
+        stopUpdater();
+
+        mTimeUpdater = new TimeUpdater(schedule.getTimepoints());
+        Log.d(LOG_TAG, "Creating new time updater " + mTimeUpdater.toString());
+
+        mTimeUpdater.setListener(new TimeUpdater.Listener() {
+            @Override
+            public void onTimeUpdated(TimeUpdater timeUpdater, long millisToNextUpdate) {
+                Log.d(LOG_TAG, String.format("Time updater finished: %s", timeUpdater.toString()));
+                mUIHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mScheduleHoursAdapter.updateSchedule(mSchedule);
+                    }
+                });
+
+                if (timeUpdater == mTimeUpdater) {
+                    Log.i(LOG_TAG, String.format("Scheduling updater to run in %d ms", millisToNextUpdate));
+                    mUpdaterHandler.postDelayed(mTimeUpdater, millisToNextUpdate);
+                } else {
+                    Log.i(LOG_TAG, "Time updater changed, so not scheduling");
+                }
+            }
+        });
+
+        startUpdater();
     }
 
     private void onScheduleError(ScheduleError error) {
@@ -179,8 +202,38 @@ public class ScheduleActivity extends AppCompatActivity {
     }
 
     private void showProgressDialog(@StringRes int loadingStringId) {
-        if (!mHasSchedule && mProgressDialog == null) {
+        if (mSchedule == null && mProgressDialog == null) {
             mProgressDialog = ProgressDialog.show(this, getString(R.string.loading), getString(loadingStringId), true);
         }
+    }
+
+    void stopUpdater() {
+        if (mTimeUpdater != null) {
+            Log.d(LOG_TAG, "Pausing existing time updater " + mTimeUpdater.toString());
+            mUpdaterHandler.removeCallbacks(mTimeUpdater);
+        }
+    }
+
+    void startUpdater() {
+        if (mTimeUpdater != null) {
+            Log.d(LOG_TAG, "Starting time updater " + mTimeUpdater.toString());
+            mUpdaterHandler.post(mTimeUpdater);
+        } else {
+            Log.i(LOG_TAG, "Time updater hasn't been created yet");
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        stopUpdater();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        startUpdater();
     }
 }

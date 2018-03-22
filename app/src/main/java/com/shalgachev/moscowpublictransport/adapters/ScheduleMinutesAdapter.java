@@ -50,19 +50,15 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
         Schedule.Timepoint timepoint = mTimepoints.get(position);
         holder.mMinuteView.setText(String.format(Locale.US, "%02d", timepoint.minute));
 
-        long diffInMillis = timepoint.millisFromNow;
-        long diffInMinutes = diffInMillis / 1000 / 60;
-
-        boolean isMinuteEnabled = diffInMillis > 0;
-
-        boolean isCountdownEnabled = timepoint.isCountdownShown;
+        long diffInMinutes = timepoint.secondsFromNow();
+        boolean isMinuteEnabled = timepoint.isEnabled();
 
         // TODO: 3/21/2018 extract this value  somewhere
         int maxDiff = 15;
         int closeThreshold = maxDiff / 3;
         int mediumThreshold = 2 * maxDiff / 3;
 
-        if (isMinuteEnabled && isCountdownEnabled) {
+        if (isMinuteEnabled && timepoint.isCountdownShown) {
             String intervalStr = ScheduleUtils.formatShortTimeInterval(context, diffInMinutes);
             holder.mCountdownView.setText(context.getString(R.string.schedule_next_in, intervalStr));
             @ColorRes int color;
