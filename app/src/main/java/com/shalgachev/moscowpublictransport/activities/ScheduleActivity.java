@@ -36,6 +36,7 @@ public class ScheduleActivity extends AppCompatActivity {
     private ScheduleHoursAdapter mScheduleHoursAdapter;
 
     Schedule mSchedule;
+    boolean mScheduleUpdated;
 
     private Handler mUpdaterHandler;
     private Handler mUIHandler;
@@ -158,6 +159,7 @@ public class ScheduleActivity extends AppCompatActivity {
     private void onScheduleAvailable(Schedule schedule) {
         Log.d(LOG_TAG, "New schedule is now available");
         mSchedule = schedule;
+        mScheduleUpdated = false;
 
         stopUpdater();
 
@@ -171,7 +173,9 @@ public class ScheduleActivity extends AppCompatActivity {
                 mUIHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mScheduleHoursAdapter.updateSchedule(mSchedule);
+                        boolean shouldAnimate = mScheduleUpdated;
+                        mScheduleHoursAdapter.updateSchedule(mSchedule, shouldAnimate);
+                        mScheduleUpdated = true;
                     }
                 });
 

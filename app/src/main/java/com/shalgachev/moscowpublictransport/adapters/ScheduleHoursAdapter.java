@@ -1,10 +1,13 @@
 package com.shalgachev.moscowpublictransport.adapters;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Rect;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +15,9 @@ import android.widget.TextView;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.Schedule;
+import com.shalgachev.moscowpublictransport.helpers.AnimationHelper;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,12 +35,18 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
         mContext = context;
     }
 
-    public void updateSchedule(Schedule schedule) {
+    public void updateSchedule(Schedule schedule, boolean animate) {
         mSchedule = schedule;
         mTimepoints = schedule.getTimepoints();
 
         // TODO: 3/22/2018 change me plz
-        notifyDataSetChanged();
+        if (animate) {
+            Log.d(LOG_TAG, "Animating changes");
+            notifyItemRangeChanged(0, getItemCount(), new Object());
+        } else {
+            Log.d(LOG_TAG, "Recreating dataset from scratch");
+            notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -46,16 +58,45 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
     }
 
     @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull List<Object> payloads) {
+        if (!payloads.isEmpty()) {
+            holder.mAdapter.onDataUpdated();
+
+            int hour = mTimepoints.getNthHour(position);
+            List<Schedule.Timepoint> timepoints = mTimepoints.getHoursMap().get(hour);
+
+            Context context = holder.view.getContext();
+
+            // TODO: 3/23/2018 precompute this in the worker thread for performance
+            boolean isEnabled = false;
+            for (Schedule.Timepoint timepoint : timepoints)
+                if (timepoint.isEnabled())
+                    isEnabled = true;
+
+            int animDuration = context.getResources().getInteger(R.integer.schedule_minute_animation_duration);
+
+            if (isEnabled && !holder.isEnabled)
+                AnimationHelper.animateTextColor(holder.mHourView, holder.colorDisabled, holder.colorEnabled).setDuration(animDuration).start();
+            else if (!isEnabled && holder.isEnabled)
+                AnimationHelper.animateTextColor(holder.mHourView, holder.colorEnabled, holder.colorDisabled).setDuration(animDuration).start();
+            holder.isEnabled = isEnabled;
+        } else {
+            onBindViewHolder(holder, position);
+        }
+    }
+
+    @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         int hour = mTimepoints.getNthHour(position);
         List<Schedule.Timepoint> timepoints = mTimepoints.getHoursMap().get(hour);
         holder.mHourView.setText(String.valueOf(hour));
 
-        ScheduleMinutesAdapter adapter = new ScheduleMinutesAdapter(mSchedule, hour, timepoints);
-        holder.mMinutesRecyclerView.setAdapter(adapter);
+        holder.mAdapter = new ScheduleMinutesAdapter(mSchedule, hour, timepoints);
+        holder.mMinutesRecyclerView.setAdapter(holder.mAdapter);
 
-        // TODO: 3/19/2018 update elevation dynamically
         Context context = holder.view.getContext();
+
+        // TODO: 3/23/2018 precompute this in the worker thread for performance
         boolean isEnabled = false;
         for (Schedule.Timepoint timepoint : timepoints)
             if (timepoint.isEnabled())
@@ -64,7 +105,9 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
         float enabledElevation = context.getResources().getDimensionPixelSize(R.dimen.hour_card_enabled_elevation);
         float disabledElevation = context.getResources().getDimensionPixelSize(R.dimen.hour_card_disabled_elevation);
         holder.mCardView.setCardElevation(isEnabled ? enabledElevation : disabledElevation);
-        holder.mHourView.setEnabled(isEnabled);
+
+        holder.isEnabled = isEnabled;
+        holder.mHourView.setTextColor(isEnabled ? holder.colorEnabled : holder.colorDisabled);
     }
 
     @Override
@@ -110,12 +153,22 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
         public TextView mHourView;
         public RecyclerView mMinutesRecyclerView;
 
+        public boolean isEnabled;
+        public int colorEnabled;
+        public int colorDisabled;
+
+        private ScheduleMinutesAdapter mAdapter;
+
         public ViewHolder(View view, Context context) {
             super(view);
             this.view = view;
             mCardView = view.findViewById(R.id.schedule_item_hour_card);
             mHourView = view.findViewById(R.id.schedule_item_hour);
             mMinutesRecyclerView = view.findViewById(R.id.schedule_item_minutes_container);
+
+            ColorStateList colors = mHourView.getTextColors();
+            colorEnabled = colors.getColorForState(new int[]{android.R.attr.state_enabled}, 0);
+            colorDisabled = colors.getColorForState(new int[]{-android.R.attr.state_enabled}, 0);
 
             setupRecyclerView(context);
         }

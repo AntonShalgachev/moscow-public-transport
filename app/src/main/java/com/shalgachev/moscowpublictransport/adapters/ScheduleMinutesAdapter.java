@@ -1,11 +1,13 @@
 package com.shalgachev.moscowpublictransport.adapters;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
+import android.content.res.ColorStateList;
 import android.support.annotation.ColorRes;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.StateSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +16,9 @@ import android.widget.TextView;
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
+import com.shalgachev.moscowpublictransport.helpers.AnimationHelper;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -25,6 +27,7 @@ import java.util.Locale;
  */
 
 public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutesAdapter.ViewHolder> {
+    private static final String LOG_TAG = "ScheduleMinutesAdapter";
     private Schedule mSchedule;
     private int mHour;
     private List<Schedule.Timepoint> mTimepoints;
@@ -35,12 +38,95 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
         mTimepoints = new ArrayList<>(minutes);
     }
 
+    public void onDataUpdated() {
+        notifyItemRangeChanged(0, getItemCount(), new Object());
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_schedule_minute_item, parent, false);
 
         return new ViewHolder(view);
+    }
+
+    private String getCountdownText(Context context, Schedule.Timepoint timepoint) {
+        long diffInMinutes = timepoint.secondsFromNow();
+
+        String intervalStr = ScheduleUtils.formatShortTimeInterval(context, diffInMinutes);
+        return context.getString(R.string.schedule_next_in, intervalStr);
+    }
+
+    private int getCountdownColor(Context context, Schedule.Timepoint timepoint) {
+        long diffInMinutes = timepoint.secondsFromNow();
+
+        // TODO: 3/21/2018 extract these values somewhere
+        int closeThreshold = 5;
+        int mediumThreshold = 10;
+
+        @ColorRes int color;
+        if (diffInMinutes <= closeThreshold)
+            color = R.color.next_in_close_color;
+        else if (diffInMinutes <= mediumThreshold)
+            color = R.color.next_in_medium_color;
+        else
+            color = R.color.next_in_far_color;
+
+        return context.getResources().getColor(color);
+    }
+
+    @Override
+    public void onBindViewHolder(final @NonNull ViewHolder holder, int position, @NonNull List<Object> payloads) {
+        if (!payloads.isEmpty()) {
+            // TODO: 3/23/2018 THIS IS COPY_PASTE, do smth about it
+            Context context = holder.view.getContext();
+            Schedule.Timepoint timepoint = mTimepoints.get(position);
+
+            int animDuration = context.getResources().getInteger(R.integer.schedule_minute_animation_duration);
+
+            boolean isMinuteEnabled = timepoint.isEnabled();
+
+            boolean isCountdownShown = timepoint.isCountdownShown;
+            boolean wasCountdownShown = holder.mCountdownView.getAlpha() > 0.5f;
+
+            String countdownText = getCountdownText(context, timepoint);
+            int countdownColor = getCountdownColor(context, timepoint);
+
+            if (!wasCountdownShown && isCountdownShown) {
+                holder.mCountdownView.setTextColor(countdownColor);
+                holder.mCountdownView.setText(countdownText);
+
+                AnimationHelper.animateAlpha(holder.mCountdownView, 0.0f, 1.0f).setDuration(animDuration).start();
+
+            } else if (wasCountdownShown && isCountdownShown) {
+                int prevColor = holder.mCountdownView.getCurrentTextColor();
+                if (prevColor != countdownColor) {
+                    AnimationHelper.animateTextColor(holder.mCountdownView, prevColor, countdownColor).setDuration(animDuration).start();
+                }
+
+                holder.mCountdownView.setText(countdownText);
+            } else if (wasCountdownShown && !isCountdownShown) {
+                AnimationHelper.animateAlpha(holder.mCountdownView, 1.0f, 0.0f).setDuration(animDuration).start();
+            }
+
+            // TODO: 3/26/2018 Implement grid layout manager which supports different heights of items and set visibility to countdown view
+
+            if (isMinuteEnabled && !holder.isEnabled)
+                AnimationHelper.animateTextColor(holder.mMinuteView, holder.colorDisabled, holder.colorEnabled).setDuration(animDuration).start();
+            else if (!isMinuteEnabled && holder.isEnabled)
+                AnimationHelper.animateTextColor(holder.mMinuteView, holder.colorEnabled, holder.colorDisabled).setDuration(animDuration).start();
+            holder.isEnabled = isMinuteEnabled;
+
+            float enabledElevation = context.getResources().getDimensionPixelSize(R.dimen.minute_card_enabled_elevation);
+            float disabledElevation = context.getResources().getDimensionPixelSize(R.dimen.minute_card_disabled_elevation);
+            ObjectAnimator animator = ObjectAnimator.ofFloat(
+                    holder.mCard, "cardElevation", holder.mCard.getCardElevation(),
+                    isMinuteEnabled ? enabledElevation : disabledElevation);
+            animator.setDuration(animDuration);
+            animator.start();
+        } else {
+            onBindViewHolder(holder, position);
+        }
     }
 
     @Override
@@ -50,31 +136,22 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
         Schedule.Timepoint timepoint = mTimepoints.get(position);
         holder.mMinuteView.setText(String.format(Locale.US, "%02d", timepoint.minute));
 
-        long diffInMinutes = timepoint.secondsFromNow();
         boolean isMinuteEnabled = timepoint.isEnabled();
 
-        // TODO: 3/21/2018 extract this value  somewhere
-        int maxDiff = 15;
-        int closeThreshold = maxDiff / 3;
-        int mediumThreshold = 2 * maxDiff / 3;
-
-        if (isMinuteEnabled && timepoint.isCountdownShown) {
-            String intervalStr = ScheduleUtils.formatShortTimeInterval(context, diffInMinutes);
-            holder.mCountdownView.setText(context.getString(R.string.schedule_next_in, intervalStr));
-            @ColorRes int color;
-            if (diffInMinutes < closeThreshold)
-                color = R.color.next_in_close_color;
-            else if (diffInMinutes < mediumThreshold)
-                color = R.color.next_in_medium_color;
-            else
-                color = R.color.next_in_far_color;
-
-            holder.mCountdownView.setTextColor(context.getResources().getColor(color));
+        if (timepoint.isCountdownShown) {
+            holder.mCountdownView.setText(getCountdownText(context, timepoint));
+            holder.mCountdownView.setTextColor(getCountdownColor(context, timepoint));
+            holder.mCountdownView.setAlpha(1.0f);
         } else {
-            holder.mCountdownView.setVisibility(View.GONE);
+            // TODO: 3/26/2018 warning antonsh
+            holder.mCountdownView.setText("");
+            holder.mCountdownView.setAlpha(0.0f);
         }
 
-        holder.mMinuteView.setEnabled(isMinuteEnabled);
+        // TODO: 3/26/2018 Implement grid layout manager which supports different heights of items and set visibility to countdown view
+
+        holder.isEnabled = isMinuteEnabled;
+        holder.mMinuteView.setTextColor(isMinuteEnabled ? holder.colorEnabled : holder.colorDisabled);
 
         float enabledElevation = context.getResources().getDimensionPixelSize(R.dimen.minute_card_enabled_elevation);
         float disabledElevation = context.getResources().getDimensionPixelSize(R.dimen.minute_card_disabled_elevation);
@@ -92,12 +169,20 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
         public TextView mMinuteView;
         public TextView mCountdownView;
 
+        public boolean isEnabled;
+        public int colorEnabled;
+        public int colorDisabled;
+
         public ViewHolder(View view) {
             super(view);
             this.view = view;
             mCard = view.findViewById(R.id.schedule_item_minute_card);
             mMinuteView = view.findViewById(R.id.schedule_item_minute);
             mCountdownView = view.findViewById(R.id.schedule_item_countdown);
+
+            ColorStateList colors = mMinuteView.getTextColors();
+            colorEnabled = colors.getColorForState(new int[]{android.R.attr.state_enabled}, 0);
+            colorDisabled = colors.getColorForState(new int[]{-android.R.attr.state_enabled}, 0);
         }
     }
 }

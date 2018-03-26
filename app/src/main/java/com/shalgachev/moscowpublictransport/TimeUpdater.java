@@ -47,6 +47,8 @@ public class TimeUpdater implements Runnable {
                 if (shownCountdowns < maxCountdowns && timepoint.isEnabled()) {
                     timepoint.isCountdownShown = true;
                     shownCountdowns += 1;
+                } else {
+                    timepoint.isCountdownShown = false;
                 }
             }
         }
