@@ -14,6 +14,7 @@ import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
 import com.shalgachev.moscowpublictransport.data.ScheduleError;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.TransportType;
+import com.shalgachev.moscowpublictransport.helpers.UrlBuilder;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -21,6 +22,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,8 +38,8 @@ import java.util.Set;
 public class MosgortransScheduleProvider extends BaseScheduleProvider {
     private static final String LOG_TAG = "MosgortransSP";
     private static final String PROVIDER_ID = "mosgortrans";
-    private static final String BASE_METADATA_URL = "http://www.mosgortrans.org/pass3/request.ajax.php?";
-    private static final String BASE_SCHEDULE_URL = "http://www.mosgortrans.org/pass3/shedule.printable.php?";
+    private static final String BASE_METADATA_URL = "http://www.mosgortrans.org/pass3/request.ajax.php";
+    private static final String BASE_SCHEDULE_URL = "http://www.mosgortrans.org/pass3/shedule.printable.php";
 
     // for some reason Mosgortrans sends these strings in a list of routes
     private static final List<String> EXCLUDED_ROUTE_NAMES = Arrays.asList("route", "stations", "streets");
@@ -177,6 +179,9 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
         List<Schedule.Timepoint> timepoints = new ArrayList<>();
 
         String url = constructScheduleUrl(stop);
+        if (url == null)
+            throw new ScheduleProviderException(ScheduleError.ErrorCode.INTERNAL_ERROR);
+
         Log.i(LOG_TAG, String.format("getSchedule: Fetching '%s'", url));
 
         try {
@@ -297,14 +302,18 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
         final String DIRECTION_PARAM = "direction";
         final String WAYPOINT_PARAM = "waypoint";
 
-        // TODO: 2/11/2018 Properly handle Russian letters, which need to be encoded in windows-1251
-        return Uri.parse(BASE_SCHEDULE_URL).buildUpon()
-                .appendQueryParameter(TRANSPORT_TYPE_PARAM, getTransportTypeId(stop.transportType))
-                .appendQueryParameter(ROUTE_PARAM, stop.route.name)
-                .appendQueryParameter(DAYS_MASK_PARAM, stop.daysMask)
-                .appendQueryParameter(DIRECTION_PARAM, stop.direction.getId())
-                .appendQueryParameter(WAYPOINT_PARAM, String.valueOf(stop.id))
-                .build().toString();
+        UrlBuilder builder = new UrlBuilder(BASE_SCHEDULE_URL, "windows-1251");
+        try {
+            builder.appendParam(TRANSPORT_TYPE_PARAM, getTransportTypeId(stop.transportType))
+                    .appendParam(ROUTE_PARAM, stop.route.name)
+                    .appendParam(DAYS_MASK_PARAM, stop.daysMask)
+                    .appendParam(DIRECTION_PARAM, stop.direction.getId())
+                    .appendParam(WAYPOINT_PARAM, String.valueOf(stop.id));
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
+
+        return builder.build();
     }
 
     @Override
