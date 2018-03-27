@@ -2,6 +2,9 @@ package com.shalgachev.moscowpublictransport.activities;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.support.annotation.AnimRes;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentTransaction;
@@ -29,6 +32,7 @@ import com.shalgachev.moscowpublictransport.fragments.ButtonsFragment;
 import java.util.List;
 
 public class RouteInputActivity extends AppCompatActivity implements ButtonsFragment.OnFragmentInteractionListener {
+    private static final int MAX_INPUT_LENGTH = 10;
     private static String EXTRA_TRANSPORT_TYPE = "com.shalgachev.moscowpublictransport.intent.TRANSPORT_TYPE";
     private static String EXTRA_ROUTE = "com.shalgachev.moscowpublictransport.intent.ROUTE";
 
@@ -36,6 +40,7 @@ public class RouteInputActivity extends AppCompatActivity implements ButtonsFrag
     ProgressBar mProgressBar;
     RecyclerView mRouteList;
     TextView mRouteTextView;
+    TextView mRoutePromptTextView;
 
     RouteListAdapter mRouteListAdapter;
 
@@ -95,6 +100,7 @@ public class RouteInputActivity extends AppCompatActivity implements ButtonsFrag
         mProgressBar = findViewById(R.id.progress);
         mRouteList = findViewById(R.id.route_list);
         mRouteTextView = findViewById(R.id.route_input);
+        mRoutePromptTextView = findViewById(R.id.route_input_prompt);
 
         mRouteList.setItemAnimator(new DefaultItemAnimator());
         mRouteList.setLayoutManager(new LinearLayoutManager(this));
@@ -192,13 +198,21 @@ public class RouteInputActivity extends AppCompatActivity implements ButtonsFrag
     }
 
     void onInputChanged() {
+        mRoutePromptTextView.setVisibility(mRouteInput.isEmpty() ? View.VISIBLE : View.INVISIBLE);
         mRouteTextView.setText(mRouteInput);
         mRouteListAdapter.filter(mRouteInput);
     }
 
     @Override
     public void onCharacterInput(CharSequence str) {
+        if (mRouteInput.length() >= MAX_INPUT_LENGTH)
+            return;
+
         mRouteInput += str;
+        if (mRouteInput.length() > MAX_INPUT_LENGTH) {
+            mRouteInput = mRouteInput.substring(0, MAX_INPUT_LENGTH - 1);
+        }
+
         onInputChanged();
     }
 

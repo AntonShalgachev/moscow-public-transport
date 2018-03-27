@@ -7,4 +7,6 @@
     <color name="next_in_close_color">#4CAF50</color>
     <color name="next_in_medium_color">#FFC107</color>
     <color name="next_in_far_color">#FF5722</color>
+
+    <color name="divider_color">#1F000000</color>
 </resources>
