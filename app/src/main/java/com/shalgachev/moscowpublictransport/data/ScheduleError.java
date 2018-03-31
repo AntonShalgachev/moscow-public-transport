@@ -20,6 +20,7 @@ public class ScheduleError {
         EMPTY_SCHEDULE,
         NO_STOPS,
         INTERNAL_ERROR,
+        PARSING_ERROR,
     }
 
     private static final Map<ErrorCode, Integer> ERROR_DESCRIPTION_IDS;

@@ -198,12 +198,24 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
                 String tagClass = tag.className();
                 String tagText = tag.text();
 
-                int value;
-                try {
-                    value = Integer.parseInt(tagText);
-                } catch (NumberFormatException e) {
-                    Log.w(LOG_TAG, String.format("Failed to parse data '%s'", tagText));
+                if (tagText.isEmpty())
                     continue;
+
+                int value;
+                String note = null;
+                try {
+                    String[] words = tagText.split(" ");
+                    if (words.length == 0) {
+                        Log.e(LOG_TAG, String.format("Failed to parse data '%s'", tagText));
+                        throw new ScheduleProviderException(ScheduleError.ErrorCode.PARSING_ERROR);
+                    }
+
+                    if (words.length > 1)
+                        note = words[1];
+                    value = Integer.parseInt(words[0]);
+                } catch (NumberFormatException e) {
+                    Log.e(LOG_TAG, String.format("Failed to parse data '%s'", tagText));
+                    throw new ScheduleProviderException(ScheduleError.ErrorCode.PARSING_ERROR);
                 }
 
                 switch (tagClass) {
@@ -216,7 +228,7 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
 
                     default:
                         Log.e(LOG_TAG, String.format("Unknown tag class '%s'", tagClass));
-                        break;
+                        throw new ScheduleProviderException(ScheduleError.ErrorCode.PARSING_ERROR);
                 }
             }
         } catch (IOException e) {

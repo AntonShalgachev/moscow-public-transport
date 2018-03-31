@@ -131,7 +131,6 @@ public class ScheduleUtils {
 
     public static void requestSchedule(final Context context, final Stop stop, final IScheduleResultListener listener) {
         Log.i(LOG_TAG, String.format("Requested schedule for stop '%s'", stop.toString()));
-        Log.i(LOG_TAG, String.format("Context: '%s'", context.toString()));
 
         new ScheduleCacheTask(context, ScheduleCacheTask.Args.getSchedule(stop), new ScheduleCacheTask.IScheduleReceiver() {
             @Override
