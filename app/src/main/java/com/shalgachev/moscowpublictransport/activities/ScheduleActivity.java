@@ -111,7 +111,7 @@ public class ScheduleActivity extends AppCompatActivity {
         AppBarLayout appBar = findViewById(R.id.app_bar);
         ImageView image = appBar.findViewById(R.id.transport_image);
 
-        switch (mStop.transportType) {
+        switch (mStop.route.transportType) {
             case BUS:
                 image.setImageResource(R.drawable.bus);
                 break;

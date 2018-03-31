@@ -8,6 +8,8 @@ import com.shalgachev.moscowpublictransport.data.Direction;
 import com.shalgachev.moscowpublictransport.data.Route;
 import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
+import com.shalgachev.moscowpublictransport.data.ScheduleDays;
+import com.shalgachev.moscowpublictransport.data.ScheduleType;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 
@@ -41,7 +43,7 @@ public class DummyScheduleProvider extends BaseScheduleProvider {
                 result.transportTypes = getTransportTypes();
                 break;
             case ROUTES:
-                result.routes = getRoutes();
+                result.routes = getRoutes(args.transportType);
                 break;
             case STOPS:
                 result.stops = getStops(args.transportType, args.route);
@@ -62,8 +64,8 @@ public class DummyScheduleProvider extends BaseScheduleProvider {
         ));
     }
 
-    private List<Route> getRoutes() {
-        return new ArrayList<>(Arrays.asList(new Route("268", getProviderId()), new Route("268К", getProviderId()), new Route("5Э", getProviderId())));
+    private List<Route> getRoutes(TransportType type) {
+        return new ArrayList<>(Arrays.asList(new Route(type, "268", getProviderId()), new Route(type, "268К", getProviderId()), new Route(type, "5Э", getProviderId())));
     }
 
     private List<String> getDaysMasks() {
@@ -93,7 +95,7 @@ public class DummyScheduleProvider extends BaseScheduleProvider {
 
         List<Stop> stops = new ArrayList<>();
         for (int i = 0; i < stopNames.size(); i++) {
-            Stop stop = new Stop(type, new Route(route, getProviderId()), daysMask, direction, stopNames.get(i), i);
+            Stop stop = new Stop(new Route(type, route, getProviderId()), new ScheduleDays(daysMask), direction, stopNames.get(i), i, ScheduleType.TIMEPOINTS);
             stops.add(stop);
         }
 

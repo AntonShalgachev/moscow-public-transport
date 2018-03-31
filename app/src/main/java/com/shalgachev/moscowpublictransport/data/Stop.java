@@ -7,20 +7,22 @@ import java.io.Serializable;
  */
 
 public class Stop implements Serializable {
-    public TransportType transportType;
     public Route route;
-    public String daysMask;
+    public ScheduleDays days;
     public Direction direction;
     public String name;
     public int id;
 
-    public Stop(TransportType transportType, Route route, String daysMask, Direction direction, String name, int id) {
-        this.transportType = transportType;
+    // additional fields
+    public ScheduleType scheduleType;
+
+    public Stop(Route route, ScheduleDays days, Direction direction, String name, int id, ScheduleType scheduleType) {
         this.route = route;
-        this.daysMask = daysMask;
+        this.days = days;
         this.direction = direction;
         this.name = name;
         this.id = id;
+        this.scheduleType = scheduleType;
     }
 
     @Override
@@ -30,21 +32,19 @@ public class Stop implements Serializable {
 
         Stop stop = (Stop) o;
 
-        if (transportType != stop.transportType) return false;
         if (!route.equals(stop.route)) return false;
-        if (!daysMask.equals(stop.daysMask)) return false;
+        if (!days.equals(stop.days)) return false;
         if (!direction.equals(stop.direction)) return false;
         if (!name.equals(stop.name)) return false;
         if (id != stop.id) return false;
         return true;
-
     }
 
     @Override
     public int hashCode() {
-        int result = transportType.hashCode();
+        int result = 0;
         result = 31 * result + route.hashCode();
-        result = 31 * result + daysMask.hashCode();
+        result = 31 * result + days.hashCode();
         result = 31 * result + direction.hashCode();
         result = 31 * result + name.hashCode();
         result = 31 * result + id;
@@ -54,9 +54,8 @@ public class Stop implements Serializable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(transportType.name()).append(",");
         sb.append(route).append(",");
-        sb.append(daysMask).append(",");
+        sb.append(days).append(",");
         sb.append(direction.getId()).append(",");
         sb.append(name).append(",");
         sb.append(id).append(",");

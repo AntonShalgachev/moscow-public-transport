@@ -272,9 +272,11 @@ public class AddTransportActivity extends AppCompatActivity {
         Map<CharSequence, ArrayList<StopListItem>> stopMap = new HashMap<>();
         for (StopListItem item : mStopListItems) {
             if (currentDirection.equals(item.stop.direction)) {
-                if (!stopMap.containsKey(item.stop.daysMask))
-                    stopMap.put(item.stop.daysMask, new ArrayList<StopListItem>());
-                stopMap.get(item.stop.daysMask).add(item);
+                String daysMask = item.stop.days.daysMask;
+
+                if (!stopMap.containsKey(daysMask))
+                    stopMap.put(daysMask, new ArrayList<StopListItem>());
+                stopMap.get(daysMask).add(item);
             }
         }
 

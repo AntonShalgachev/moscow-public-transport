@@ -23,17 +23,6 @@ public class Schedule {
             return String.format(Locale.US, "%d:%d", hour, minute);
         }
 
-        public static Timepoint valueOf(String str) {
-            String[] values = str.split(":");
-            if (values.length != 2)
-                throw new IllegalArgumentException(String.format("Failed to parse timepoint '%s'", str));
-
-            int hour = Integer.valueOf(values[0]);
-            int minute = Integer.valueOf(values[1]);
-
-            return new Timepoint(hour, minute);
-        }
-
         public int hour;
         public int minute;
 
