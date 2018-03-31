@@ -15,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.shalgachev.moscowpublictransport.HourItemDividerDecoration;
 import com.shalgachev.moscowpublictransport.R;
@@ -158,6 +159,10 @@ public class ScheduleActivity extends AppCompatActivity {
 
     private void onScheduleAvailable(Schedule schedule) {
         Log.d(LOG_TAG, "New schedule is now available");
+
+        if (mSchedule != null)
+            Toast.makeText(this, R.string.schedule_refreshed_toast, Toast.LENGTH_SHORT).show();
+
         mSchedule = schedule;
         mScheduleUpdated = false;
 

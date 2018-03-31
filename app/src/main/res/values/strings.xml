@@ -86,6 +86,7 @@
     <string name="schedule_activity_title">Расписание</string>
     <string name="route_input_activity_title">Выберите маршрут</string>
     <string name="choose_route_button_title">Маршрут не выбран</string>
+    <string name="schedule_refreshed_toast">Расписание обновлено</string>
 
     <string name="route_input_prompt">Начните вводить</string>
     <string name="button_title_goto_alpha">АБВ→</string>

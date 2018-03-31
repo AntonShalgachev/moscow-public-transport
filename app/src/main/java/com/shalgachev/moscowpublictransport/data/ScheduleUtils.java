@@ -135,11 +135,13 @@ public class ScheduleUtils {
         new ScheduleCacheTask(context, ScheduleCacheTask.Args.getSchedule(stop), new ScheduleCacheTask.IScheduleReceiver() {
             @Override
             public void onResult(ScheduleCacheTask.Result result) {
+                final Schedule cachedSchedule = result.schedule;
+
                 // TODO: 3/18/2018 use error codes instead
-                if (result.schedule != null) {
+                if (cachedSchedule != null) {
                     Log.i(LOG_TAG, "Found saved schedule");
                     if (listener != null)
-                        listener.onCachedSchedule(result.schedule);
+                        listener.onCachedSchedule(cachedSchedule);
                 } else {
                     Log.i(LOG_TAG, "Schedule isn't saved");
                 }
@@ -153,10 +155,17 @@ public class ScheduleUtils {
                             public void onScheduleProviderExecuted(BaseScheduleProvider.Result result) {
                                 if (result.error == null) {
                                     Log.i(LOG_TAG, "Schedule fetched");
-                                    if (listener != null)
-                                        listener.onFreshSchedule(result.schedule);
 
-                                    new ScheduleCacheTask(context, ScheduleCacheTask.Args.saveSchedule(result.schedule), new ScheduleCacheTask.IScheduleReceiver() {
+                                    Schedule freshSchedule = result.schedule;
+                                    if (cachedSchedule != null && freshSchedule != null && freshSchedule.equals(cachedSchedule)) {
+                                        Log.i(LOG_TAG, "Schedule hasn't changed");
+                                        return;
+                                    }
+
+                                    if (listener != null)
+                                        listener.onFreshSchedule(freshSchedule);
+
+                                    new ScheduleCacheTask(context, ScheduleCacheTask.Args.saveSchedule(freshSchedule), new ScheduleCacheTask.IScheduleReceiver() {
                                         @Override
                                         public void onResult(ScheduleCacheTask.Result result) {
                                             Log.i(LOG_TAG, "Schedule saved");

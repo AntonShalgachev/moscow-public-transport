@@ -36,9 +36,29 @@ public class Schedule {
         public int secondsFromNow() {
             return (int)(millisFromNow / 1000 / 60);
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Timepoint timepoint = (Timepoint) o;
+
+            if (hour !=  timepoint.hour) return false;
+            if (minute !=  timepoint.minute) return false;
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = 0;
+            result = 31 * result + hour;
+            result = 31 * result + minute;
+            return result;
+        }
     }
 
-    private class HourComparator implements Comparator<Integer> {
+    private static class HourComparator implements Comparator<Integer> {
         private int mDayFirstHour;
 
         public HourComparator(int dayFirstHour) {
@@ -58,7 +78,7 @@ public class Schedule {
         }
     }
 
-    public class Timepoints
+    public static class Timepoints
     {
         private List<Timepoint> mTimepoints;
         private TreeMap<Integer, List<Timepoint>> mHours;
@@ -97,6 +117,24 @@ public class Schedule {
         public int getFirstHour() {
             return mFirstHour;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Timepoints timepoints = (Timepoints) o;
+
+            if (!mTimepoints.equals(timepoints.mTimepoints)) return false;
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = 0;
+            result = 31 * result + mTimepoints.hashCode();
+            return result;
+        }
     }
 
     private ScheduleType mScheduleType;
@@ -119,5 +157,27 @@ public class Schedule {
 
     public Timepoints getTimepoints() {
         return mTimepoints;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Schedule schedule = (Schedule) o;
+
+        if (!mScheduleType.equals(schedule.mScheduleType)) return false;
+        if (!mStop.equals(schedule.mStop)) return false;
+        if (!mTimepoints.equals(schedule.mTimepoints)) return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 0;
+        result = 31 * result + mScheduleType.hashCode();
+        result = 31 * result + mStop.hashCode();
+        result = 31 * result + mTimepoints.hashCode();
+        return result;
     }
 }
