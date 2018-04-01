@@ -60,7 +60,6 @@ public abstract class BaseScheduleProvider {
 
     private static void createScheduleProviders() {
         Set<BaseScheduleProvider> providers = new HashSet<>();
-        providers.add(new DummyScheduleProvider());
         providers.add(new MosgortransScheduleProvider());
 
         mScheduleProviders = new HashMap<>();
