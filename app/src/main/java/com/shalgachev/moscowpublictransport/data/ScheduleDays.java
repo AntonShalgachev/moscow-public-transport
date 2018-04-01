@@ -13,13 +13,15 @@ public class ScheduleDays implements Serializable {
     // additional fields
     public int firstHour;
 
-    public ScheduleDays(String daysMask) {
+    public ScheduleDays(String daysMask, int firstHour) {
         this.daysMask = daysMask;
         this.season = Season.ALL;
+        this.firstHour = firstHour;
     }
-    public ScheduleDays(String daysMask, Season season) {
+    public ScheduleDays(String daysMask, Season season, int firstHour) {
         this.daysMask = daysMask;
         this.season = season;
+        this.firstHour = firstHour;
     }
 
     @Override

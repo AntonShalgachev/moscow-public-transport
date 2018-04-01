@@ -1,5 +1,7 @@
 package com.shalgachev.moscowpublictransport.data;
 
+import android.support.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -83,13 +85,13 @@ public class Schedule {
         private List<Timepoint> mTimepoints;
         private TreeMap<Integer, List<Timepoint>> mHours;
         private Integer[] mSortedHours;
-        // TODO: 3/18/2018 get first hour of the day from the schedule provider
         private int mFirstHour = 5;
 
-        Timepoints(List<Timepoint> timepoints) {
+        Timepoints(List<Timepoint> timepoints, int firstHour) {
             mTimepoints = new ArrayList<>(timepoints);
+            mFirstHour = firstHour;
 
-            mHours = new TreeMap<>(new HourComparator(mFirstHour));
+            mHours = new TreeMap<>(new HourComparator(firstHour));
 
             for (Timepoint timepoint : timepoints) {
                 int hour = timepoint.hour;
@@ -141,10 +143,10 @@ public class Schedule {
     private Stop mStop;
     private Timepoints mTimepoints;
 
-    public void setAsTimepoints(Stop stop, List<Timepoint> timepoints) {
+    public void setAsTimepoints(@NonNull Stop stop, List<Timepoint> timepoints) {
         mScheduleType = ScheduleType.TIMEPOINTS;
         mStop = stop;
-        mTimepoints = new Timepoints(timepoints);
+        mTimepoints = new Timepoints(timepoints, stop.days.firstHour);
     }
 
     public ScheduleType getScheduleType() {

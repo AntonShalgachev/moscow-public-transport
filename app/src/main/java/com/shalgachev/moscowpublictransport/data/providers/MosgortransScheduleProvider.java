@@ -43,6 +43,8 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
     private static final String BASE_METADATA_URL = "http://www.mosgortrans.org/pass3/request.ajax.php";
     private static final String BASE_SCHEDULE_URL = "http://www.mosgortrans.org/pass3/shedule.printable.php";
 
+    private static final int FIRST_HOUR = 5;
+
     // for some reason Mosgortrans sends these strings in a list of routes
     private static final List<String> EXCLUDED_ROUTE_NAMES = Arrays.asList("route", "stations", "streets");
 
@@ -152,7 +154,7 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
         if (route.providerId.equals(getProviderId())) {
             for (String mask : getDaysMasks(route)) {
                 for (Direction direction : getDirections(route, mask)) {
-                    List<Stop> stops = getStops(route, new ScheduleDays(mask), direction);
+                    List<Stop> stops = getStops(route, new ScheduleDays(mask, FIRST_HOUR), direction);
                     direction.setEndpoints(stops.get(0).name, stops.get(stops.size() - 1).name);
 
                     allStops.addAll(stops);

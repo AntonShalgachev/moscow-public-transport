@@ -27,6 +27,8 @@ import java.util.concurrent.TimeUnit;
  * Created by anton on 5/28/2017.
  */
 
+// TODO: 4/1/2018 Remove this class
+
 public class DummyScheduleProvider extends BaseScheduleProvider {
     @Override
     public Result runProvider(ScheduleArgs args) throws ScheduleProviderException {
@@ -95,7 +97,7 @@ public class DummyScheduleProvider extends BaseScheduleProvider {
 
         List<Stop> stops = new ArrayList<>();
         for (int i = 0; i < stopNames.size(); i++) {
-            Stop stop = new Stop(new Route(type, route, getProviderId()), new ScheduleDays(daysMask), direction, stopNames.get(i), i, ScheduleType.TIMEPOINTS);
+            Stop stop = new Stop(new Route(type, route, getProviderId()), new ScheduleDays(daysMask, 0), direction, stopNames.get(i), i, ScheduleType.TIMEPOINTS);
             stops.add(stop);
         }
 
@@ -117,10 +119,7 @@ public class DummyScheduleProvider extends BaseScheduleProvider {
     }
 
     private Schedule getSchedule() {
-        Schedule schedule = new Schedule();
-        schedule.setAsTimepoints(null, null);
-
-        return schedule;
+        return new Schedule();
     }
 
     @Override
