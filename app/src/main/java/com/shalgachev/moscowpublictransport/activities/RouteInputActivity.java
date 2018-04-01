@@ -187,6 +187,7 @@ public class RouteInputActivity extends AppCompatActivity implements ButtonsFrag
 
     void onRoutesAvailable(List<Route> routes) {
         mRouteListAdapter.setAvailableRoutes(routes);
+        onInputChanged();
     }
 
     void addButtons() {
