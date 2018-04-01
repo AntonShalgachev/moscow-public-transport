@@ -89,7 +89,7 @@ public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.View
     }
 
     private boolean routeMatchesFilter(Route route, CharSequence filter) {
-        return route.name.toString().contains(filter);
+        return route.name.toLowerCase().contains(filter.toString().toLowerCase());
     }
 
     public Route getSelectedRoute() {
