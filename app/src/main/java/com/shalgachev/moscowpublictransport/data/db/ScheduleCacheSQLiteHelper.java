@@ -43,16 +43,18 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
     // TABLE_SAVED_STOPS
     private static final String COLUMN_PROVIDER_ID = "provider_id";
     private static final String COLUMN_TRANSPORT_TYPE = "transport_type";
-    private static final String COLUMN_ROUTE = "route";
+    private static final String COLUMN_ROUTE_ID = "route_id";
     private static final String COLUMN_SEASON = "season";
-    private static final String COLUMN_DAYS_MASK = "days_mask";
+    private static final String COLUMN_DAYS_ID = "days_id";
     private static final String COLUMN_DIRECTION_ID = "direction_id";
     private static final String COLUMN_STOP_ID = "stop_id";
 
     // TABLE_STOPS_TRAITS
-    private static final String COLUMN_NAME = "name";
+    private static final String COLUMN_STOP_NAME = "stop_name";
+    private static final String COLUMN_ROUTE_NAME = "route_name";
     private static final String COLUMN_DIRECTION_FROM = "direction_from";
     private static final String COLUMN_DIRECTION_TO = "direction_to";
+    private static final String COLUMN_DAYS_MASK = "days_mask";
     private static final String COLUMN_FIRST_HOUR = "first_hour";
     private static final String COLUMN_SCHEDULE_TYPE = "schedule_type";
 
@@ -61,7 +63,7 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
     private static final String COLUMN_MINUTE = "minute";
 
     private static final String DATABASE_NAME = "moscow_public_transport.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 9;
 
     public ScheduleCacheSQLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -75,9 +77,9 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
                 + COLUMN_ID + " integer primary key autoincrement"
                 + ", " + COLUMN_PROVIDER_ID + " text not null"
                 + ", " + COLUMN_TRANSPORT_TYPE + " text not null"
-                + ", " + COLUMN_ROUTE + " text not null"
+                + ", " + COLUMN_ROUTE_ID + " text not null"
                 + ", " + COLUMN_SEASON + " text not null"
-                + ", " + COLUMN_DAYS_MASK + " text not null"
+                + ", " + COLUMN_DAYS_ID + " text not null"
                 + ", " + COLUMN_DIRECTION_ID + " text not null"
                 + ", " + COLUMN_STOP_ID + " integer not null"
                 + ");";
@@ -85,9 +87,11 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
                 + "( "
                 + COLUMN_ID + " integer primary key autoincrement"
                 + ", " + COLUMN_SAVED_STOP_ID + " integer not null"
-                + ", " + COLUMN_NAME + " text not null"
+                + ", " + COLUMN_STOP_NAME + " text not null"
+                + ", " + COLUMN_ROUTE_NAME + " text not null"
                 + ", " + COLUMN_DIRECTION_FROM + " text not null"
                 + ", " + COLUMN_DIRECTION_TO + " text not null"
+                + ", " + COLUMN_DAYS_MASK + " text not null"
                 + ", " + COLUMN_FIRST_HOUR + " integer not null"
                 + ", " + COLUMN_SCHEDULE_TYPE + " text not null"
                 + ");";
@@ -202,9 +206,11 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
                 String.valueOf(stopId)
         };
         String[] traitCols = {
-                COLUMN_NAME,
+                COLUMN_STOP_NAME,
+                COLUMN_ROUTE_NAME,
                 COLUMN_DIRECTION_FROM,
                 COLUMN_DIRECTION_TO,
+                COLUMN_DAYS_MASK,
                 COLUMN_FIRST_HOUR,
                 COLUMN_SCHEDULE_TYPE,
         };
@@ -219,9 +225,11 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
                 }
 
                 StopTraits traits = new StopTraits();
-                traits.name = cur.getString(cur.getColumnIndexOrThrow(COLUMN_NAME));
+                traits.stopName = cur.getString(cur.getColumnIndexOrThrow(COLUMN_STOP_NAME));
+                traits.routeName = cur.getString(cur.getColumnIndexOrThrow(COLUMN_ROUTE_NAME));
                 traits.directionFrom = cur.getString(cur.getColumnIndexOrThrow(COLUMN_DIRECTION_FROM));
                 traits.directionTo = cur.getString(cur.getColumnIndexOrThrow(COLUMN_DIRECTION_TO));
+                traits.daysMask = cur.getString(cur.getColumnIndexOrThrow(COLUMN_DAYS_MASK));
                 traits.firstHour = cur.getInt(cur.getColumnIndexOrThrow(COLUMN_FIRST_HOUR));
                 traits.scheduleType = ScheduleType.valueOf(cur.getString(cur.getColumnIndexOrThrow(COLUMN_SCHEDULE_TYPE)));
 
@@ -242,9 +250,9 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
 
         stop.providerId = cur.getString(cur.getColumnIndexOrThrow(COLUMN_PROVIDER_ID));
         stop.transportType = stringToEnum(TransportType.class, cur.getString(cur.getColumnIndexOrThrow(COLUMN_TRANSPORT_TYPE)));
-        stop.route = cur.getString(cur.getColumnIndexOrThrow(COLUMN_ROUTE));
+        stop.routeId = cur.getString(cur.getColumnIndexOrThrow(COLUMN_ROUTE_ID));
         stop.season = stringToEnum(Season.class, cur.getString(cur.getColumnIndexOrThrow(COLUMN_SEASON)));
-        stop.daysMask = cur.getString(cur.getColumnIndexOrThrow(COLUMN_DAYS_MASK));
+        stop.daysId = cur.getString(cur.getColumnIndexOrThrow(COLUMN_DAYS_ID));
         stop.directionId = cur.getString(cur.getColumnIndexOrThrow(COLUMN_DIRECTION_ID));
         stop.stopId = cur.getInt(cur.getColumnIndexOrThrow(COLUMN_STOP_ID));
 
@@ -447,9 +455,9 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(COLUMN_PROVIDER_ID, stop.providerId);
         values.put(COLUMN_TRANSPORT_TYPE, enumToString(stop.transportType));
-        values.put(COLUMN_ROUTE, stop.route);
+        values.put(COLUMN_ROUTE_ID, stop.routeId);
         values.put(COLUMN_SEASON, enumToString(stop.season));
-        values.put(COLUMN_DAYS_MASK, stop.daysMask);
+        values.put(COLUMN_DAYS_ID, stop.daysId);
         values.put(COLUMN_DIRECTION_ID, stop.directionId);
         values.put(COLUMN_STOP_ID, stop.stopId);
 
@@ -461,9 +469,11 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(COLUMN_SAVED_STOP_ID, stopId);
-        values.put(COLUMN_NAME, traits.name);
+        values.put(COLUMN_ROUTE_NAME, traits.routeName);
+        values.put(COLUMN_STOP_NAME, traits.stopName);
         values.put(COLUMN_DIRECTION_FROM, traits.directionFrom);
         values.put(COLUMN_DIRECTION_TO, traits.directionTo);
+        values.put(COLUMN_DAYS_MASK, traits.daysMask);
         values.put(COLUMN_FIRST_HOUR, traits.firstHour);
         values.put(COLUMN_SCHEDULE_TYPE, enumToString(traits.scheduleType));
 
@@ -515,8 +525,8 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
 
         savedStop.providerId = stop.route.providerId;
         savedStop.transportType = stop.route.transportType;
-        savedStop.route = stop.route.name;
-        savedStop.daysMask = stop.days.daysMask;
+        savedStop.routeId = stop.route.id;
+        savedStop.daysId = stop.days.daysId;
         savedStop.season = stop.days.season;
         savedStop.directionId = stop.direction.getId();
         savedStop.stopId = stop.id;
@@ -527,9 +537,11 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
     private StopTraits convertToStopTraits(Stop stop) {
         StopTraits traits = new StopTraits();
 
-        traits.name = stop.name;
+        traits.stopName = stop.name;
+        traits.routeName = stop.route.name;
         traits.directionFrom = stop.direction.getFrom();
         traits.directionTo = stop.direction.getTo();
+        traits.daysMask = stop.days.daysMask;
         traits.firstHour = stop.days.firstHour;
         traits.scheduleType = stop.scheduleType;
 
@@ -537,19 +549,19 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
     }
 
     private Stop convertToStop(SavedStop savedStop, StopTraits traits) {
-        Route route = new Route(savedStop.transportType, savedStop.route, savedStop.providerId);
-        ScheduleDays days = new ScheduleDays(savedStop.daysMask, savedStop.season, traits.firstHour);
+        Route route = new Route(savedStop.transportType, savedStop.routeId, traits.routeName, savedStop.providerId);
+        ScheduleDays days = new ScheduleDays(savedStop.daysId, traits.daysMask, savedStop.season, traits.firstHour);
 
         Direction dir = new Direction(savedStop.directionId, traits.directionFrom, traits.directionFrom);
 
-        return new Stop(route, days, dir, traits.name, savedStop.stopId, traits.scheduleType);
+        return new Stop(route, days, dir, traits.stopName, savedStop.stopId, traits.scheduleType);
     }
 
     private String getStopWhereClause() {
         return COLUMN_PROVIDER_ID + " = ?"
                 + " AND " + COLUMN_TRANSPORT_TYPE + " = ?"
-                + " AND " + COLUMN_ROUTE + " = ?"
-                + " AND " + COLUMN_DAYS_MASK + " = ?"
+                + " AND " + COLUMN_ROUTE_ID + " = ?"
+                + " AND " + COLUMN_DAYS_ID + " = ?"
                 + " AND " + COLUMN_SEASON + " = ?"
                 + " AND " + COLUMN_DIRECTION_ID + " = ?"
                 + " AND " + COLUMN_STOP_ID + " = ?";
@@ -559,8 +571,8 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
         return new String[]{
                 stop.providerId,
                 enumToString(stop.transportType),
-                stop.route,
-                stop.daysMask,
+                stop.routeId,
+                stop.daysId,
                 enumToString(stop.season),
                 stop.directionId,
                 String.valueOf(stop.stopId),

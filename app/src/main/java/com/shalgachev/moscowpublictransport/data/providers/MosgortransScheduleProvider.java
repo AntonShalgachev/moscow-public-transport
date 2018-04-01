@@ -71,7 +71,7 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
 
         for (String name : routeNames)
             if (!EXCLUDED_ROUTE_NAMES.contains(name))
-                routes.add(new Route(transportType, name, getProviderId()));
+                routes.add(new Route(transportType, name, name, getProviderId()));
 
         return routes;
     }
@@ -154,7 +154,7 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
         if (route.providerId.equals(getProviderId())) {
             for (String mask : getDaysMasks(route)) {
                 for (Direction direction : getDirections(route, mask)) {
-                    List<Stop> stops = getStops(route, new ScheduleDays(mask, FIRST_HOUR), direction);
+                    List<Stop> stops = getStops(route, new ScheduleDays(mask, mask, FIRST_HOUR), direction);
                     direction.setEndpoints(stops.get(0).name, stops.get(stops.size() - 1).name);
 
                     allStops.addAll(stops);

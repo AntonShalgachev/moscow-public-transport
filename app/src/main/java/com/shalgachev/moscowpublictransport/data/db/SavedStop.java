@@ -10,9 +10,9 @@ import com.shalgachev.moscowpublictransport.data.TransportType;
 public class SavedStop {
     String providerId;
     TransportType transportType;
-    String route;
+    String routeId;
     Season season;
-    String daysMask;
+    String daysId;
     String directionId;
     int stopId;
 }

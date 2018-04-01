@@ -10,8 +10,9 @@ public class Stop implements Serializable {
     public Route route;
     public ScheduleDays days;
     public Direction direction;
-    public String name;
     public int id;
+
+    public String name;
 
     // additional fields
     public ScheduleType scheduleType;
@@ -35,7 +36,6 @@ public class Stop implements Serializable {
         if (!route.equals(stop.route)) return false;
         if (!days.equals(stop.days)) return false;
         if (!direction.equals(stop.direction)) return false;
-        if (!name.equals(stop.name)) return false;
         if (id != stop.id) return false;
         return true;
     }
@@ -46,7 +46,6 @@ public class Stop implements Serializable {
         result = 31 * result + route.hashCode();
         result = 31 * result + days.hashCode();
         result = 31 * result + direction.hashCode();
-        result = 31 * result + name.hashCode();
         result = 31 * result + id;
         return result;
     }

@@ -7,18 +7,24 @@ import java.io.Serializable;
  */
 
 public class ScheduleDays implements Serializable {
-    public String daysMask;
     public Season season;
+    public String daysId;
+
+    public String daysMask;
 
     // additional fields
     public int firstHour;
 
-    public ScheduleDays(String daysMask, int firstHour) {
+    public ScheduleDays(String daysId, String daysMask, int firstHour) {
+        this.daysId = daysId;
         this.daysMask = daysMask;
         this.season = Season.ALL;
         this.firstHour = firstHour;
+        if (daysMask == null)
+            throw new RuntimeException();
     }
-    public ScheduleDays(String daysMask, Season season, int firstHour) {
+    public ScheduleDays(String daysId, String daysMask, Season season, int firstHour) {
+        this.daysId = daysId;
         this.daysMask = daysMask;
         this.season = season;
         this.firstHour = firstHour;
@@ -27,7 +33,7 @@ public class ScheduleDays implements Serializable {
     @Override
     public int hashCode() {
         int result = 0;
-        result = 31 * result + daysMask.hashCode();
+        result = 31 * result + daysId.hashCode();
         result = 31 * result + season.hashCode();
         return result;
     }
@@ -39,7 +45,7 @@ public class ScheduleDays implements Serializable {
 
         ScheduleDays days = (ScheduleDays) o;
 
-        if (!daysMask.equals(days.daysMask)) return false;
+        if (!daysId.equals(days.daysId)) return false;
         if (!season.equals(days.season)) return false;
         return true;
     }

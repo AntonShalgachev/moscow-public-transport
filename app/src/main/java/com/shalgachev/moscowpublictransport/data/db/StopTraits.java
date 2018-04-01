@@ -7,9 +7,11 @@ import com.shalgachev.moscowpublictransport.data.ScheduleType;
  */
 
 public class StopTraits {
-    public String name;
+    public String stopName;
+    public String routeName;
     public String directionFrom;
     public String directionTo;
+    public String daysMask;
     public int firstHour;
     ScheduleType scheduleType;
 }
