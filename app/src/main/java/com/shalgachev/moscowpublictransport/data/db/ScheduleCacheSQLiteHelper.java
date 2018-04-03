@@ -552,7 +552,7 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
         Route route = new Route(savedStop.transportType, savedStop.routeId, traits.routeName, savedStop.providerId);
         ScheduleDays days = new ScheduleDays(savedStop.daysId, traits.daysMask, savedStop.season, traits.firstHour);
 
-        Direction dir = new Direction(savedStop.directionId, traits.directionFrom, traits.directionFrom);
+        Direction dir = new Direction(savedStop.directionId, traits.directionFrom, traits.directionTo);
 
         return new Stop(route, days, dir, traits.stopName, savedStop.stopId, traits.scheduleType);
     }
