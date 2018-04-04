@@ -63,9 +63,9 @@
 
     <string name="saved_stop_direction">%1$s → %2$s</string>
 
-    <string name="provider_name_dummy">Фиктивный</string>
     <string name="provider_name_mosgortrans">Мосгортранс</string>
     <string name="provider_name_avtoline">Автолайн</string>
+    <string name="provider_name_moscow_private">Москва (частные)</string>
     <string name="loading">Загрузка</string>
     <string name="loading_routes">Загрузка маршрутов</string>
     <string name="loading_stops">Загрузка остановок</string>

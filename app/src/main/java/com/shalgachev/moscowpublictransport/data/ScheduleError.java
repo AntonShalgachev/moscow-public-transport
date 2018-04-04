@@ -21,6 +21,9 @@ public class ScheduleError {
         NO_STOPS,
         INTERNAL_ERROR,
         PARSING_ERROR,
+        NOT_IMPLEMENTED,
+        API_OUTDATED,
+        WRONG_PROVIDER,
     }
 
     private static final Map<ErrorCode, Integer> ERROR_DESCRIPTION_IDS;

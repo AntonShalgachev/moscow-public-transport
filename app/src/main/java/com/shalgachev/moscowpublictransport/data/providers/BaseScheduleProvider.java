@@ -3,6 +3,7 @@ package com.shalgachev.moscowpublictransport.data.providers;
 import android.content.Context;
 import android.util.Log;
 
+import com.shalgachev.moscowpublictransport.data.InternetUtils;
 import com.shalgachev.moscowpublictransport.data.Route;
 import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
@@ -61,6 +62,7 @@ public abstract class BaseScheduleProvider {
     private static void createScheduleProviders() {
         Set<BaseScheduleProvider> providers = new HashSet<>();
         providers.add(new MosgortransScheduleProvider());
+        providers.add(new MoscowPrivateScheduleProvider());
 
         mScheduleProviders = new HashMap<>();
         for (BaseScheduleProvider provider : providers) {
@@ -81,7 +83,7 @@ public abstract class BaseScheduleProvider {
 
     public static BaseScheduleProvider getUnitedProvider() {
         // TODO: 1/9/2018 get united schedule provider instead of mosgortrans
-        return getScheduleProvider("mosgortrans");
+        return getScheduleProvider("moscow_private");
     }
 
     public ScheduleProviderTask createAndRunTask(ScheduleArgs args, ScheduleProviderTask.IScheduleReceiver receiver) {
@@ -113,6 +115,12 @@ public abstract class BaseScheduleProvider {
         }
     }
     public abstract Result runProvider(ScheduleArgs args) throws ScheduleProviderException;
+
+    protected void throwIfNoInternet() throws ScheduleProviderException {
+        if (!InternetUtils.isInternetAvailable()) {
+            throw new ScheduleProviderException(ScheduleError.ErrorCode.INTERNET_NOT_AVAILABLE);
+        }
+    }
 
     public abstract String getProviderId();
     public abstract String getProviderName(Context context);

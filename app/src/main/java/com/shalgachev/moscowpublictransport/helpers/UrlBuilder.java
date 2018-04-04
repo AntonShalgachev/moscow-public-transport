@@ -13,14 +13,24 @@ public class UrlBuilder {
 
     private String mConnector = "?";
 
-    public UrlBuilder(String base, String encoding) {
+    public UrlBuilder(String base, String encoding) throws UnsupportedEncodingException {
         mBuilder = new StringBuilder(base);
         mEncoding = encoding;
+
+        URLEncoder.encode("test", mEncoding);
     }
 
-    public UrlBuilder appendParam(String key, String value) throws UnsupportedEncodingException {
+    public UrlBuilder(String base ) throws UnsupportedEncodingException {
+        this(base, "UTF-8");
+    }
+
+    public UrlBuilder appendParam(String key, String value) {
         mBuilder.append(mConnector).append(key).append('=');
-        mBuilder.append(URLEncoder.encode(value, mEncoding));
+        try {
+            mBuilder.append(URLEncoder.encode(value, mEncoding));
+        } catch (UnsupportedEncodingException e) {
+            throw new AssertionError("Encoding should have been tested in constructor");
+        }
         mConnector = "&";
 
         return this;
