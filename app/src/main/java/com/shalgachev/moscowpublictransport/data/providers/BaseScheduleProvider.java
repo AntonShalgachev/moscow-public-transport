@@ -57,33 +57,26 @@ public abstract class BaseScheduleProvider {
     }
 
     private static final String LOG_TAG = "BaseScheduleProvider";
-    private static Map<CharSequence, BaseScheduleProvider> mScheduleProviders;
+    private static ScheduleProviderProxy sProxy;
 
-    private static void createScheduleProviders() {
+    private static void createProxyIfNeeded() {
+        if (sProxy != null)
+            return;
+
         Set<BaseScheduleProvider> providers = new HashSet<>();
         providers.add(new MosgortransScheduleProvider());
         providers.add(new MoscowPrivateScheduleProvider());
 
-        mScheduleProviders = new HashMap<>();
-        for (BaseScheduleProvider provider : providers) {
-            mScheduleProviders.put(provider.getProviderId(), provider);
-        }
+        sProxy = new ScheduleProviderProxy(providers);
     }
 
-    // TODO: 3/31/2018 Provider ID should be enum
     public static BaseScheduleProvider getScheduleProvider(CharSequence id) {
-        if (mScheduleProviders == null)
-            createScheduleProviders();
-
-        if (!mScheduleProviders.containsKey(id))
-            throw new IllegalArgumentException(String.format("Invalid schedule provider: %s", id));
-
-        return mScheduleProviders.get(id);
+        return sProxy.getScheduleProviderByName(id);
     }
 
     public static BaseScheduleProvider getUnitedProvider() {
-        // TODO: 1/9/2018 get united schedule provider instead of mosgortrans
-        return getScheduleProvider("moscow_private");
+        createProxyIfNeeded();
+        return sProxy;
     }
 
     public ScheduleProviderTask createAndRunTask(ScheduleArgs args, ScheduleProviderTask.IScheduleReceiver receiver) {
