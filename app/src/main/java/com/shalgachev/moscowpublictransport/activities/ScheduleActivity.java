@@ -148,6 +148,12 @@ public class ScheduleActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onScheduleCached(boolean first) {
+                if (first)
+                    Toast.makeText(ScheduleActivity.this, R.string.schedule_cached_toast, Toast.LENGTH_LONG).show();
+            }
+
+            @Override
             public void onError(ScheduleError error) {
                 if (mProgressDialog != null)
                     mProgressDialog.dismiss();
@@ -161,7 +167,7 @@ public class ScheduleActivity extends AppCompatActivity {
         Log.d(LOG_TAG, "New schedule is now available");
 
         if (mSchedule != null)
-            Toast.makeText(this, R.string.schedule_refreshed_toast, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.schedule_refreshed_toast, Toast.LENGTH_LONG).show();
 
         mSchedule = schedule;
         mScheduleUpdated = false;

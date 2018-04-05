@@ -137,8 +137,9 @@ public class ScheduleUtils {
             public void onResult(ScheduleCacheTask.Result result) {
                 final Schedule cachedSchedule = result.schedule;
 
+                final boolean hasCached = cachedSchedule != null;
                 // TODO: 3/18/2018 use error codes instead
-                if (cachedSchedule != null) {
+                if (hasCached) {
                     Log.i(LOG_TAG, "Found saved schedule");
                     if (listener != null)
                         listener.onCachedSchedule(cachedSchedule);
@@ -169,9 +170,10 @@ public class ScheduleUtils {
                                         @Override
                                         public void onResult(ScheduleCacheTask.Result result) {
                                             Log.i(LOG_TAG, "Schedule saved");
+                                            if (listener != null)
+                                                listener.onScheduleCached(!hasCached);
                                         }
                                     }).execute();
-
                                 } else {
                                     Log.e(LOG_TAG, "Error while refreshing schedule");
                                     if (listener != null)
@@ -187,6 +189,7 @@ public class ScheduleUtils {
     public interface IScheduleResultListener {
         void onCachedSchedule(Schedule schedule);
         void onFreshSchedule(Schedule schedule);
+        void onScheduleCached(boolean first);
         void onError(ScheduleError error);
     }
 }
