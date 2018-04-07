@@ -58,6 +58,8 @@
     <string name="menu_done">Готово</string>
     <string name="next_in">Ближайший через:</string>
     <string name="schedule_next_in">(%s)</string>
+    <string name="schedule_now">сейчас</string>
+    <string name="schedule_late">уходит</string>
     <string name="interval_min">%d м.</string>
     <string name="interval_hour">%d ч.</string>
 

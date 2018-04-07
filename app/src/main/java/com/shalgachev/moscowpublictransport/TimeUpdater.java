@@ -1,5 +1,6 @@
 package com.shalgachev.moscowpublictransport;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.shalgachev.moscowpublictransport.data.Schedule;
@@ -16,12 +17,18 @@ public class TimeUpdater implements Runnable {
     private final Schedule.Timepoints mTimepoints;
     private Listener mListener;
 
+    private int mMaxCountdowns;
+    private int mMaxLateMinutes;
+
     public interface Listener {
         void onTimeUpdated(TimeUpdater timeUpdater, long millisToNextUpdate);
     }
 
-    public TimeUpdater(Schedule.Timepoints timepoints) {
+    public TimeUpdater(Schedule.Timepoints timepoints, Context context) {
         mTimepoints = timepoints;
+
+        mMaxCountdowns = context.getResources().getInteger(R.integer.time_updater_max_countdowns);
+        mMaxLateMinutes = context.getResources().getInteger(R.integer.time_updater_max_late_minutes);
     }
 
     public void setListener(Listener listener) {
@@ -37,18 +44,23 @@ public class TimeUpdater implements Runnable {
             Log.i(LOG_TAG, "Updating time...");
             Calendar nowCalendar = Calendar.getInstance();
 
-            final int maxCountdowns = 3;
             int shownCountdowns = 0;
             for (Schedule.Timepoint timepoint : mTimepoints.getTimepoints()) {
                 Calendar timepointCalendar = ScheduleUtils.getTimepointCalendar(timepoint, mTimepoints.getFirstHour());
 
                 timepoint.millisFromNow = (timepointCalendar.getTimeInMillis() - nowCalendar.getTimeInMillis());
 
-                if (shownCountdowns < maxCountdowns && timepoint.isEnabled()) {
+                boolean isLate = false;
+                if (timepoint.millisFromNow > -mMaxLateMinutes * 60 * 1000 && timepoint.millisFromNow < 0)
+                    isLate = true;
+
+                timepoint.isEnabled = timepoint.millisFromNow > 0 || isLate;
+
+                if (shownCountdowns < mMaxCountdowns && timepoint.isEnabled()) {
                     timepoint.isCountdownShown = true;
                     shownCountdowns += 1;
                 } else {
-                    timepoint.isCountdownShown = false;
+                    timepoint.isCountdownShown = isLate;
                 }
             }
         }

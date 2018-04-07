@@ -32,12 +32,21 @@ public class Schedule {
         // used in schedule activity to notify remaining time
         public long millisFromNow;
         public boolean isCountdownShown;
+        public boolean isEnabled;
 
         public boolean isEnabled() {
-            return millisFromNow > 0;
+            return isEnabled;
         }
-        public int secondsFromNow() {
-            return (int)(millisFromNow / 1000 / 60);
+        public int minutesFromNow() {
+            long millis = millisFromNow;
+            long coef = 1000 * 60;
+
+            long minutes = millis / coef;
+            if ((millis ^ coef) < 0 && (minutes * coef != millis)) {
+                minutes--;
+            }
+
+            return (int) minutes;
         }
 
         @Override

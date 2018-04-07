@@ -30,9 +30,11 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
     private Context mContext;
     private Schedule mSchedule;
     private Schedule.Timepoints mTimepoints;
+    private RecyclerView.RecycledViewPool mMinutesPool;
 
-    public ScheduleHoursAdapter(Context context) {
+    public ScheduleHoursAdapter(Context context, RecyclerView.RecycledViewPool minutesPool) {
         mContext = context;
+        mMinutesPool = minutesPool;
     }
 
     public void updateSchedule(Schedule schedule, boolean animate) {
@@ -41,10 +43,10 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
 
         // TODO: 3/22/2018 change me plz
         if (animate) {
-            Log.d(LOG_TAG, "Animating changes");
+            Log.d(LOG_TAG, "notifyItemRangeChanged");
             notifyItemRangeChanged(0, getItemCount(), new Object());
         } else {
-            Log.d(LOG_TAG, "Recreating dataset from scratch");
+            Log.d(LOG_TAG, "notifyDataSetChanged");
             notifyDataSetChanged();
         }
     }
@@ -54,12 +56,13 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_schedule_hour_item, parent, false);
 
-        return new ViewHolder(view, mContext);
+        return new ViewHolder(view, mContext, mMinutesPool);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull List<Object> payloads) {
         if (!payloads.isEmpty()) {
+            Log.d(LOG_TAG, "Animating changes");
             holder.mAdapter.onDataUpdated();
 
             int hour = mTimepoints.getNthHour(position);
@@ -81,6 +84,7 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
                 AnimationHelper.animateTextColor(holder.mHourView, holder.colorEnabled, holder.colorDisabled).setDuration(animDuration).start();
             holder.isEnabled = isEnabled;
         } else {
+            Log.d(LOG_TAG, "Recreating dataset from scratch");
             onBindViewHolder(holder, position);
         }
     }
@@ -159,7 +163,7 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
 
         private ScheduleMinutesAdapter mAdapter;
 
-        public ViewHolder(View view, Context context) {
+        public ViewHolder(View view, Context context, RecyclerView.RecycledViewPool minutesPool) {
             super(view);
             this.view = view;
             mCardView = view.findViewById(R.id.schedule_item_hour_card);
@@ -170,10 +174,10 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
             colorEnabled = colors.getColorForState(new int[]{android.R.attr.state_enabled}, 0);
             colorDisabled = colors.getColorForState(new int[]{-android.R.attr.state_enabled}, 0);
 
-            setupRecyclerView(context);
+            setupRecyclerView(context, minutesPool);
         }
 
-        private void setupRecyclerView(Context context) {
+        private void setupRecyclerView(Context context, RecyclerView.RecycledViewPool minutesPool) {
             // TODO: 3/18/2018 change number of columns
             int columns = 7;
             GridLayoutManager layoutManager = new GridLayoutManager(context, columns) {
@@ -191,6 +195,7 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
                     context.getResources().getDimensionPixelSize(R.dimen.minutes_vertical_offset),
                     columns);
             mMinutesRecyclerView.addItemDecoration(decoration);
+            mMinutesRecyclerView.setRecycledViewPool(minutesPool);
         }
     }
 }

@@ -7,7 +7,7 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.StateSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,11 +39,13 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
     }
 
     public void onDataUpdated() {
+        Log.v(LOG_TAG, String.format("Updating data for hour %d", mHour));
         notifyItemRangeChanged(0, getItemCount(), new Object());
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        Log.v(LOG_TAG, String.format("Creating view holder for hour %d", mHour));
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_schedule_minute_item, parent, false);
 
@@ -51,21 +53,28 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
     }
 
     private String getCountdownText(Context context, Schedule.Timepoint timepoint) {
-        long diffInMinutes = timepoint.secondsFromNow();
-
-        String intervalStr = ScheduleUtils.formatShortTimeInterval(context, diffInMinutes);
-        return context.getString(R.string.schedule_next_in, intervalStr);
+        long diffInMinutes = timepoint.minutesFromNow();
+        if (diffInMinutes > 0) {
+            String intervalStr = ScheduleUtils.formatShortTimeInterval(context, diffInMinutes);
+            return context.getString(R.string.schedule_next_in, intervalStr);
+        } else if (diffInMinutes == 0) {
+            return context.getString(R.string.schedule_now);
+        } else {
+            return context.getString(R.string.schedule_late);
+        }
     }
 
     private int getCountdownColor(Context context, Schedule.Timepoint timepoint) {
-        long diffInMinutes = timepoint.secondsFromNow();
+        long diffInMinutes = timepoint.minutesFromNow();
 
         // TODO: 3/21/2018 extract these values somewhere
         int closeThreshold = 5;
         int mediumThreshold = 10;
 
         @ColorRes int color;
-        if (diffInMinutes <= closeThreshold)
+        if (diffInMinutes < 0)
+            color = R.color.next_in_late_color;
+        else if (diffInMinutes <= closeThreshold)
             color = R.color.next_in_close_color;
         else if (diffInMinutes <= mediumThreshold)
             color = R.color.next_in_medium_color;

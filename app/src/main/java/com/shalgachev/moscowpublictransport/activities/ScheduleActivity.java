@@ -53,7 +53,8 @@ public class ScheduleActivity extends AppCompatActivity {
 
         mContentRecyclerView = findViewById(R.id.schedule_container);
 
-        mScheduleHoursAdapter = new ScheduleHoursAdapter(this);
+        RecyclerView.RecycledViewPool minutesPool = new RecyclerView.RecycledViewPool();
+        mScheduleHoursAdapter = new ScheduleHoursAdapter(this, minutesPool);
         mContentRecyclerView.setAdapter(mScheduleHoursAdapter);
 
         mContentRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -174,7 +175,7 @@ public class ScheduleActivity extends AppCompatActivity {
 
         stopUpdater();
 
-        mTimeUpdater = new TimeUpdater(schedule.getTimepoints());
+        mTimeUpdater = new TimeUpdater(schedule.getTimepoints(), this);
         Log.d(LOG_TAG, "Creating new time updater " + mTimeUpdater.toString());
 
         mTimeUpdater.setListener(new TimeUpdater.Listener() {
