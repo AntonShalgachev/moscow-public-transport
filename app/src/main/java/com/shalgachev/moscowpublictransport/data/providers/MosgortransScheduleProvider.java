@@ -15,6 +15,7 @@ import com.shalgachev.moscowpublictransport.data.ScheduleDays;
 import com.shalgachev.moscowpublictransport.data.ScheduleError;
 import com.shalgachev.moscowpublictransport.data.ScheduleType;
 import com.shalgachev.moscowpublictransport.data.Stop;
+import com.shalgachev.moscowpublictransport.data.Timepoint;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 import com.shalgachev.moscowpublictransport.helpers.UrlBuilder;
 
@@ -27,11 +28,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by anton on 6/25/2017.
@@ -170,7 +167,7 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
 
         throwIfNoInternet();
 
-        List<Schedule.Timepoint> timepoints = new ArrayList<>();
+        List<Timepoint> timepoints = new ArrayList<>();
 
         String url = constructScheduleUrl(stop);
         if (url == null)
@@ -217,7 +214,7 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
                         hour = value;
                         break;
                     case "minute":
-                        timepoints.add(new Schedule.Timepoint(hour,value));
+                        timepoints.add(new Timepoint(hour,value));
                         break;
 
                     default:

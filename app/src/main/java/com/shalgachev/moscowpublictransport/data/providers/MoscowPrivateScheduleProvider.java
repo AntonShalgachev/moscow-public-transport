@@ -15,6 +15,7 @@ import com.shalgachev.moscowpublictransport.data.ScheduleError;
 import com.shalgachev.moscowpublictransport.data.ScheduleType;
 import com.shalgachev.moscowpublictransport.data.Season;
 import com.shalgachev.moscowpublictransport.data.Stop;
+import com.shalgachev.moscowpublictransport.data.Timepoint;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 import com.shalgachev.moscowpublictransport.helpers.UrlBuilder;
 
@@ -295,7 +296,7 @@ public class MoscowPrivateScheduleProvider extends BaseScheduleProvider {
                 .appendParam(PARAM_STOP_ID, String.valueOf(stop.id))
                 .build();
 
-        List<Schedule.Timepoint> timepoints = new ArrayList<>();
+        List<Timepoint> timepoints = new ArrayList<>();
 
         try {
             JSONObject root = loadUrlAsObject(url);
@@ -309,7 +310,7 @@ public class MoscowPrivateScheduleProvider extends BaseScheduleProvider {
                 for (int i = 0; i < minutes.length(); i++) {
                     int minute = Integer.valueOf(minutes.getString(i));
 
-                    timepoints.add(new Schedule.Timepoint(hour, minute));
+                    timepoints.add(new Timepoint(hour, minute));
                 }
             }
         } catch (JSONException e) {

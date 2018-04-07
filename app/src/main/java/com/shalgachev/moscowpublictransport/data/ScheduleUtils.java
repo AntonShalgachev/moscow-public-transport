@@ -8,8 +8,6 @@ import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
 import com.shalgachev.moscowpublictransport.helpers.StringUtils;
 
-import org.jsoup.helper.StringUtil;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -124,7 +122,7 @@ public class ScheduleUtils {
         }
     }
 
-    public static Calendar getTimepointCalendar(Schedule.Timepoint timepoint, int firstHour) {
+    public static Calendar getTimepointCalendar(Timepoint timepoint, int firstHour) {
         Calendar timepointCalendar = Calendar.getInstance();
 
         int currentHour = timepointCalendar.get(Calendar.HOUR_OF_DAY);

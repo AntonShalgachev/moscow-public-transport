@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.shalgachev.moscowpublictransport.data.Direction;
@@ -16,6 +15,7 @@ import com.shalgachev.moscowpublictransport.data.ScheduleDays;
 import com.shalgachev.moscowpublictransport.data.ScheduleType;
 import com.shalgachev.moscowpublictransport.data.Season;
 import com.shalgachev.moscowpublictransport.data.Stop;
+import com.shalgachev.moscowpublictransport.data.Timepoint;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 
 import java.util.ArrayList;
@@ -287,13 +287,13 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
 
         Log.i(LOG_TAG, String.format("Found %d timepoints", dataSize));
 
-        List<Schedule.Timepoint> timepoints = new ArrayList<>();
+        List<Timepoint> timepoints = new ArrayList<>();
 
         try {
             while (cur.moveToNext()) {
                 int hour = cur.getInt(cur.getColumnIndexOrThrow(COLUMN_HOUR));
                 int minute = cur.getInt(cur.getColumnIndexOrThrow(COLUMN_MINUTE));
-                timepoints.add(new Schedule.Timepoint(hour, minute));
+                timepoints.add(new Timepoint(hour, minute));
             }
         } finally {
             cur.close();
@@ -330,9 +330,9 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
         Log.d(LOG_TAG, String.format("saveTimetableSchedule('%s', %d)", schedule.toString(), stopId));
         SQLiteDatabase db = getWritableDatabase();
 
-        List<Schedule.Timepoint> timepoints = schedule.getTimepoints().getTimepoints();
+        List<Timepoint> timepoints = schedule.getTimepoints().getTimepoints();
 
-        for (Schedule.Timepoint timepoint : timepoints) {
+        for (Timepoint timepoint : timepoints) {
             ContentValues values = new ContentValues();
             values.put(COLUMN_SAVED_STOP_ID, stopId);
             values.put(COLUMN_HOUR, timepoint.hour);

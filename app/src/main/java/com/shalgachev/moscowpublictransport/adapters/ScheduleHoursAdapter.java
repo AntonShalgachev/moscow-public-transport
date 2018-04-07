@@ -15,9 +15,10 @@ import android.widget.TextView;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.Schedule;
+import com.shalgachev.moscowpublictransport.data.Timepoint;
+import com.shalgachev.moscowpublictransport.data.Timepoints;
 import com.shalgachev.moscowpublictransport.helpers.AnimationHelper;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,7 +30,7 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
 
     private Context mContext;
     private Schedule mSchedule;
-    private Schedule.Timepoints mTimepoints;
+    private Timepoints mTimepoints;
     private RecyclerView.RecycledViewPool mMinutesPool;
 
     public ScheduleHoursAdapter(Context context, RecyclerView.RecycledViewPool minutesPool) {
@@ -66,13 +67,13 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
             holder.mAdapter.onDataUpdated();
 
             int hour = mTimepoints.getNthHour(position);
-            List<Schedule.Timepoint> timepoints = mTimepoints.getHoursMap().get(hour);
+            List<Timepoint> timepoints = mTimepoints.getHoursMap().get(hour);
 
             Context context = holder.view.getContext();
 
             // TODO: 3/23/2018 precompute this in the worker thread for performance
             boolean isEnabled = false;
-            for (Schedule.Timepoint timepoint : timepoints)
+            for (Timepoint timepoint : timepoints)
                 if (timepoint.isEnabled())
                     isEnabled = true;
 
@@ -92,7 +93,7 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         int hour = mTimepoints.getNthHour(position);
-        List<Schedule.Timepoint> timepoints = mTimepoints.getHoursMap().get(hour);
+        List<Timepoint> timepoints = mTimepoints.getHoursMap().get(hour);
         holder.mHourView.setText(String.valueOf(hour));
 
         holder.mAdapter = new ScheduleMinutesAdapter(mSchedule, hour, timepoints);
@@ -102,7 +103,7 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
 
         // TODO: 3/23/2018 precompute this in the worker thread for performance
         boolean isEnabled = false;
-        for (Schedule.Timepoint timepoint : timepoints)
+        for (Timepoint timepoint : timepoints)
             if (timepoint.isEnabled())
                 isEnabled = true;
 

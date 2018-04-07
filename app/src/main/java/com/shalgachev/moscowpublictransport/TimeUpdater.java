@@ -3,8 +3,9 @@ package com.shalgachev.moscowpublictransport;
 import android.content.Context;
 import android.util.Log;
 
-import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
+import com.shalgachev.moscowpublictransport.data.Timepoint;
+import com.shalgachev.moscowpublictransport.data.Timepoints;
 
 import java.util.Calendar;
 
@@ -14,7 +15,7 @@ import java.util.Calendar;
 
 public class TimeUpdater implements Runnable {
     private static final String LOG_TAG = "TimeUpdater";
-    private final Schedule.Timepoints mTimepoints;
+    private final Timepoints mTimepoints;
     private Listener mListener;
 
     private int mMaxCountdowns;
@@ -24,7 +25,7 @@ public class TimeUpdater implements Runnable {
         void onTimeUpdated(TimeUpdater timeUpdater, long millisToNextUpdate);
     }
 
-    public TimeUpdater(Schedule.Timepoints timepoints, Context context) {
+    public TimeUpdater(Timepoints timepoints, Context context) {
         mTimepoints = timepoints;
 
         mMaxCountdowns = context.getResources().getInteger(R.integer.time_updater_max_countdowns);
@@ -45,7 +46,7 @@ public class TimeUpdater implements Runnable {
             Calendar nowCalendar = Calendar.getInstance();
 
             int shownCountdowns = 0;
-            for (Schedule.Timepoint timepoint : mTimepoints.getTimepoints()) {
+            for (Timepoint timepoint : mTimepoints.getTimepoints()) {
                 Calendar timepointCalendar = ScheduleUtils.getTimepointCalendar(timepoint, mTimepoints.getFirstHour());
 
                 timepoint.millisFromNow = (timepointCalendar.getTimeInMillis() - nowCalendar.getTimeInMillis());

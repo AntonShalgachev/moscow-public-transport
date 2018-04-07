@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
+import com.shalgachev.moscowpublictransport.data.Timepoint;
 import com.shalgachev.moscowpublictransport.helpers.AnimationHelper;
 
 import java.util.ArrayList;
@@ -30,9 +31,9 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
     private static final String LOG_TAG = "ScheduleMinutesAdapter";
     private Schedule mSchedule;
     private int mHour;
-    private List<Schedule.Timepoint> mTimepoints;
+    private List<Timepoint> mTimepoints;
 
-    public ScheduleMinutesAdapter(Schedule schedule, int hour, List<Schedule.Timepoint> minutes) {
+    public ScheduleMinutesAdapter(Schedule schedule, int hour, List<Timepoint> minutes) {
         mSchedule = schedule;
         mHour = hour;
         mTimepoints = new ArrayList<>(minutes);
@@ -52,7 +53,7 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
         return new ViewHolder(view);
     }
 
-    private String getCountdownText(Context context, Schedule.Timepoint timepoint) {
+    private String getCountdownText(Context context, Timepoint timepoint) {
         long diffInMinutes = timepoint.minutesFromNow();
         if (diffInMinutes > 0) {
             String intervalStr = ScheduleUtils.formatShortTimeInterval(context, diffInMinutes);
@@ -64,7 +65,7 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
         }
     }
 
-    private int getCountdownColor(Context context, Schedule.Timepoint timepoint) {
+    private int getCountdownColor(Context context, Timepoint timepoint) {
         long diffInMinutes = timepoint.minutesFromNow();
 
         // TODO: 3/21/2018 extract these values somewhere
@@ -89,7 +90,7 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
         if (!payloads.isEmpty()) {
             // TODO: 3/23/2018 THIS IS COPY_PASTE, do smth about it
             Context context = holder.view.getContext();
-            Schedule.Timepoint timepoint = mTimepoints.get(position);
+            Timepoint timepoint = mTimepoints.get(position);
 
             int animDuration = context.getResources().getInteger(R.integer.schedule_minute_animation_duration);
 
@@ -142,7 +143,7 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
     public void onBindViewHolder(ViewHolder holder, int position) {
         Context context = holder.view.getContext();
 
-        Schedule.Timepoint timepoint = mTimepoints.get(position);
+        Timepoint timepoint = mTimepoints.get(position);
         holder.mMinuteView.setText(String.format(Locale.US, "%02d", timepoint.minute));
 
         boolean isMinuteEnabled = timepoint.isEnabled();
