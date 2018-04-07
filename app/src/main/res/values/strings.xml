@@ -54,6 +54,12 @@
     <string name="date_weekdays">Будни</string>
     <string name="date_weekends">Выходные</string>
 
+    <string name="season_winter">Зима</string>
+    <string name="season_summer">Лето</string>
+
+    <string name="schedule_days_all_seasons">%s</string>
+    <string name="schedule_days_seasons">%s (%s)</string>
+
     <string name="date_delimiter">", "</string>
     <string name="menu_done">Готово</string>
     <string name="next_in">Ближайший через:</string>

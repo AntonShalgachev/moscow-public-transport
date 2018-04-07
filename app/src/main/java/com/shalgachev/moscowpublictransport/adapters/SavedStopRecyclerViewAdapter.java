@@ -151,7 +151,7 @@ public class SavedStopRecyclerViewAdapter extends SelectableAdapter<SavedStopRec
 
         holder.item = stop;
         holder.mRouteView.setText(stop.route.name);
-        holder.mDaysView.setText(ScheduleUtils.daysMaskToString(mContext, stop.days.daysMask, true));
+        holder.mDaysView.setText(ScheduleUtils.scheduleDaysToString(mContext, stop.days));
         holder.mNameView.setText(stop.name);
         holder.mDirectionView.setText(mContext.getString(R.string.saved_stop_direction, stop.direction.getFrom(), stop.direction.getTo()));
 

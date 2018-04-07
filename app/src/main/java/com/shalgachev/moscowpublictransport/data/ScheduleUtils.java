@@ -6,6 +6,9 @@ import android.util.Log;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
+import com.shalgachev.moscowpublictransport.helpers.StringUtils;
+
+import org.jsoup.helper.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -18,7 +21,7 @@ import java.util.List;
 public class ScheduleUtils {
     private static final String LOG_TAG = "ScheduleUtils";
 
-    public static CharSequence daysMaskToString(Context context, CharSequence mask, boolean shortDays) {
+    public static CharSequence daysMaskToString(Context context, CharSequence mask) {
         CharSequence result;
         if (mask.equals("1111111")) {
             result = context.getString(R.string.date_all);
@@ -27,6 +30,8 @@ public class ScheduleUtils {
         } else if (mask.equals("0000011")) {
             result = context.getString(R.string.date_weekends);
         } else {
+            boolean shortDays = StringUtils.countMatches(mask, '1') > 1;
+
             final int[] dayIds;
             final int[] dayIdsCapital;
             if (shortDays) {
@@ -85,6 +90,26 @@ public class ScheduleUtils {
 
         // TODO: 6/3/2017 Capitalize first letter
         return result;
+    }
+
+    public static String scheduleDaysToString(Context context, ScheduleDays days) {
+        Season season = days.season;
+        CharSequence maskStr = daysMaskToString(context, days.daysMask);
+
+        if (season == Season.ALL)
+            return context.getString(R.string.schedule_days_all_seasons, maskStr);
+
+        String seasonStr = null;
+        switch (season) {
+            case WINTER:
+                seasonStr = context.getString(R.string.season_winter);
+                break;
+            case SUMMER:
+                seasonStr = context.getString(R.string.season_summer);
+                break;
+        }
+
+        return context.getString(R.string.schedule_days_seasons, maskStr, seasonStr);
     }
 
     public static String formatShortTimeInterval(Context context, long minutes) {

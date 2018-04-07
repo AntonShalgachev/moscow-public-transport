@@ -50,7 +50,7 @@ public class StopListPagerAdapter extends FragmentPagerAdapter {
     }
 
     public void addTab(CharSequence daysMask, ArrayList<StopListItem> stopListItems) {
-        CharSequence title = ScheduleUtils.daysMaskToString(mContext, daysMask, true);
+        CharSequence title = ScheduleUtils.daysMaskToString(mContext, daysMask);
         Fragment fragment = StopListFragment.newInstance(stopListItems);
 
         mFragmentHolders.add(new FragmentHolder(title, fragment));

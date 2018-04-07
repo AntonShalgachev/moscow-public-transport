@@ -6,7 +6,7 @@
     <integer name="schedule_item_appearance_duration">200</integer>
 
     <integer name="time_updater_max_countdowns">3</integer>
-    <integer name="time_updater_max_late_minutes">2</integer>
+    <integer name="time_updater_max_late_minutes">1</integer>
 
     <dimen name="route_button_selected_text_size">40sp</dimen>
 </resources>
