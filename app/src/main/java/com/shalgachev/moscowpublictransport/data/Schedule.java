@@ -3,6 +3,7 @@ package com.shalgachev.moscowpublictransport.data;
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -80,6 +81,23 @@ public class Schedule {
         }
     }
 
+    private static class TimepointComparator implements Comparator<Timepoint> {
+        private HourComparator hourComparator;
+
+        public TimepointComparator(int dayFirstHour) {
+            hourComparator = new HourComparator(dayFirstHour);
+        }
+
+        @Override
+        public int compare(Timepoint o1, Timepoint o2) {
+            int hourCompare = hourComparator.compare(o1.hour, o2.hour);
+            if (hourCompare != 0)
+                return hourCompare;
+
+            return o1.minute - o2.minute;
+        }
+    }
+
     public static class Timepoints
     {
         private List<Timepoint> mTimepoints;
@@ -90,6 +108,8 @@ public class Schedule {
         Timepoints(List<Timepoint> timepoints, int firstHour) {
             mTimepoints = new ArrayList<>(timepoints);
             mFirstHour = firstHour;
+
+            Collections.sort(mTimepoints, new TimepointComparator(firstHour));
 
             mHours = new TreeMap<>(new HourComparator(firstHour));
 
