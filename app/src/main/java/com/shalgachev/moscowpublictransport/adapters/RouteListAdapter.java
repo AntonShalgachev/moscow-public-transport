@@ -3,6 +3,7 @@ package com.shalgachev.moscowpublictransport.adapters;
 import android.content.Context;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,8 +23,9 @@ import java.util.List;
  */
 
 public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.ViewHolder> {
-    private List<SelectableRoute> mRoutes = new ArrayList<>();
-    private List<SelectableRoute> mFilteredRoutes = new ArrayList<>();
+    static private final String LOG_TAG = "RouteListAdapter";
+    private List<SelectableRoute> mRoutes;
+    private List<SelectableRoute> mFilteredRoutes;
     private Context mContext;
     private Listener mListener;
 
@@ -31,15 +33,12 @@ public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.View
         this.mContext = context;
     }
 
-    public void setAvailableRoutes(final List<Route> routes) {
+    public void setAvailableRoutes(final List<Route> routes, CharSequence filter) {
         mRoutes = new ArrayList<>();
         for (Route route : routes)
             mRoutes.add(new SelectableRoute(route));
 
-        mFilteredRoutes = new ArrayList<>(mRoutes);
-        notifyDataSetChanged();
-
-        filter("");
+        filter(filter);
     }
 
     public void setListener(Listener listener)
@@ -48,6 +47,15 @@ public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.View
     }
 
     private void updateRoutes(final List<SelectableRoute> routes) {
+        Log.d(LOG_TAG, "Updating routes");
+        if (mFilteredRoutes == null) {
+            Log.d(LOG_TAG, "Recreating whole set");
+            mFilteredRoutes = new ArrayList<>(routes);
+            notifyDataSetChanged();
+
+            return;
+        }
+
         final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
             @Override
             public int getOldListSize() {
@@ -76,6 +84,10 @@ public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.View
     }
 
     public void filter(CharSequence filter) {
+        if (mRoutes == null)
+            return;
+
+        Log.d(LOG_TAG, String.format("Filtering with input '%s'", filter));
         List<SelectableRoute> filteredRoutes = new ArrayList<>();
         for (SelectableRoute route : mRoutes) {
             if (routeMatchesFilter(route, filter))
@@ -93,6 +105,9 @@ public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.View
     }
 
     public Route getSelectedRoute() {
+        if (mFilteredRoutes == null)
+            return null;
+
         for (SelectableRoute route : mFilteredRoutes)
             if (route.selected)
                 return route;
@@ -142,7 +157,7 @@ public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.View
 
     @Override
     public int getItemCount() {
-        return mFilteredRoutes.size();
+        return mFilteredRoutes == null ? 0 : mFilteredRoutes.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

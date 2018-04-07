@@ -97,8 +97,8 @@ public class SavedStopRecyclerViewAdapter extends SelectableAdapter<SavedStopRec
             }
         });
 
-        mItems = new ArrayList<>(items);
         diffResult.dispatchUpdatesTo(this);
+        mItems = new ArrayList<>(items);
     }
 
     public List<Stop> getSelectedStops() {
