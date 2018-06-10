@@ -10,6 +10,7 @@ import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
 import com.shalgachev.moscowpublictransport.data.ScheduleError;
 import com.shalgachev.moscowpublictransport.data.ScheduleProviderTask;
 import com.shalgachev.moscowpublictransport.data.Stop;
+import com.shalgachev.moscowpublictransport.data.Stops;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 
 import java.util.HashMap;
@@ -50,7 +51,7 @@ public abstract class BaseScheduleProvider {
         public OperationType operationType;
         public List<TransportType> transportTypes;
         public List<Route> routes;
-        public List<Stop> stops;
+        public Stops stops;
         public Schedule schedule;
 
         public ScheduleError error;

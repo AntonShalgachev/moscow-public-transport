@@ -41,7 +41,12 @@ public class Direction implements Comparable<Direction>, Serializable {
 
     @Override
     public int compareTo(@NonNull Direction other) {
-        return other.getId().toString().compareTo(other.toString());
+        return other.getId().compareTo(other.toString());
+    }
+
+    @Override
+    public String toString() {
+        return mId;
     }
 
     public void setEndpoints(String from, String to) {

@@ -15,6 +15,7 @@ import com.shalgachev.moscowpublictransport.data.ScheduleDays;
 import com.shalgachev.moscowpublictransport.data.ScheduleError;
 import com.shalgachev.moscowpublictransport.data.ScheduleType;
 import com.shalgachev.moscowpublictransport.data.Stop;
+import com.shalgachev.moscowpublictransport.data.Stops;
 import com.shalgachev.moscowpublictransport.data.Timepoint;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 import com.shalgachev.moscowpublictransport.helpers.UrlBuilder;
@@ -28,7 +29,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by anton on 6/25/2017.
@@ -136,26 +139,40 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
     }
 
     @NonNull
-    private List<Stop> getStops(Route route) throws ScheduleProviderException {
+    private Stops getStops(Route route) throws ScheduleProviderException {
         if (!route.providerId.equals(getProviderId()))
             throw new ScheduleProviderException(ScheduleError.ErrorCode.WRONG_PROVIDER);
 
         Log.i(LOG_TAG, "Loading stops for route " + route.toString());
-        List<Stop> allStops = new ArrayList<>();
+
+        Map<Stops.StopConfiguration, List<Stop>> stopsMap = new HashMap<>();
+        List<Direction> directions = new ArrayList<>();
+        List<ScheduleDays> scheduleDays = new ArrayList<>();
 
         for (String mask : getDaysMasks(route)) {
+            ScheduleDays days = new ScheduleDays(mask, mask, FIRST_HOUR);
+            if (!scheduleDays.contains(days))
+                scheduleDays.add(days);
+
             for (Direction direction : getDirections(route, mask)) {
-                List<Stop> stops = getStops(route, new ScheduleDays(mask, mask, FIRST_HOUR), direction);
+                if (!directions.contains(direction))
+                    directions.add(direction);
+
+                Stops.StopConfiguration configuration = new Stops.StopConfiguration(direction, days);
+
+                List<Stop> stops = getStops(route, days, direction);
+                if (stops.isEmpty()) {
+                    Log.w(LOG_TAG, String.format("Stops empty for configuration '%s'", configuration.toString()));
+                    throw new ScheduleProviderException(ScheduleError.ErrorCode.NO_STOPS);
+                }
+
                 direction.setEndpoints(stops.get(0).name, stops.get(stops.size() - 1).name);
 
-                allStops.addAll(stops);
+                stopsMap.put(configuration, stops);
             }
         }
 
-        if (allStops.isEmpty())
-            throw new ScheduleProviderException(ScheduleError.ErrorCode.NO_STOPS);
-
-        return allStops;
+        return new Stops(stopsMap, directions, scheduleDays);
     }
 
     @NonNull

@@ -29,6 +29,7 @@ import com.shalgachev.moscowpublictransport.data.ScheduleError;
 import com.shalgachev.moscowpublictransport.data.ScheduleProviderTask;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.StopListItem;
+import com.shalgachev.moscowpublictransport.data.Stops;
 import com.shalgachev.moscowpublictransport.data.TransportType;
 import com.shalgachev.moscowpublictransport.data.db.ScheduleCacheSQLiteHelper;
 import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
@@ -53,7 +54,7 @@ public class AddTransportActivity extends AppCompatActivity {
     private Route mRoute;
     private ArrayList<Direction> mDirections;
     private int mDirectionIdx;
-    private List<Stop> mStops;
+    private Stops mStops;
     private ArrayList<StopListItem> mStopListItems;
     private StopListPagerAdapter mPagerAdapter;
     private ProgressDialog mProgressDialog;
@@ -177,7 +178,7 @@ public class AddTransportActivity extends AppCompatActivity {
     }
 
     private void onStopsAvailable() {
-        if (mStops.isEmpty()) {
+        if (!mStops.hasStops()) {
             Log.e(LOG_TAG, "Failed to load stops: stops are empty");
         }
 
@@ -191,7 +192,8 @@ public class AddTransportActivity extends AppCompatActivity {
 
                 Set<Direction> directions = new HashSet<>();
                 mStopListItems = new ArrayList<>();
-                for (Stop stop : mStops) {
+                // TODO: 6/10/2018 revise this code; mStops contains info about all directions
+                for (Stop stop : mStops.getAllStops()) {
                     directions.add(stop.direction);
 
                     // TODO: 3/10/2018 implement next stop indicator
