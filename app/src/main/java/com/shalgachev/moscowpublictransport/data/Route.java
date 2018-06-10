@@ -54,6 +54,6 @@ public class Route implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("%s %s (%s, %s)", transportType.toString(), id, name, providerId);
+        return String.format("%s %s (id %s, %s)", transportType.toString(), name, id, providerId);
     }
 }

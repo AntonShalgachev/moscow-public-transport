@@ -42,7 +42,7 @@ public class Stops {
     }
 
     public boolean hasStops() {
-        return !mStops.isEmpty();
+        return !mAllStops.isEmpty();
     }
 
     public static class StopConfiguration {

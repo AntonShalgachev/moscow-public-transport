@@ -253,8 +253,7 @@ public class MoscowPrivateScheduleProvider extends BaseScheduleProvider {
                 List<Stop> stops = getStops(route, days, direction);
                 if (stops.isEmpty()) {
                     Log.w(LOG_TAG, String.format("Stops empty for configuration '%s'", configuration.toString()));
-                    // TODO: 6/10/2018 maybe no need to throw an exception?
-                    throw new ScheduleProviderException(ScheduleError.ErrorCode.NO_STOPS);
+                    continue;
                 }
 
                 direction.setEndpoints(stops.get(0).name, stops.get(stops.size() - 1).name);
@@ -263,7 +262,14 @@ public class MoscowPrivateScheduleProvider extends BaseScheduleProvider {
             }
         }
 
-        return new Stops(stopsMap, directions, scheduleDays);
+        Stops stops = new Stops(stopsMap, directions, scheduleDays);
+
+        if (!stops.hasStops()) {
+            Log.w(LOG_TAG, String.format("There are no stops for route '%s'", route.toString()));
+            throw new ScheduleProviderException(ScheduleError.ErrorCode.NO_STOPS);
+        }
+
+        return stops;
     }
 
     @NonNull
