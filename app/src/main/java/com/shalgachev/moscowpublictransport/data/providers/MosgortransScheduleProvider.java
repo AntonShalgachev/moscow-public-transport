@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.util.Pair;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.Direction;
@@ -14,6 +15,7 @@ import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
 import com.shalgachev.moscowpublictransport.data.ScheduleDays;
 import com.shalgachev.moscowpublictransport.data.ScheduleError;
 import com.shalgachev.moscowpublictransport.data.ScheduleType;
+import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.Stops;
 import com.shalgachev.moscowpublictransport.data.Timepoint;
@@ -98,20 +100,22 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
         String url = constructMetadataUrl(MetadataListType.DIRECTIONS, route.transportType, route.name, daysMask);
         Log.i(LOG_TAG, String.format("getDirections: Fetching '%s'", url));
 
-        List<String> directionList = InternetUtils.fetchUrlAsStringList(url);
+        List<String> directionsNames = InternetUtils.fetchUrlAsStringList(url);
 
-        if (directionList == null)
+        if (directionsNames == null)
             throw new ScheduleProviderException(ScheduleError.ErrorCode.URL_FETCH_FAILED);
 
-        if (directionList.size() != 2) {
-            Log.e(LOG_TAG, String.format("getDirections(%s, %s, %s): Unusual direction list: has %d items, expected 2", route.transportType.name(), route, daysMask, directionList.size()));
+        if (directionsNames.size() != 2) {
+            Log.e(LOG_TAG, String.format("getDirections(%s, %s, %s): Unusual direction list: has %d items, expected 2", route.transportType.name(), route, daysMask, directionsNames.size()));
         }
 
         List<Direction> directions = new ArrayList<>();
 
-        for (int i = 0; i < directionList.size(); i++) {
+        for (int i = 0; i < directionsNames.size(); i++) {
             String id = (i == 0) ? "AB" : "BA";
-            directions.add(new Direction(id));
+            Direction direction = new Direction(id);
+            direction.setName(directionsNames.get(i));
+            directions.add(direction);
         }
 
         return directions;
@@ -166,7 +170,8 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
                     continue;
                 }
 
-                direction.setEndpoints(stops.get(0).name, stops.get(stops.size() - 1).name);
+                Pair<String, String> endpoints = ScheduleUtils.inferDirectionEndpoints(direction.getName(), stops);
+                direction.setEndpoints(endpoints.first, endpoints.second);
 
                 stopsMap.put(configuration, stops);
             }

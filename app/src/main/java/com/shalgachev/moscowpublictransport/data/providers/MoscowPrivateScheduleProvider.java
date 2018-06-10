@@ -3,6 +3,7 @@ package com.shalgachev.moscowpublictransport.data.providers;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.util.Pair;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.Direction;
@@ -13,6 +14,7 @@ import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
 import com.shalgachev.moscowpublictransport.data.ScheduleDays;
 import com.shalgachev.moscowpublictransport.data.ScheduleError;
 import com.shalgachev.moscowpublictransport.data.ScheduleType;
+import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
 import com.shalgachev.moscowpublictransport.data.Season;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.Stops;
@@ -187,8 +189,12 @@ public class MoscowPrivateScheduleProvider extends BaseScheduleProvider {
             for (int i = 0; i < numberOfDirs; i++) {
                 JSONObject item = root.getJSONObject(i);
                 int id = item.getInt("id");
+                String name = item.getString("direction");
 
-                directions.add(new Direction(String.valueOf(id)));
+                Direction direction = new Direction(String.valueOf(id));
+                direction.setName(name);
+
+                directions.add(direction);
             }
 
             return directions;
@@ -256,7 +262,8 @@ public class MoscowPrivateScheduleProvider extends BaseScheduleProvider {
                     continue;
                 }
 
-                direction.setEndpoints(stops.get(0).name, stops.get(stops.size() - 1).name);
+                Pair<String, String> endpoints = ScheduleUtils.inferDirectionEndpoints(direction.getName(), stops);
+                direction.setEndpoints(endpoints.first, endpoints.second);
 
                 stopsMap.put(configuration, stops);
             }

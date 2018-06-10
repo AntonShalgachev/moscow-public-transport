@@ -10,6 +10,7 @@ import java.io.Serializable;
 
 public class Direction implements Comparable<Direction>, Serializable {
     private String mId;
+    private String mName;
     private String mFrom;
     private String mTo;
 
@@ -54,6 +55,10 @@ public class Direction implements Comparable<Direction>, Serializable {
         mTo = to;
     }
 
+    public void setName(String name) {
+        mName = name;
+    }
+
     public String getFrom() {
         return mFrom;
     }
@@ -64,5 +69,9 @@ public class Direction implements Comparable<Direction>, Serializable {
 
     public String getId() {
         return mId;
+    }
+
+    public String getName() {
+        return mName;
     }
 }

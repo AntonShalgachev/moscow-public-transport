@@ -3,10 +3,13 @@ package com.shalgachev.moscowpublictransport.data;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
 import com.shalgachev.moscowpublictransport.helpers.StringUtils;
+
+import org.jsoup.helper.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -18,6 +21,53 @@ import java.util.List;
 
 public class ScheduleUtils {
     private static final String LOG_TAG = "ScheduleUtils";
+
+    public static Pair<String, String> inferDirectionEndpoints(String directionName, List<Stop> stops) {
+        final String DELIMETER = " - ";
+
+        List<String> stopNames = new ArrayList<>();
+
+        for (Stop stop : stops)
+            stopNames.add(stop.name);
+
+        String[] splitResult = directionName.split(DELIMETER);
+
+        if (splitResult.length == 2)
+            return new Pair<>(splitResult[0], splitResult[1]);
+
+        if (stopNames.size() >= 2) {
+            String from = stopNames.get(0);
+            String to = stopNames.get(stopNames.size() - 1);
+
+            String supposedDirectionName = from + DELIMETER + to;
+
+            if (directionName.equals(supposedDirectionName))
+                return new Pair<>(from, to);
+        }
+
+        for (int i = 0; i < splitResult.length - 1; i++) {
+            List<String> fromList = new ArrayList<>();
+            List<String> toList = new ArrayList<>();
+
+            for (int p = 0; p < splitResult.length; p++) {
+                if (p <= i)
+                    fromList.add(splitResult[p]);
+                else
+                    toList.add(splitResult[p]);
+            }
+
+            String from = StringUtil.join(fromList, DELIMETER);
+            String to = StringUtil.join(toList, DELIMETER);
+
+            if (stopNames.contains(from) && stopNames.contains(to))
+                return new Pair<>(from, to);
+        }
+
+        Log.e(LOG_TAG, String.format("Failed to infer endpoints for '%s'", directionName));
+
+        // TODO: 6/10/2018 return something more meaningful
+        return new Pair<>("???", "???");
+    }
 
     public static CharSequence daysMaskToString(Context context, CharSequence mask) {
         CharSequence result;
