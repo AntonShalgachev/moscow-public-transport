@@ -7,6 +7,7 @@ import android.util.Log;
 import com.shalgachev.moscowpublictransport.data.db.ScheduleCacheSQLiteHelper;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -43,19 +44,19 @@ public class ScheduleCacheTask extends AsyncTask<Void, Void, ScheduleCacheTask.R
 
             return args;
         }
-        public static Args addToMainMenu(List<Stop> stops) {
+        public static Args addToMainMenu(Collection<Stop> stops) {
             Args args = new Args(Operation.ADD_TO_MAIN_MENU);
             args.stops = new ArrayList<>(stops);
 
             return args;
         }
-        public static Args synchronizeStopsOnMainMenu(List<StopListItem> stops) {
+        public static Args synchronizeStopsOnMainMenu(Collection<StopListItem> stops) {
             Args args = new Args(Operation.SYNCHRONIZE_STOPS_ON_MAIN_MENU);
             args.selectableStops = new ArrayList<>(stops);
 
             return args;
         }
-        public static Args removeFromMainMenu(List<Stop> stops) {
+        public static Args removeFromMainMenu(Collection<Stop> stops) {
             Args args = new Args(Operation.REMOVE_FROM_MAIN_MENU);
             args.stops = new ArrayList<>(stops);
 

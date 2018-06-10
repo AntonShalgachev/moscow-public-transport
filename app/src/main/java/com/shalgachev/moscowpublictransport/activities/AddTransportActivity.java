@@ -25,6 +25,7 @@ import com.shalgachev.moscowpublictransport.data.Direction;
 import com.shalgachev.moscowpublictransport.data.Route;
 import com.shalgachev.moscowpublictransport.data.ScheduleArgs;
 import com.shalgachev.moscowpublictransport.data.ScheduleCacheTask;
+import com.shalgachev.moscowpublictransport.data.ScheduleDays;
 import com.shalgachev.moscowpublictransport.data.ScheduleError;
 import com.shalgachev.moscowpublictransport.data.ScheduleProviderTask;
 import com.shalgachev.moscowpublictransport.data.Stop;
@@ -52,10 +53,10 @@ public class AddTransportActivity extends AppCompatActivity {
     private TextView mDirectionToTextView;
     private Button mChooseRouteButton;
     private Route mRoute;
-    private ArrayList<Direction> mDirections;
+    private List<Direction> mDirections;
     private int mDirectionIdx;
     private Stops mStops;
-    private ArrayList<StopListItem> mStopListItems;
+    private Map<Stop, StopListItem> mStopListItems;
     private StopListPagerAdapter mPagerAdapter;
     private ProgressDialog mProgressDialog;
 
@@ -132,7 +133,7 @@ public class AddTransportActivity extends AppCompatActivity {
         if (mStopListItems == null)
             return;
 
-        new ScheduleCacheTask(getApplicationContext(), ScheduleCacheTask.Args.synchronizeStopsOnMainMenu(mStopListItems), new ScheduleCacheTask.IScheduleReceiver() {
+        new ScheduleCacheTask(getApplicationContext(), ScheduleCacheTask.Args.synchronizeStopsOnMainMenu(mStopListItems.values()), new ScheduleCacheTask.IScheduleReceiver() {
             @Override
             public void onResult(ScheduleCacheTask.Result result) {
                 ToastHelper.showStopDeltaToast(getApplicationContext(), result.stopsSaved, result.stopsDeleted);
@@ -185,26 +186,24 @@ public class AddTransportActivity extends AppCompatActivity {
         new ScheduleCacheTask(getApplicationContext(), ScheduleCacheTask.Args.getStopsOnMainMenu(mTransportType), new ScheduleCacheTask.IScheduleReceiver() {
             @Override
             public void onResult(ScheduleCacheTask.Result result) {
+                List<Stop> stopsOnMainMenu = result.stops;
+
                 if (mProgressDialog != null)
                     mProgressDialog.dismiss();
 
                 // TODO: 3/18/2018 handle errors
 
-                Set<Direction> directions = new HashSet<>();
-                mStopListItems = new ArrayList<>();
-                // TODO: 6/10/2018 revise this code; mStops contains info about all directions
+                mStopListItems = new HashMap<>();
                 for (Stop stop : mStops.getAllStops()) {
-                    directions.add(stop.direction);
-
                     // TODO: 3/10/2018 implement next stop indicator
                     StopListItem item = new StopListItem(stop, "<CHANGE ME PLZ>", false);
-                    mStopListItems.add(item);
+                    mStopListItems.put(stop, item);
 
-                    if (result.stops.contains(stop))
+                    if (stopsOnMainMenu.contains(stop))
                         item.selected = true;
                 }
 
-                mDirections = new ArrayList<>(directions);
+                mDirections = mStops.getDirections();
                 mDirectionIdx = 0;
 
                 updateDirection();
@@ -270,24 +269,15 @@ public class AddTransportActivity extends AppCompatActivity {
         if (currentDirection == null)
             return;
 
-        // TODO: 3/18/2018 optimize this logic, it takes a lot of time and blocks UI
-        Map<CharSequence, ArrayList<StopListItem>> stopMap = new HashMap<>();
-        for (StopListItem item : mStopListItems) {
-            if (currentDirection.equals(item.stop.direction)) {
-                String daysMask = item.stop.days.daysMask;
-
-                if (!stopMap.containsKey(daysMask))
-                    stopMap.put(daysMask, new ArrayList<StopListItem>());
-                stopMap.get(daysMask).add(item);
-            }
-        }
-
         mPagerAdapter.reset();
-        for (Map.Entry<CharSequence, ArrayList<StopListItem>> entry : stopMap.entrySet()) {
-            CharSequence daysMask = entry.getKey();
-            ArrayList<StopListItem> items = entry.getValue();
+        for (ScheduleDays scheduleDays : mStops.getScheduleDays()) {
+            List<Stop> stops = mStops.getStops(currentDirection, scheduleDays);
 
-            mPagerAdapter.addTab(daysMask, items);
+            List<StopListItem> stopListItems = new ArrayList<>();
+            for (Stop stop : stops)
+                stopListItems.add(mStopListItems.get(stop));
+
+            mPagerAdapter.addTab(scheduleDays.daysMask, stopListItems);
         }
     }
 

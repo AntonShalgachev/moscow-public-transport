@@ -248,7 +248,7 @@ public class ScheduleUtils {
                                         }
                                     }).execute();
                                 } else {
-                                    Log.e(LOG_TAG, "Error while refreshing schedule");
+                                    Log.e(LOG_TAG, String.format("Error while refreshing schedule: %s", result.error.code));
                                     if (listener != null)
                                         listener.onError(result.error);
                                 }

@@ -15,6 +15,7 @@ import com.shalgachev.moscowpublictransport.data.StopListItem;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A fragment representing a list of Items.
@@ -31,11 +32,11 @@ public class StopListFragment extends Fragment {
     public StopListFragment() {
     }
 
-    public static StopListFragment newInstance(ArrayList<StopListItem> items) {
+    public static StopListFragment newInstance(List<StopListItem> items) {
         StopListFragment fragment = new StopListFragment();
 
         Bundle args = new Bundle();
-        args.putSerializable(ARG_STOP_LIST_ITEMS, items);
+        args.putSerializable(ARG_STOP_LIST_ITEMS, new ArrayList<>(items));
         fragment.setArguments(args);
 
         return fragment;
