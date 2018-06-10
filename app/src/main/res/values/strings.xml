@@ -15,7 +15,7 @@
     <string name="add_trolley_title_extra">троллейбус</string>
     <string name="add_tram_title_extra">трамвай</string>
 
-    <string name="select_stops">Выберите остановки:</string>
+    <string name="select_stops">Остановки</string>
     <string name="select_route">Укажите маршрут</string>
 
     <string name="date_monday">понедельник</string>
@@ -100,4 +100,8 @@
     <string name="route_input_prompt">Начните вводить</string>
     <string name="button_title_goto_alpha">АБВ→</string>
     <string name="button_title_goto_digits">←123</string>
+    <string name="direction_a">А</string>
+    <string name="direction_b">Б</string>
+    <string name="direction_title">Направление</string>
+    <string name="season_title">Сезон</string>
 </resources>
