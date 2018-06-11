@@ -15,9 +15,14 @@ import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextSwitcher;
 import android.widget.TextView;
+import android.widget.ViewSwitcher;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.adapters.StopListPagerAdapter;
@@ -32,25 +37,22 @@ import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.StopListItem;
 import com.shalgachev.moscowpublictransport.data.Stops;
 import com.shalgachev.moscowpublictransport.data.TransportType;
-import com.shalgachev.moscowpublictransport.data.db.ScheduleCacheSQLiteHelper;
 import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
 import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
 import com.shalgachev.moscowpublictransport.helpers.ToastHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class AddTransportActivity extends AppCompatActivity {
     private static final String LOG_TAG = "AddTransportActivity";
     private static int REQUEST_ROUTE = 1;
 
     private TransportType mTransportType;
-    private TextView mDirectionFromTextView;
-    private TextView mDirectionToTextView;
+    private TextSwitcher mDirectionFromTextView;
+    private TextSwitcher mDirectionToTextView;
     private Button mChooseRouteButton;
     private Route mRoute;
     private List<Direction> mDirections;
@@ -161,7 +163,31 @@ public class AddTransportActivity extends AppCompatActivity {
         mDirectionFromTextView = findViewById(R.id.text_direction_from);
         mDirectionToTextView = findViewById(R.id.text_direction_to);
 
+        initTextSwitcher(mDirectionFromTextView);
+        initTextSwitcher(mDirectionToTextView);
+
         mChooseRouteButton = findViewById(R.id.input_route_button);
+    }
+
+    void initTextSwitcher(TextSwitcher ts) {
+        ts.setFactory(new ViewSwitcher.ViewFactory() {
+            @Override
+            public View makeView() {
+                TextView textView = new TextView(AddTransportActivity.this);
+                // TODO: 6/11/2018 extract to values
+                textView.setTextSize(14);
+                return textView;
+            }
+        });
+
+        Animation outAnim = AnimationUtils.loadAnimation(this, R.anim.slide_direction_out_bottom);
+        Animation inAnim = AnimationUtils.loadAnimation(this, R.anim.slide_direction_in_top);
+
+        outAnim.setInterpolator(new DecelerateInterpolator());
+        inAnim.setInterpolator(new DecelerateInterpolator());
+
+        ts.setOutAnimation(outAnim);
+        ts.setInAnimation(inAnim);
     }
 
     private void onProviderError(ScheduleError error) {

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <integer name="buttons_transition_duration">200</integer>
+    <integer name="direction_transition_duration">350</integer>
 
     <integer name="schedule_minute_animation_duration">500</integer>
     <integer name="schedule_item_appearance_duration">200</integer>

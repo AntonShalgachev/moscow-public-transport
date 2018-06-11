@@ -53,7 +53,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ufo" />
 
-    <TextView
+    <TextSwitcher
         android:id="@+id/text_direction_from"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -67,7 +67,7 @@
         app:layout_constraintStart_toEndOf="@+id/direction_a"
         app:layout_constraintTop_toTopOf="@+id/direction_a" />
 
-    <TextView
+    <TextSwitcher
         android:id="@+id/text_direction_to"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
