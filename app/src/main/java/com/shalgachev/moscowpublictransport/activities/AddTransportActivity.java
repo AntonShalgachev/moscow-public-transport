@@ -22,8 +22,11 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 import com.shalgachev.moscowpublictransport.R;
@@ -35,6 +38,7 @@ import com.shalgachev.moscowpublictransport.data.ScheduleCacheTask;
 import com.shalgachev.moscowpublictransport.data.ScheduleDays;
 import com.shalgachev.moscowpublictransport.data.ScheduleError;
 import com.shalgachev.moscowpublictransport.data.ScheduleProviderTask;
+import com.shalgachev.moscowpublictransport.data.Season;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.StopListItem;
 import com.shalgachev.moscowpublictransport.data.Stops;
@@ -57,9 +61,12 @@ public class AddTransportActivity extends AppCompatActivity {
     private TextSwitcher mDirectionToTextView;
     private Button mChooseRouteButton;
     private ImageButton mChangeDirectionButton;
+    private RadioGroup mSeasonGroup;
+    private TextView mSeasonTitle;
     private Route mRoute;
     private List<Direction> mDirections;
     private int mDirectionIdx;
+    private Season mSelectedSeason = Season.ALL;
     private Stops mStops;
     private Map<Stop, StopListItem> mStopListItems;
     private StopListPagerAdapter mPagerAdapter;
@@ -171,6 +178,26 @@ public class AddTransportActivity extends AppCompatActivity {
 
         mChooseRouteButton = findViewById(R.id.input_route_button);
         mChangeDirectionButton = findViewById(R.id.button_toggle_direction);
+
+        mSeasonGroup = findViewById(R.id.season_group);
+        mSeasonGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                mSelectedSeason = Season.ALL;
+                switch (checkedId) {
+                    case R.id.season_winter:
+                        mSelectedSeason = Season.WINTER;
+                        break;
+                    case R.id.season_summer:
+                        mSelectedSeason = Season.SUMMER;
+                        break;
+                }
+
+                updateStops();
+            }
+        });
+
+        mSeasonTitle = findViewById(R.id.season_title);
     }
 
     void initTextSwitcher(TextSwitcher ts) {
@@ -213,6 +240,19 @@ public class AddTransportActivity extends AppCompatActivity {
             Log.e(LOG_TAG, "Failed to load stops: stops are empty");
         }
 
+        mStopListItems = new HashMap<>();
+        for (Stop stop : mStops.getAllStops()) {
+            // TODO: 3/10/2018 implement next stop indicator
+            StopListItem item = new StopListItem(stop, "<CHANGE ME PLZ>", false);
+            mStopListItems.put(stop, item);
+        }
+
+        mDirections = mStops.getDirections();
+        mDirectionIdx = 0;
+
+        updateSeasons();
+        updateDirection();
+
         new ScheduleCacheTask(getApplicationContext(), ScheduleCacheTask.Args.getStopsOnMainMenu(mTransportType), new ScheduleCacheTask.IScheduleReceiver() {
             @Override
             public void onResult(ScheduleCacheTask.Result result) {
@@ -223,20 +263,27 @@ public class AddTransportActivity extends AppCompatActivity {
 
                 // TODO: 3/18/2018 handle errors
 
-                mStopListItems = new HashMap<>();
-                for (Stop stop : mStops.getAllStops()) {
-                    // TODO: 3/10/2018 implement next stop indicator
-                    StopListItem item = new StopListItem(stop, "<CHANGE ME PLZ>", false);
-                    mStopListItems.put(stop, item);
+//                mStopListItems = new HashMap<>();
+//                for (Stop stop : mStops.getAllStops()) {
+//                    // TODO: 3/10/2018 implement next stop indicator
+//                    StopListItem item = new StopListItem(stop, "<CHANGE ME PLZ>", false);
+//                    mStopListItems.put(stop, item);
+//
+//                    if (stopsOnMainMenu.contains(stop))
+//                        item.selected = true;
+//                }
 
-                    if (stopsOnMainMenu.contains(stop))
-                        item.selected = true;
+                for (Stop stop : stopsOnMainMenu) {
+                    if (stop == null)
+                        continue;
+
+                    StopListItem stopListItem = mStopListItems.get(stop);
+                    if (stopListItem == null)
+                        continue;
+
+                    stopListItem.selected = true;
                 }
 
-                mDirections = mStops.getDirections();
-                mDirectionIdx = 0;
-
-                updateDirection();
                 updateStops();
             }
         }).execute();
@@ -299,6 +346,37 @@ public class AddTransportActivity extends AppCompatActivity {
         mDirectionToTextView.setText(currentDirection.getTo());
     }
 
+    private void updateSeasons() {
+        boolean hasSpecialSeasons = false;
+        for (ScheduleDays scheduleDays : mStops.getScheduleDays()) {
+            if (scheduleDays.season != Season.ALL) {
+                hasSpecialSeasons = true;
+                break;
+            }
+        }
+
+        if (hasSpecialSeasons) {
+            // TODO: 6/13/2018 Choose actual for the current time season
+            mSelectedSeason = Season.WINTER;
+        } else {
+            mSelectedSeason = Season.ALL;
+        }
+
+        mSeasonTitle.setVisibility(hasSpecialSeasons ? View.VISIBLE : View.GONE);
+        mSeasonGroup.setVisibility(hasSpecialSeasons ? View.VISIBLE : View.GONE);
+
+        int idToCheck = -1;
+        switch (mSelectedSeason) {
+            case WINTER:
+                idToCheck = R.id.season_winter;
+                break;
+            case SUMMER:
+                idToCheck = R.id.season_summer;
+                break;
+        }
+        mSeasonGroup.check(idToCheck);
+    }
+
     private void updateStops() {
         Direction currentDirection = getCurrentDirection();
         if (currentDirection == null)
@@ -306,6 +384,9 @@ public class AddTransportActivity extends AppCompatActivity {
 
         mPagerAdapter.reset();
         for (ScheduleDays scheduleDays : mStops.getScheduleDays()) {
+            if (scheduleDays.season != mSelectedSeason)
+                continue;
+
             List<Stop> stops = mStops.getStops(currentDirection, scheduleDays);
 
             List<StopListItem> stopListItems = new ArrayList<>();

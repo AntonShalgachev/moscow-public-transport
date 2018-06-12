@@ -144,11 +144,10 @@
         android:id="@+id/season_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
         android:layout_marginTop="8dp"
         android:text="@string/season_title"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/season_group"
         app:layout_constraintTop_toBottomOf="@+id/divider" />
 
     <FrameLayout
@@ -199,5 +198,30 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.55" />
+
+    <RadioGroup
+        android:id="@+id/season_group"
+        android:layout_width="wrap_content"
+        android:layout_height="65dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="16dp"
+        android:gravity="start"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/season_title">
+
+        <RadioButton
+            android:id="@+id/season_winter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/season_winter" />
+
+        <RadioButton
+            android:id="@+id/season_summer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/season_summer" />
+    </RadioGroup>
 
 </android.support.constraint.ConstraintLayout>
