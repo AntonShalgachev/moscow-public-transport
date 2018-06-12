@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item>
+        <shape android:shape="oval" android:padding="10dp">
+            <size
+                android:width="256dp"
+                android:height="256dp" />
+            <solid
+                android:color="@color/change_direction_background_color" />
+        </shape>
+    </item>
+    <item android:drawable="@drawable/ic_swap_vert_black_48dp" />
+
+</layer-list>

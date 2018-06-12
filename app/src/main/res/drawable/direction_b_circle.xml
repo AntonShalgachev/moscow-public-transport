@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval" >
+    <size
+        android:width="@dimen/direction_background_size"
+        android:height="@dimen/direction_background_size" />
+    <solid
+        android:color="@color/direction_b_background_color" />
+</shape>

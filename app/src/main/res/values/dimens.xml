@@ -19,4 +19,7 @@
     <dimen name="minute_card_disabled_elevation">1dp</dimen>
     <dimen name="hour_card_enabled_elevation">0dp</dimen>
     <dimen name="hour_card_disabled_elevation">0dp</dimen>
+
+    <dimen name="direction_background_size">32dp</dimen>
+    <dimen name="direction_text_size">20sp</dimen>
 </resources>

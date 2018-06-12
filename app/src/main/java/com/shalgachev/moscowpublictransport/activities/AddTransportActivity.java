@@ -3,6 +3,7 @@ package com.shalgachev.moscowpublictransport.activities;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.StringRes;
@@ -19,6 +20,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
@@ -54,6 +56,7 @@ public class AddTransportActivity extends AppCompatActivity {
     private TextSwitcher mDirectionFromTextView;
     private TextSwitcher mDirectionToTextView;
     private Button mChooseRouteButton;
+    private ImageButton mChangeDirectionButton;
     private Route mRoute;
     private List<Direction> mDirections;
     private int mDirectionIdx;
@@ -167,6 +170,7 @@ public class AddTransportActivity extends AppCompatActivity {
         initTextSwitcher(mDirectionToTextView);
 
         mChooseRouteButton = findViewById(R.id.input_route_button);
+        mChangeDirectionButton = findViewById(R.id.button_toggle_direction);
     }
 
     void initTextSwitcher(TextSwitcher ts) {
@@ -266,6 +270,11 @@ public class AddTransportActivity extends AppCompatActivity {
 
         updateDirection();
         updateStops();
+
+        mChangeDirectionButton.setRotation(0.0f);
+
+        long animDuration = getResources().getInteger(R.integer.direction_transition_duration);
+        mChangeDirectionButton.animate().rotation(360.0f).setDuration(animDuration).setInterpolator(new DecelerateInterpolator()).start();
     }
 
     public void onClickRouteInput(View view) {

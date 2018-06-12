@@ -83,18 +83,20 @@
 
     <ImageButton
         android:id="@+id/button_toggle_direction"
+        style="@style/Widget.AppCompat.ImageButton"
         android:layout_width="40dp"
         android:layout_height="0dp"
         android:layout_marginBottom="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:background="@null"
         android:onClick="onClickSwapDirections"
-        android:scaleType="centerCrop"
+        android:scaleType="centerInside"
         app:layout_constraintBottom_toBottomOf="@+id/direction_b"
         app:layout_constraintStart_toStartOf="@+id/guideline2"
         app:layout_constraintTop_toTopOf="@+id/direction_a"
         app:layout_constraintVertical_bias="1.0"
-        app:srcCompat="@drawable/ic_swap_vert_black_48dp" />
+        app:srcCompat="@drawable/change_direction_circle" />
 
     <TextView
         android:id="@+id/textView"
@@ -169,8 +171,11 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
+        android:background="@drawable/direction_a_circle"
+        android:gravity="center"
         android:text="@string/direction_a"
-        android:textSize="24sp"
+        android:textAlignment="center"
+        android:textSize="@dimen/direction_text_size"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/direction_title" />
 
@@ -180,8 +185,11 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
+        android:background="@drawable/direction_b_circle"
+        android:gravity="center"
         android:text="@string/direction_b"
-        android:textSize="24sp"
+        android:textAlignment="center"
+        android:textSize="@dimen/direction_text_size"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/direction_a" />
 
