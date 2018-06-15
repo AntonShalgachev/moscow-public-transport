@@ -2,9 +2,6 @@ package com.shalgachev.moscowpublictransport.activities;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.support.annotation.AnimRes;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentTransaction;
@@ -13,9 +10,11 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.HapticFeedbackConstants;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -37,6 +36,7 @@ public class RouteInputActivity extends AppCompatActivity implements ButtonsFrag
     private static String EXTRA_ROUTE = "com.shalgachev.moscowpublictransport.intent.ROUTE";
 
     TransportType mTransportType;
+    ImageButton mDeleteButton;
     ProgressBar mProgressBar;
     RecyclerView mRouteList;
     TextView mRouteTextView;
@@ -96,6 +96,15 @@ public class RouteInputActivity extends AppCompatActivity implements ButtonsFrag
             throw new IllegalArgumentException("Transport transportType is null");
 
         setContentView(R.layout.activity_route_input);
+
+        mDeleteButton = findViewById(R.id.delete);
+        mDeleteButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                onDeleteAll();
+                return true;
+            }
+        });
 
         mProgressBar = findViewById(R.id.progress);
         mRouteList = findViewById(R.id.route_list);
@@ -205,6 +214,8 @@ public class RouteInputActivity extends AppCompatActivity implements ButtonsFrag
 
     @Override
     public void onCharacterInput(CharSequence str) {
+        vibrate();
+
         if (mRouteInput.length() >= MAX_INPUT_LENGTH)
             return;
 
@@ -217,14 +228,27 @@ public class RouteInputActivity extends AppCompatActivity implements ButtonsFrag
     }
 
     public void onCharacterDelete(View view) {
+        vibrate();
+
         if (mRouteInput.length() > 0) {
             mRouteInput = mRouteInput.substring(0, mRouteInput.length() - 1);
             onInputChanged();
         }
     }
 
+    public void onDeleteAll() {
+        vibrate();
+
+        if (mRouteInput.length() > 0) {
+            mRouteInput = "";
+            onInputChanged();
+        }
+    }
+
     @Override
     public void onTransitionRequested(ButtonsFragment.Type currentType) {
+        vibrate();
+
         ButtonsFragment.Type nextType = ButtonsFragment.Type.Alpha;
         @AnimRes int enterAnim = R.anim.slide_in_left;
         @AnimRes int exitAnim = R.anim.slide_out_right;
@@ -248,5 +272,9 @@ public class RouteInputActivity extends AppCompatActivity implements ButtonsFrag
         transaction.setCustomAnimations(enterAnim, exitAnim);
         transaction.replace(R.id.buttons, fragment);
         transaction.commit();
+    }
+
+    private void vibrate() {
+        getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
     }
 }

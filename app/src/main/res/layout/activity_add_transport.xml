@@ -215,14 +215,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/season_winter" />
+            android:text="@string/season_winter"
+            android:textSize="18sp" />
 
         <RadioButton
             android:id="@+id/season_summer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/season_summer" />
+            android:text="@string/season_summer"
+            android:textSize="18sp" />
     </RadioGroup>
 
 </android.support.constraint.ConstraintLayout>
