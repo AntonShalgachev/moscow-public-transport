@@ -43,15 +43,13 @@
         android:id="@+id/image_transport_icon"
         android:layout_width="wrap_content"
         android:layout_height="80dp"
-        android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="16dp"
         android:adjustViewBounds="true"
-        android:background="@drawable/ufo_circle"
         android:scaleType="fitXY"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ufo" />
+        app:srcCompat="@drawable/ufo_in_circle" />
 
     <TextSwitcher
         android:id="@+id/text_direction_from"

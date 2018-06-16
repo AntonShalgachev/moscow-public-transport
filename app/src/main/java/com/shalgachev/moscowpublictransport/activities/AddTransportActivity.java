@@ -3,7 +3,6 @@ package com.shalgachev.moscowpublictransport.activities;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.StringRes;
@@ -22,11 +21,9 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 import com.shalgachev.moscowpublictransport.R;
@@ -160,7 +157,6 @@ public class AddTransportActivity extends AppCompatActivity {
         setTitle(getString(R.string.add_transport_title, getString(transportData.titleExtraResource)));
 
         ImageView transportIcon = findViewById(R.id.image_transport_icon);
-        transportIcon.setBackgroundResource(transportData.iconBackgroundResource);
         transportIcon.setImageResource(transportData.iconImageResource);
 
         ViewPager viewPager = findViewById(R.id.stops_container);
@@ -262,16 +258,6 @@ public class AddTransportActivity extends AppCompatActivity {
                     mProgressDialog.dismiss();
 
                 // TODO: 3/18/2018 handle errors
-
-//                mStopListItems = new HashMap<>();
-//                for (Stop stop : mStops.getAllStops()) {
-//                    // TODO: 3/10/2018 implement next stop indicator
-//                    StopListItem item = new StopListItem(stop, "<CHANGE ME PLZ>", false);
-//                    mStopListItems.put(stop, item);
-//
-//                    if (stopsOnMainMenu.contains(stop))
-//                        item.selected = true;
-//                }
 
                 for (Stop stop : stopsOnMainMenu) {
                     if (stop == null)
@@ -402,18 +388,15 @@ public class AddTransportActivity extends AppCompatActivity {
         switch (mTransportType) {
             case BUS:
                 transportData.titleExtraResource = R.string.add_bus_title_extra;
-                transportData.iconBackgroundResource = R.drawable.bus_circle;
-                transportData.iconImageResource = R.drawable.bus;
+                transportData.iconImageResource = R.drawable.bus_in_circle;
                 break;
             case TROLLEY:
                 transportData.titleExtraResource = R.string.add_trolley_title_extra;
-                transportData.iconBackgroundResource = R.drawable.trolley_circle;
-                transportData.iconImageResource = R.drawable.trolley;
+                transportData.iconImageResource = R.drawable.trolley_in_circle;
                 break;
             case TRAM:
                 transportData.titleExtraResource = R.string.add_tram_title_extra;
-                transportData.iconBackgroundResource = R.drawable.tram_circle;
-                transportData.iconImageResource = R.drawable.tram;
+                transportData.iconImageResource = R.drawable.tram_in_circle;
                 break;
             default:
                 throw new IllegalArgumentException("Unexpected transport transportType");
@@ -426,9 +409,6 @@ public class AddTransportActivity extends AppCompatActivity {
         private
         @StringRes
         int titleExtraResource;
-        private
-        @DrawableRes
-        int iconBackgroundResource;
         private
         @DrawableRes
         int iconImageResource;

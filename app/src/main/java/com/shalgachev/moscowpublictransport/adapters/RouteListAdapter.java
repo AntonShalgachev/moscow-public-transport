@@ -1,12 +1,14 @@
 package com.shalgachev.moscowpublictransport.adapters;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
@@ -146,13 +148,25 @@ public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.View
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         final SelectableRoute route = mFilteredRoutes.get(position);
 
         holder.route = route;
         holder.mNameView.setText(route.name);
         holder.mProviderView.setText(BaseScheduleProvider.getScheduleProvider(route.providerId).getProviderName(mContext));
         holder.mRadioButton.setChecked(route.selected);
+
+        switch(route.transportType) {
+            case BUS:
+                holder.mRouteIcon.setImageResource(R.drawable.bus_in_circle);
+                break;
+            case TROLLEY:
+                holder.mRouteIcon.setImageResource(R.drawable.trolley_in_circle);
+                break;
+            case TRAM:
+                holder.mRouteIcon.setImageResource(R.drawable.tram_in_circle);
+                break;
+        }
     }
 
     @Override
@@ -165,6 +179,7 @@ public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.View
         public final TextView mNameView;
         public final TextView mProviderView;
         public final RadioButton mRadioButton;
+        public final ImageView mRouteIcon;
         public SelectableRoute route;
 
         ItemIterationListener mListener;
@@ -175,6 +190,7 @@ public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.View
             mNameView = view.findViewById(R.id.route_name);
             mProviderView = view.findViewById(R.id.provider_name);
             mRadioButton = view.findViewById(R.id.route_radio_button);
+            mRouteIcon = view.findViewById(R.id.route_icon);
 
             mListener = listener;
 

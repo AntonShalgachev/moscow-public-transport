@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:shape="oval" >
+            <size
+                android:width="256dp"
+                android:height="256dp" />
+            <solid
+                android:color="#74C365" />
+        </shape>
+    </item>
+    <item android:drawable="@drawable/trolley"/>
+</layer-list>
