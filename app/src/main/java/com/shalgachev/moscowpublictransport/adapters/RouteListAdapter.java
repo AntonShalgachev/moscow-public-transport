@@ -35,10 +35,16 @@ public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.View
         this.mContext = context;
     }
 
-    public void setAvailableRoutes(final List<Route> routes, CharSequence filter) {
+    public void setAvailableRoutes(final List<Route> routes, CharSequence filter, CharSequence routeToSelect) {
         mRoutes = new ArrayList<>();
-        for (Route route : routes)
-            mRoutes.add(new SelectableRoute(route));
+        for (Route route : routes) {
+            SelectableRoute selectableRoute = new SelectableRoute(route);
+
+            if (routeToSelect != null && selectableRoute.name.equals(routeToSelect))
+                selectableRoute.selected = true;
+
+            mRoutes.add(selectableRoute);
+        }
 
         filter(filter);
     }

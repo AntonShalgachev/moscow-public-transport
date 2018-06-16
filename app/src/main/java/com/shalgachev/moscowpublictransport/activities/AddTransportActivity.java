@@ -12,6 +12,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -92,7 +93,10 @@ public class AddTransportActivity extends AppCompatActivity {
     }
 
     private void startRouteInputActivity() {
-        startActivityForResult(RouteInputActivity.createIntent(this, mTransportType), REQUEST_ROUTE);
+        if (mRoute != null)
+            startActivityForResult(RouteInputActivity.createIntent(this, mTransportType, mRoute.name), REQUEST_ROUTE);
+        else
+            startActivityForResult(RouteInputActivity.createIntent(this, mTransportType), REQUEST_ROUTE);
     }
 
     @Override
@@ -105,6 +109,9 @@ public class AddTransportActivity extends AppCompatActivity {
                 if (route == null)
                     throw new AssertionError("Route shouldn't be null");
 
+                if (route.equals(mRoute))
+                    return;
+
                 Log.d(LOG_TAG, String.format("Selected route: '%s'", route.toString()));
 
                 mRoute = route;
@@ -113,6 +120,8 @@ public class AddTransportActivity extends AppCompatActivity {
                 mChooseRouteButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
 
                 loadStops();
+            } else if (mRoute == null) {
+                finish();
             }
         }
     }
@@ -201,8 +210,11 @@ public class AddTransportActivity extends AppCompatActivity {
             @Override
             public View makeView() {
                 TextView textView = new TextView(AddTransportActivity.this);
-                // TODO: 6/11/2018 extract to values
-                textView.setTextSize(14);
+                float size = getResources().getDimension(R.dimen.direction_name_size);
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
+
+                textView.setGravity(Gravity.START);
+                textView.setMaxWidth(getResources().getDimensionPixelSize(R.dimen.direction_name_max_width));
                 return textView;
             }
         });

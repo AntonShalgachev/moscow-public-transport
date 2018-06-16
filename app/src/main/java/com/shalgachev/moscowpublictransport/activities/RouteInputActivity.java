@@ -33,6 +33,7 @@ import java.util.List;
 public class RouteInputActivity extends AppCompatActivity implements ButtonsFragment.OnFragmentInteractionListener {
     private static final int MAX_INPUT_LENGTH = 10;
     private static String EXTRA_TRANSPORT_TYPE = "com.shalgachev.moscowpublictransport.intent.TRANSPORT_TYPE";
+    private static String EXTRA_INITIAL_INPUT = "com.shalgachev.moscowpublictransport.intent.INITIAL_INPUT";
     private static String EXTRA_ROUTE = "com.shalgachev.moscowpublictransport.intent.ROUTE";
 
     TransportType mTransportType;
@@ -45,10 +46,19 @@ public class RouteInputActivity extends AppCompatActivity implements ButtonsFrag
     RouteListAdapter mRouteListAdapter;
 
     String mRouteInput = "";
+    String mRouteToSelect = null;
 
     public static Intent createIntent(Activity activity, TransportType type) {
         Intent intent = new Intent(activity, RouteInputActivity.class);
         intent.putExtra(EXTRA_TRANSPORT_TYPE, type);
+
+        return intent;
+    }
+
+    public static Intent createIntent(Activity activity, TransportType type, String initialInput) {
+        Intent intent = new Intent(activity, RouteInputActivity.class);
+        intent.putExtra(EXTRA_TRANSPORT_TYPE, type);
+        intent.putExtra(EXTRA_INITIAL_INPUT, initialInput);
 
         return intent;
     }
@@ -89,8 +99,13 @@ public class RouteInputActivity extends AppCompatActivity implements ButtonsFrag
         super.onCreate(savedInstanceState);
 
         Bundle extras = getIntent().getExtras();
-        if (extras != null)
+        if (extras != null) {
             mTransportType = (TransportType) extras.getSerializable(EXTRA_TRANSPORT_TYPE);
+            if (extras.containsKey(EXTRA_INITIAL_INPUT)) {
+                mRouteInput = extras.getString(EXTRA_INITIAL_INPUT);
+                mRouteToSelect = mRouteInput;
+            }
+        }
 
         if (mTransportType == null)
             throw new IllegalArgumentException("Transport transportType is null");
@@ -195,7 +210,7 @@ public class RouteInputActivity extends AppCompatActivity implements ButtonsFrag
     }
 
     void onRoutesAvailable(List<Route> routes) {
-        mRouteListAdapter.setAvailableRoutes(routes, mRouteInput);
+        mRouteListAdapter.setAvailableRoutes(routes, mRouteInput, mRouteToSelect);
     }
 
     void addButtons() {

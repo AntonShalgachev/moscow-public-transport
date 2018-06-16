@@ -10,4 +10,7 @@
     <integer name="time_updater_max_late_minutes">1</integer>
 
     <dimen name="route_button_selected_text_size">40sp</dimen>
+
+    <dimen name="direction_name_max_width">200dp</dimen>
+    <dimen name="direction_name_size">14sp</dimen>
 </resources>

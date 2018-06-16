@@ -18,7 +18,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/direction_b">
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout">
 
     </FrameLayout>
 
@@ -50,51 +50,6 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ufo_in_circle" />
-
-    <TextSwitcher
-        android:id="@+id/text_direction_from"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:maxLines="2"
-        android:text="From"
-        android:textAlignment="viewStart"
-        app:layout_constraintBottom_toBottomOf="@+id/direction_a"
-        app:layout_constraintEnd_toStartOf="@+id/guideline2"
-        app:layout_constraintStart_toEndOf="@+id/direction_a"
-        app:layout_constraintTop_toTopOf="@+id/direction_a" />
-
-    <TextSwitcher
-        android:id="@+id/text_direction_to"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:maxLines="2"
-        android:text="To"
-        android:textAlignment="viewStart"
-        app:layout_constraintBottom_toBottomOf="@+id/direction_b"
-        app:layout_constraintEnd_toStartOf="@+id/guideline2"
-        app:layout_constraintStart_toEndOf="@+id/direction_b"
-        app:layout_constraintTop_toTopOf="@+id/direction_b" />
-
-    <ImageButton
-        android:id="@+id/button_toggle_direction"
-        style="@style/Widget.AppCompat.ImageButton"
-        android:layout_width="40dp"
-        android:layout_height="0dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:background="@null"
-        android:onClick="onClickSwapDirections"
-        android:scaleType="centerInside"
-        app:layout_constraintBottom_toBottomOf="@+id/direction_b"
-        app:layout_constraintStart_toStartOf="@+id/guideline2"
-        app:layout_constraintTop_toTopOf="@+id/direction_a"
-        app:layout_constraintVertical_bias="1.0"
-        app:srcCompat="@drawable/change_direction_circle" />
 
     <TextView
         android:id="@+id/textView"
@@ -163,40 +118,113 @@
 
     </FrameLayout>
 
-    <TextView
-        android:id="@+id/direction_a"
+    <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:background="@drawable/direction_a_circle"
-        android:gravity="center"
-        android:text="@string/direction_a"
-        android:textAlignment="center"
-        android:textSize="@dimen/direction_text_size"
+        android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/direction_title" />
+        app:layout_constraintTop_toBottomOf="@+id/direction_title"
+        app:layout_constraintWidth_max="200dp">
 
-    <TextView
-        android:id="@+id/direction_b"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/direction_b_circle"
-        android:gravity="center"
-        android:text="@string/direction_b"
-        android:textAlignment="center"
-        android:textSize="@dimen/direction_text_size"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/direction_a" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|start"
+            android:orientation="vertical">
 
-    <android.support.constraint.Guideline
-        android:id="@+id/guideline2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.55" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|start"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/direction_a"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/direction_a_circle"
+                    android:gravity="center"
+                    android:text="@string/direction_a"
+                    android:textAlignment="center"
+                    android:textSize="@dimen/direction_text_size"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="156dp" />
+
+                <TextSwitcher
+                    android:id="@+id/text_direction_from"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:maxLines="2"
+                    android:text="From"
+                    android:measureAllChildren="false"
+                    android:textAlignment="viewStart"
+                    app:layout_constraintStart_toEndOf="@+id/direction_a"
+                    tools:layout_editor_absoluteY="188dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|start"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/direction_b"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/direction_b_circle"
+                    android:gravity="center"
+                    android:text="@string/direction_b"
+                    android:textAlignment="center"
+                    android:textSize="@dimen/direction_text_size"
+                    tools:layout_editor_absoluteX="16dp"
+                    tools:layout_editor_absoluteY="189dp" />
+
+                <TextSwitcher
+                    android:id="@+id/text_direction_to"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:maxLines="2"
+                    android:text="To"
+                    android:measureAllChildren="false"
+                    android:textAlignment="viewStart"
+                    tools:layout_editor_absoluteX="56dp"
+                    tools:layout_editor_absoluteY="205dp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/button_toggle_direction"
+            style="@style/Widget.AppCompat.ImageButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@null"
+            android:onClick="onClickSwapDirections"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/change_direction_circle"
+            tools:layout_editor_absoluteX="198dp"
+            tools:layout_editor_absoluteY="379dp" />
+
+    </LinearLayout>
 
     <RadioGroup
         android:id="@+id/season_group"
@@ -220,9 +248,18 @@
             android:id="@+id/season_summer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:layout_weight="1"
             android:text="@string/season_summer"
             android:textSize="18sp" />
     </RadioGroup>
+
+    <android.support.constraint.Barrier
+        android:id="@+id/barrier2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="right"
+        app:constraint_referenced_ids="linearLayout"
+        tools:layout_editor_absoluteX="360dp" />
 
 </android.support.constraint.ConstraintLayout>
