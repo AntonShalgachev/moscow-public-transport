@@ -29,6 +29,7 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -251,6 +252,9 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
                         throw new ScheduleProviderException(ScheduleError.ErrorCode.PARSING_ERROR);
                 }
             }
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            throw new ScheduleProviderException(ScheduleError.ErrorCode.INTERNET_NOT_AVAILABLE);
         } catch (IOException e) {
             e.printStackTrace();
             throw new ScheduleProviderException(ScheduleError.ErrorCode.INTERNAL_ERROR);
