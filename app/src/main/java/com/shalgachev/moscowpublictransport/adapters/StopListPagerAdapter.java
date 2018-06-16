@@ -27,6 +27,7 @@ public class StopListPagerAdapter extends FragmentPagerAdapter {
         mFragmentManager = fragmentManager;
 
         reset();
+        notifyDataSetChanged();
     }
 
     @Override
@@ -54,7 +55,6 @@ public class StopListPagerAdapter extends FragmentPagerAdapter {
         Fragment fragment = StopListFragment.newInstance(stopListItems);
 
         mFragmentHolders.add(new FragmentHolder(title, fragment));
-        notifyDataSetChanged();
     }
 
     public void reset() {
@@ -68,7 +68,6 @@ public class StopListPagerAdapter extends FragmentPagerAdapter {
         }
 
         mFragmentHolders = new ArrayList<>();
-        notifyDataSetChanged();
     }
 
     private class FragmentHolder {

@@ -87,6 +87,7 @@
     <!--Schedule errors-->
     <string name="schedule_error_unknown">Неизвестная ошибка (%s)</string>
     <string name="schedule_error_internet_not_available">Нет соединения с интернетом</string>
+    <string name="schedule_error_invalid_schedule_url">Остановка устарела. Попробуйте добавить её заново</string>
 
     <string name="toast_stops_saved">Добавлено остановок: %d</string>
     <string name="toast_stops_deleted">Удалено остановок: %d</string>

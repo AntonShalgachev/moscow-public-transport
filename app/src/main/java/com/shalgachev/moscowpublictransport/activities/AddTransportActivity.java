@@ -68,6 +68,7 @@ public class AddTransportActivity extends AppCompatActivity {
     private Stops mStops;
     private Map<Stop, StopListItem> mStopListItems;
     private StopListPagerAdapter mPagerAdapter;
+    private ViewPager mViewPager;
     private ProgressDialog mProgressDialog;
 
     @Override
@@ -168,12 +169,12 @@ public class AddTransportActivity extends AppCompatActivity {
         ImageView transportIcon = findViewById(R.id.image_transport_icon);
         transportIcon.setImageResource(transportData.iconImageResource);
 
-        ViewPager viewPager = findViewById(R.id.stops_container);
+        mViewPager = findViewById(R.id.stops_container);
         mPagerAdapter = new StopListPagerAdapter(getSupportFragmentManager(), this);
-        viewPager.setAdapter(mPagerAdapter);
+        mViewPager.setAdapter(mPagerAdapter);
 
         TabLayout tabLayout = findViewById(R.id.days_tabs);
-        tabLayout.setupWithViewPager(viewPager);
+        tabLayout.setupWithViewPager(mViewPager);
 
         mDirectionFromTextView = findViewById(R.id.text_direction_from);
         mDirectionToTextView = findViewById(R.id.text_direction_to);
@@ -393,6 +394,8 @@ public class AddTransportActivity extends AppCompatActivity {
 
             mPagerAdapter.addTab(scheduleDays.daysMask, stopListItems);
         }
+
+        mPagerAdapter.notifyDataSetChanged();
     }
 
     private TransportData getTransportData() {

@@ -31,6 +31,7 @@ public class ScheduleError {
         ERROR_DESCRIPTION_IDS = new HashMap<>();
 
         ERROR_DESCRIPTION_IDS.put(ErrorCode.INTERNET_NOT_AVAILABLE, R.string.schedule_error_internet_not_available);
+        ERROR_DESCRIPTION_IDS.put(ErrorCode.INVALID_SCHEDULE_URL, R.string.schedule_error_invalid_schedule_url);
     }
 
     public ScheduleError(ErrorCode code) {
