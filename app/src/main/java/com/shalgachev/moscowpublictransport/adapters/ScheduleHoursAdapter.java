@@ -62,11 +62,12 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull List<Object> payloads) {
+        Log.v(LOG_TAG, String.format("onBindViewHolder for position %d", position));
         if (!payloads.isEmpty()) {
-            Log.d(LOG_TAG, "Animating changes");
             holder.mAdapter.onDataUpdated();
 
             int hour = mTimepoints.getNthHour(position);
+            Log.d(LOG_TAG, String.format("Animating changes for hour %d", hour));
             List<Timepoint> timepoints = mTimepoints.getHoursMap().get(hour);
 
             Context context = holder.view.getContext();
@@ -85,14 +86,14 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
                 AnimationHelper.animateTextColor(holder.mHourView, holder.colorEnabled, holder.colorDisabled).setDuration(animDuration).start();
             holder.isEnabled = isEnabled;
         } else {
-            Log.d(LOG_TAG, "Recreating dataset from scratch");
             onBindViewHolder(holder, position);
         }
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         int hour = mTimepoints.getNthHour(position);
+        Log.d(LOG_TAG, String.format("Recreating dataset from scratch for hour %d", hour));
         List<Timepoint> timepoints = mTimepoints.getHoursMap().get(hour);
         holder.mHourView.setText(String.valueOf(hour));
 
