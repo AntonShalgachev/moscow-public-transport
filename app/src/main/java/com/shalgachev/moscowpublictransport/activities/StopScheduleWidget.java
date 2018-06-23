@@ -1,12 +1,15 @@
 package com.shalgachev.moscowpublictransport.activities;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
+import android.content.Intent;
 import android.widget.RemoteViews;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.ScheduleCacheTask;
+import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
 
 /**
  * Implementation of App Widget functionality.
@@ -25,6 +28,11 @@ public class StopScheduleWidget extends AppWidgetProvider {
 
                 RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.stop_schedule_widget);
                 views.setTextViewText(R.id.appwidget_text, result.stop.toString());
+
+                Intent intent = new Intent(context, ScheduleActivity.class);
+                intent.putExtra(ExtraHelper.STOP_EXTRA, result.stop);
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+                views.setOnClickPendingIntent(R.id.appwidget_text, pendingIntent);
 
                 appWidgetManager.updateAppWidget(appWidgetId, views);
             }
