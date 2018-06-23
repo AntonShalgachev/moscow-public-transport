@@ -20,10 +20,11 @@ public class StopScheduleWidget extends AppWidgetProvider {
         new ScheduleCacheTask(context.getApplicationContext(), ScheduleCacheTask.Args.getStopForWidgetId(appWidgetId), new ScheduleCacheTask.IScheduleReceiver() {
             @Override
             public void onResult(ScheduleCacheTask.Result result) {
-                String widgetText = result.stop != null ? result.stop.toString() : "???";
+                if (result.stop == null)
+                    return;
 
                 RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.stop_schedule_widget);
-                views.setTextViewText(R.id.appwidget_text, widgetText);
+                views.setTextViewText(R.id.appwidget_text, result.stop.toString());
 
                 appWidgetManager.updateAppWidget(appWidgetId, views);
             }

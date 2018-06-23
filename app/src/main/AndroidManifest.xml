@@ -65,7 +65,8 @@
         </receiver>
 
         <activity android:name=".activities.StopScheduleWidgetConfigureActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:label="@string/appwidget_single_stop_title">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>

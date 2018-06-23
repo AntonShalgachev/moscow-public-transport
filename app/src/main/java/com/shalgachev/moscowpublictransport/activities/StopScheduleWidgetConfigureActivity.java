@@ -43,8 +43,6 @@ public class StopScheduleWidgetConfigureActivity extends AppCompatActivity imple
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        setTitle(R.string.appwidget_single_stop_title);
-
         mPagerAdapter = new SavedStopPagerAdapter(true, getSupportFragmentManager(), this);
 
         mViewPager = findViewById(R.id.container);
