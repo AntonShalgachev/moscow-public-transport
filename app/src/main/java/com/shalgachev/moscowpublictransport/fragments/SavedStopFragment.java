@@ -1,5 +1,6 @@
 package com.shalgachev.moscowpublictransport.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -29,13 +30,16 @@ import java.util.List;
 public class SavedStopFragment extends Fragment {
 
     private static final String ARG_TRANSPORT_TYPE = "transport_type";
+    private static final String ARG_FROM_WIDGET = "from_widget";
 
     private TransportType mTransportType;
+    private boolean mFromWidget;
+
     private SavedStopRecyclerViewAdapter.ViewHolder.ItemIterationListener mListener;
     private RecyclerView mRecycleView;
     private SavedStopRecyclerViewAdapter mRecyclerAdapter;
 
-    FloatingActionButton mFab;
+    FloatingActionButton mFab = null;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -44,10 +48,11 @@ public class SavedStopFragment extends Fragment {
     public SavedStopFragment() {
     }
 
-    public static SavedStopFragment newInstance(TransportType transportType) {
+    public static SavedStopFragment newInstance(TransportType transportType, boolean fromWidget) {
         SavedStopFragment fragment = new SavedStopFragment();
         Bundle args = new Bundle();
         args.putSerializable(ARG_TRANSPORT_TYPE, transportType);
+        args.putSerializable(ARG_FROM_WIDGET, fromWidget);
         fragment.setArguments(args);
         return fragment;
     }
@@ -58,6 +63,7 @@ public class SavedStopFragment extends Fragment {
 
         if (getArguments() != null) {
             mTransportType = (TransportType) getArguments().getSerializable(ARG_TRANSPORT_TYPE);
+            mFromWidget = (boolean) getArguments().getSerializable(ARG_FROM_WIDGET);
         }
     }
 
@@ -82,19 +88,29 @@ public class SavedStopFragment extends Fragment {
         mRecycleView.setAdapter(mRecyclerAdapter);
 
         mFab = rootView.findViewById(R.id.fab);
-        mFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), AddTransportActivity.class);
-                intent.putExtra(ExtraHelper.TRANSPORT_TYPE_EXTRA, mTransportType);
-                startActivity(intent);
-            }
-        });
+        if (mFromWidget) {
+            mFab.hide();
+            mFab = null;
+        }
+
+        if (mFab != null) {
+            mFab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(getActivity(), AddTransportActivity.class);
+                    intent.putExtra(ExtraHelper.TRANSPORT_TYPE_EXTRA, mTransportType);
+                    startActivity(intent);
+                }
+            });
+        }
 
         mRecycleView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+
+                if (mFab == null)
+                    return;
 
                 if (dy > 0)
                     mFab.hide();
@@ -129,14 +145,18 @@ public class SavedStopFragment extends Fragment {
             return;
 
         // TODO: 3/18/2018 progress indicator
-        new ScheduleCacheTask(getActivity(), ScheduleCacheTask.Args.getStopsOnMainMenu(mTransportType), new ScheduleCacheTask.IScheduleReceiver() {
-            @Override
-            public void onResult(ScheduleCacheTask.Result result) {
-                mRecyclerAdapter.updateStops(result.stops);
-            }
-        }).execute();
+        Activity activity = getActivity();
+        if (activity != null) {
+            new ScheduleCacheTask(activity.getApplicationContext(), ScheduleCacheTask.Args.getStopsOnMainMenu(mTransportType), new ScheduleCacheTask.IScheduleReceiver() {
+                @Override
+                public void onResult(ScheduleCacheTask.Result result) {
+                    mRecyclerAdapter.updateStops(result.stops);
+                }
+            }).execute();
+        }
 
-        mFab.show();
+        if (mFab != null)
+            mFab.show();
     }
 
     public SavedStopRecyclerViewAdapter getRecyclerAdapter() {

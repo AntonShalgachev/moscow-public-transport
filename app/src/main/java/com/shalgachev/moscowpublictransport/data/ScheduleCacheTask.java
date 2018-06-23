@@ -26,6 +26,10 @@ public class ScheduleCacheTask extends AsyncTask<Void, Void, ScheduleCacheTask.R
             SYNCHRONIZE_STOPS_ON_MAIN_MENU,
             REMOVE_FROM_MAIN_MENU,
             GET_STOPS_ON_MAIN_MENU,
+
+            ADD_WIDGET_SIMPLE_STOP,
+            REMOVE_WIDGET_SIMPLE_STOP,
+            GET_STOP_FOR_WIDGET_ID,
         }
 
         public Args(Operation operation) {
@@ -69,6 +73,28 @@ public class ScheduleCacheTask extends AsyncTask<Void, Void, ScheduleCacheTask.R
             return args;
         }
 
+        public static Args addWidgetSimpleStop(Stop stop, int widgetId) {
+            Args args = new Args(Operation.ADD_WIDGET_SIMPLE_STOP);
+            args.stop = stop;
+            args.widgetId = widgetId;
+
+            return args;
+        }
+
+        public static Args removeWidgetSimpleStop(int widgetId) {
+            Args args = new Args(Operation.REMOVE_WIDGET_SIMPLE_STOP);
+            args.widgetId = widgetId;
+
+            return args;
+        }
+
+        public static Args getStopForWidgetId(int widgetId) {
+            Args args = new Args(Operation.GET_STOP_FOR_WIDGET_ID);
+            args.widgetId = widgetId;
+
+            return args;
+        }
+
         Operation operation;
 
         TransportType type;
@@ -76,12 +102,14 @@ public class ScheduleCacheTask extends AsyncTask<Void, Void, ScheduleCacheTask.R
         List<Stop> stops;
         List<StopListItem> selectableStops;
         Schedule schedule;
+        int widgetId;
     }
 
     public static class Result
     {
         public Schedule schedule;
         public List<Stop> stops;
+        public Stop stop;
         public int stopsSaved;
         public int stopsDeleted;
 
@@ -167,6 +195,15 @@ public class ScheduleCacheTask extends AsyncTask<Void, Void, ScheduleCacheTask.R
                 break;
             case GET_STOPS_ON_MAIN_MENU:
                 result.stops = db.getStopsOnMainMenu(mArgs.type);
+                break;
+            case ADD_WIDGET_SIMPLE_STOP:
+                db.addStopToWidgetSimpleStop(mArgs.stop, mArgs.widgetId);
+                break;
+            case REMOVE_WIDGET_SIMPLE_STOP:
+                db.removeStopToWidgetSimpleStop(mArgs.widgetId);
+                break;
+            case GET_STOP_FOR_WIDGET_ID:
+                result.stop = db.getStopForWidgetId(mArgs.widgetId);
                 break;
         }
 

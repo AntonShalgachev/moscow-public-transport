@@ -43,7 +43,7 @@ public class RouteListActivity extends AppCompatActivity implements SavedStopRec
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mPagerAdapter = new SavedStopPagerAdapter(getSupportFragmentManager(), this);
+        mPagerAdapter = new SavedStopPagerAdapter(false, getSupportFragmentManager(), this);
 
         mViewPager = findViewById(R.id.container);
         mViewPager.setAdapter(mPagerAdapter);
@@ -96,7 +96,7 @@ public class RouteListActivity extends AppCompatActivity implements SavedStopRec
     }
 
     @Override
-    public void onItemLongClicked(Stop stop, int position) {
+    public boolean onItemLongClicked(Stop stop, int position) {
         if (mActionMode == null) {
             mActionMode = startSupportActionMode(mActionModeCallback);
 
@@ -106,6 +106,8 @@ public class RouteListActivity extends AppCompatActivity implements SavedStopRec
         }
 
         toggleSelection(stop, position);
+
+        return true;
     }
 
     private void toggleSelection(Stop stop, int position) {

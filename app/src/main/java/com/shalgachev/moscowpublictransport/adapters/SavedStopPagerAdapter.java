@@ -21,18 +21,20 @@ import java.util.List;
 public class SavedStopPagerAdapter extends FragmentPagerAdapter {
     private final List<TransportType> TRANSPORT_TYPES = Arrays.asList(TransportType.BUS, TransportType.TROLLEY, TransportType.TRAM);
 
+    private boolean mFromWidget;
     private HashMap<Integer, SavedStopFragment> mFragments;
     private Context mContext;
 
-    public SavedStopPagerAdapter(FragmentManager fragmentManager, Context context) {
+    public SavedStopPagerAdapter(boolean fromWidget, FragmentManager fragmentManager, Context context) {
         super(fragmentManager);
         mContext = context;
+        mFromWidget = fromWidget;
         mFragments = new HashMap<>();
     }
 
     @Override
     public Fragment getItem(int position) {
-        return SavedStopFragment.newInstance(TRANSPORT_TYPES.get(position));
+        return SavedStopFragment.newInstance(TRANSPORT_TYPES.get(position), mFromWidget);
     }
 
     public SavedStopFragment getFragment(int position) {

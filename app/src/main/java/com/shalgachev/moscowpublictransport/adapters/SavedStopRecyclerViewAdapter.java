@@ -196,8 +196,7 @@ public class SavedStopRecyclerViewAdapter extends SelectableAdapter<SavedStopRec
             view.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    handleLongClick();
-                    return true;
+                    return handleLongClick();
                 }
             });
         }
@@ -207,14 +206,16 @@ public class SavedStopRecyclerViewAdapter extends SelectableAdapter<SavedStopRec
                 mListener.onItemClicked(item, getAdapterPosition());
         }
 
-        void handleLongClick() {
+        boolean handleLongClick() {
             if (mListener != null)
-                mListener.onItemLongClicked(item, getAdapterPosition());
+                return mListener.onItemLongClicked(item, getAdapterPosition());
+
+            return false;
         }
 
         public interface ItemIterationListener {
             void onItemClicked(Stop stop, int position);
-            void onItemLongClicked(Stop stop, int position);
+            boolean onItemLongClicked(Stop stop, int position);
         }
 
         @Override

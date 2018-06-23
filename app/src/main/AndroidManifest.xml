@@ -28,8 +28,8 @@
         <activity
             android:name=".activities.AddTransportActivity"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:parentActivityName=".activities.RouteListActivity">
+            android:parentActivityName=".activities.RouteListActivity"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.shalgachev.moscowpublictransport.activities.RouteListActivity" />
@@ -37,20 +37,38 @@
         <activity
             android:name=".activities.ScheduleActivity"
             android:label="@string/schedule_activity_title"
-            android:screenOrientation="portrait"
             android:parentActivityName=".activities.RouteListActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.shalgachev.moscowpublictransport.activities.RouteListActivity" />
         </activity>
-        <activity android:name=".activities.RouteInputActivity"
+        <activity
+            android:name=".activities.RouteInputActivity"
             android:label="@string/route_input_activity_title"
-            android:screenOrientation="portrait"
-            android:parentActivityName=".activities.AddTransportActivity">
+            android:parentActivityName=".activities.AddTransportActivity"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.shalgachev.moscowpublictransport.activities.AddTransportActivity" />
+        </activity>
+
+        <receiver android:name=".activities.StopScheduleWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/stop_schedule_widget_info" />
+        </receiver>
+
+        <activity android:name=".activities.StopScheduleWidgetConfigureActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
         </activity>
     </application>
 

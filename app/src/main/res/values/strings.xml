@@ -105,4 +105,10 @@
     <string name="direction_b">Б</string>
     <string name="direction_title">Направление</string>
     <string name="season_title">Сезон</string>
+
+    <string name="appwidget_single_stop_title">Выберите остановку:</string>
+
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="configure">Configure</string>
+    <string name="add_widget">Add widget</string>
 </resources>

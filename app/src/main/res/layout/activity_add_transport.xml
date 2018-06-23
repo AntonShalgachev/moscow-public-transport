@@ -163,8 +163,8 @@
                     android:layout_marginStart="8dp"
                     android:layout_weight="1"
                     android:maxLines="2"
-                    android:text="From"
                     android:measureAllChildren="false"
+                    android:text="From"
                     android:textAlignment="viewStart"
                     app:layout_constraintStart_toEndOf="@+id/direction_a"
                     tools:layout_editor_absoluteY="188dp" />
@@ -200,8 +200,8 @@
                     android:layout_marginStart="8dp"
                     android:layout_weight="1"
                     android:maxLines="2"
-                    android:text="To"
                     android:measureAllChildren="false"
+                    android:text="To"
                     android:textAlignment="viewStart"
                     tools:layout_editor_absoluteX="56dp"
                     tools:layout_editor_absoluteY="205dp" />

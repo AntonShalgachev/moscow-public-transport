@@ -34,6 +34,7 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
     private static final String TABLE_STOPS_TRAITS = "stops_traits";
     private static final String TABLE_TIMETABLES = "timetables";
     private static final String TABLE_STOPS_ON_MAIN_SCREEN = "stops_on_main_screen";
+    private static final String TABLE_STOPS_WIDGET_SIMPLE_STOP = "stops_widget_simple_stop";
 
     // columns
     // common
@@ -62,8 +63,11 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
     private static final String COLUMN_HOUR = "hour";
     private static final String COLUMN_MINUTE = "minute";
 
+    // TABLE_STOPS_WIDGET_SIMPLE_STOP
+    private static final String COLUMN_WIDGET_ID = "widget_id";
+
     private static final String DATABASE_NAME = "moscow_public_transport.db";
-    private static final int DATABASE_VERSION = 9;
+    private static final int DATABASE_VERSION = 10;
 
     public ScheduleCacheSQLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -107,11 +111,18 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
                 + COLUMN_ID + " integer primary key autoincrement"
                 + ", " + COLUMN_SAVED_STOP_ID + " integer not null"
                 + ");";
+        final String TABLE_STOPS_WIDGET_SIMPLE_STOP_CREATE_QUERY = "create table " + TABLE_STOPS_WIDGET_SIMPLE_STOP
+                + "( "
+                + COLUMN_ID + " integer primary key autoincrement"
+                + ", " + COLUMN_WIDGET_ID + " integer not null"
+                + ", " + COLUMN_SAVED_STOP_ID + " integer not null"
+                + ");";
 
         execSQLDebug(db, SAVED_STOPS_CREATE_QUERY, true);
         execSQLDebug(db, STOPS_TRAITS_CREATE_QUERY, true);
         execSQLDebug(db, TIMETABLES_CREATE_QUERY, true);
         execSQLDebug(db, STOPS_ON_MAIN_SCREEN_CREATE_QUERY, true);
+        execSQLDebug(db, TABLE_STOPS_WIDGET_SIMPLE_STOP_CREATE_QUERY, true);
     }
 
     @Override
@@ -124,11 +135,13 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
         final String STOPS_TRAITS_DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_STOPS_TRAITS;
         final String TIMETABLES_DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_TIMETABLES;
         final String STOPS_ON_MAIN_SCREEN_DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_STOPS_ON_MAIN_SCREEN;
+        final String TABLE_STOPS_WIDGET_SIMPLE_STOP_DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_STOPS_WIDGET_SIMPLE_STOP;
 
         execSQLDebug(db, SAVED_STOPS_DROP_QUERY, true);
         execSQLDebug(db, STOPS_TRAITS_DROP_QUERY, true);
         execSQLDebug(db, TIMETABLES_DROP_QUERY, true);
         execSQLDebug(db, STOPS_ON_MAIN_SCREEN_DROP_QUERY, true);
+        execSQLDebug(db, TABLE_STOPS_WIDGET_SIMPLE_STOP_DROP_QUERY, true);
 
         onCreate(db);
     }
@@ -518,6 +531,136 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
         Log.i(LOG_TAG, String.format("Found %d stops", stops.size()));
 
         return stops;
+    }
+
+    private boolean isAddedToWidgetSimpleStop(int stopId) {
+        if (stopId < 0)
+            return false;
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        String whereClause = COLUMN_SAVED_STOP_ID + " = ?";
+        String[] whereArgs = new String[] {
+                String.valueOf(stopId)
+        };
+
+        long rows = DatabaseUtils.queryNumEntries(db, TABLE_STOPS_WIDGET_SIMPLE_STOP, whereClause, whereArgs);
+
+        if (rows < 0 || rows > 1)
+            Log.w(LOG_TAG, String.format("queryNumEntries returned %d rows", rows));
+
+        return rows > 0;
+    }
+
+    private boolean hasWidgetId(int widgetId) {
+        if (widgetId < 0)
+            return false;
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        String whereClause = COLUMN_WIDGET_ID + " = ?";
+        String[] whereArgs = new String[] {
+                String.valueOf(widgetId)
+        };
+
+        long rows = DatabaseUtils.queryNumEntries(db, TABLE_STOPS_WIDGET_SIMPLE_STOP, whereClause, whereArgs);
+
+        if (rows < 0 || rows > 1)
+            Log.w(LOG_TAG, String.format("queryNumEntries returned %d rows", rows));
+
+        return rows > 0;
+    }
+
+    public void addStopToWidgetSimpleStop(Stop stop, int widgetId) {
+        Log.i(LOG_TAG, String.format("addStopToWidgetSimpleStop('%s', %d)", stop.toString(), widgetId));
+
+        SavedStop savedStop = convertToSavedStop(stop);
+        int stopId = getSavedStopId(savedStop);
+
+        if (stopId < 0) {
+            Log.e(LOG_TAG, "Stop isn't saved!");
+            // TODO: 6/23/2018 throw error
+            return;
+        }
+
+        if (isAddedToWidgetSimpleStop(stopId)) {
+            Log.w(LOG_TAG, "The stop is already added!");
+            return;
+        }
+
+        if (hasWidgetId(widgetId)) {
+            Log.w(LOG_TAG, "Found an existing widget!");
+            removeStopToWidgetSimpleStop(widgetId);
+        }
+
+        SQLiteDatabase db = getWritableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_WIDGET_ID, widgetId);
+        contentValues.put(COLUMN_SAVED_STOP_ID, stopId);
+        long id = db.insert(TABLE_STOPS_WIDGET_SIMPLE_STOP, "", contentValues);
+
+        Log.i(LOG_TAG, String.format("Stop %d added to widget with id %d", stopId, id));
+    }
+
+    public void removeStopToWidgetSimpleStop(int widgetId) {
+        Log.i(LOG_TAG, String.format("removeStopToWidgetSimpleStop(%d)", widgetId));
+
+        SQLiteDatabase db = getWritableDatabase();
+
+        String whereClause = COLUMN_WIDGET_ID + " = ?";
+        String[] whereArgs = new String[] {
+                String.valueOf(widgetId)
+        };
+
+        int affectedRows = db.delete(TABLE_STOPS_WIDGET_SIMPLE_STOP, whereClause, whereArgs);
+
+        Log.i(LOG_TAG, String.format("%d entires were removed", affectedRows));
+        if (affectedRows != 1) {
+            Log.w(LOG_TAG, "Expected only 1 row to be affected");
+        }
+    }
+
+    public Stop getStopForWidgetId(int widgetId) {
+        Log.i(LOG_TAG, String.format("getStopForWidgetId(%d)", widgetId));
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        String selectQuery = "SELECT * FROM " + TABLE_SAVED_STOPS + " , " + TABLE_STOPS_WIDGET_SIMPLE_STOP +
+                " WHERE " + TABLE_SAVED_STOPS + "." + COLUMN_ID + " = " + TABLE_STOPS_WIDGET_SIMPLE_STOP + "." + COLUMN_SAVED_STOP_ID +
+                " AND " + COLUMN_WIDGET_ID + " = ?";
+        String[] selectArgs = new String[] {
+                String.valueOf(widgetId),
+        };
+
+        Log.d(LOG_TAG, selectQuery);
+        Cursor cur = db.rawQuery(selectQuery, selectArgs);
+
+        try {
+            if (cur != null && cur.moveToFirst()) {
+                int rows = cur.getCount();
+                if (rows != 1) {
+                    // TODO: 3/31/2018 throw error
+                    Log.e(LOG_TAG, String.format("There are %d stops for widget id %d. Expected no more than 1", rows, widgetId));
+                }
+
+                SavedStop savedStop = getSavedStopFromCursor(cur);
+                StopTraits traits = getStopTraits(cur.getInt(cur.getColumnIndexOrThrow(COLUMN_SAVED_STOP_ID)));
+
+                if (traits == null) {
+                    // TODO: 6/23/2018 throw error
+                    Log.e(LOG_TAG, String.format("No traits for stop %d", savedStop.stopId));
+                    return null;
+                }
+
+                return convertToStop(savedStop, traits);
+            }
+        } finally {
+            if (cur != null)
+                cur.close();
+        }
+
+        return null;
     }
 
     private SavedStop convertToSavedStop(Stop stop) {
