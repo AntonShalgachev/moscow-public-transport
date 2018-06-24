@@ -8,7 +8,7 @@
                 android:width="256dp"
                 android:height="256dp" />
             <solid
-                android:color="#ff0000" />
+                android:color="@color/ufo_color" />
         </shape>
     </item>
     <item android:drawable="@drawable/ufo"/>

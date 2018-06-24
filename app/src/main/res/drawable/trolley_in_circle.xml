@@ -8,7 +8,7 @@
                 android:width="256dp"
                 android:height="256dp" />
             <solid
-                android:color="#74C365" />
+                android:color="@color/trolley_color" />
         </shape>
     </item>
     <item android:drawable="@drawable/trolley"/>

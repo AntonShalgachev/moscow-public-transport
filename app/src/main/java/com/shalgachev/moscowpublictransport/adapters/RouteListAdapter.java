@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.Route;
+import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
 import com.shalgachev.moscowpublictransport.data.SelectableRoute;
 import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
 
@@ -161,18 +162,7 @@ public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.View
         holder.mNameView.setText(route.name);
         holder.mProviderView.setText(BaseScheduleProvider.getScheduleProvider(route.providerId).getProviderName(mContext));
         holder.mRadioButton.setChecked(route.selected);
-
-        switch(route.transportType) {
-            case BUS:
-                holder.mRouteIcon.setImageResource(R.drawable.bus_in_circle);
-                break;
-            case TROLLEY:
-                holder.mRouteIcon.setImageResource(R.drawable.trolley_in_circle);
-                break;
-            case TRAM:
-                holder.mRouteIcon.setImageResource(R.drawable.tram_in_circle);
-                break;
-        }
+        holder.mRouteIcon.setImageResource(ScheduleUtils.getTransportIcon(route.transportType));
     }
 
     @Override

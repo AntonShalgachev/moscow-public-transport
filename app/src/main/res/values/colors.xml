@@ -4,6 +4,11 @@
     <color name="colorPrimaryDark">#3949AB</color>
     <color name="colorAccent">#FF4081</color>
 
+    <color name="bus_color">#87CEEB</color>
+    <color name="trolley_color">#74C365</color>
+    <color name="tram_color">#DAA520</color>
+    <color name="ufo_color">#FF0000</color>
+
     <color name="next_in_close_color">#4CAF50</color>
     <color name="next_in_medium_color">#FFC107</color>
     <color name="next_in_far_color">#FF5722</color>

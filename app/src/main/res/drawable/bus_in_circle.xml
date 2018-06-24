@@ -8,7 +8,7 @@
                 android:width="256dp"
                 android:height="256dp" />
             <solid
-                android:color="#87CEEB" />
+                android:color="@color/bus_color" />
         </shape>
     </item>
     <item android:drawable="@drawable/bus"/>

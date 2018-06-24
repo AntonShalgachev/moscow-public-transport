@@ -8,7 +8,7 @@
                 android:width="256dp"
                 android:height="256dp" />
             <solid
-                android:color="#DAA520" />
+                android:color="@color/tram_color" />
         </shape>
     </item>
     <item android:drawable="@drawable/tram"/>

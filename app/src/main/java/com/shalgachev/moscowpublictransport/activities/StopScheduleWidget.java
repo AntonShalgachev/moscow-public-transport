@@ -5,10 +5,13 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.view.View;
 import android.widget.RemoteViews;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.ScheduleCacheTask;
+import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
+import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
 
 /**
@@ -27,16 +30,30 @@ public class StopScheduleWidget extends AppWidgetProvider {
                     return;
 
                 RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.stop_schedule_widget);
-                views.setTextViewText(R.id.appwidget_text, result.stop.toString());
+
+                inflateStop(context, views, result.stop);
 
                 Intent intent = new Intent(context, ScheduleActivity.class);
                 intent.putExtra(ExtraHelper.STOP_EXTRA, result.stop);
                 PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-                views.setOnClickPendingIntent(R.id.appwidget_text, pendingIntent);
+                views.setOnClickPendingIntent(R.id.container, pendingIntent);
 
                 appWidgetManager.updateAppWidget(appWidgetId, views);
             }
         }).execute();
+    }
+
+    static void inflateStop(Context context, RemoteViews views, Stop stop) {
+        views.setTextViewText(R.id.stop_direction, context.getString(R.string.saved_stop_direction_short, stop.direction.getTo()));
+        views.setTextViewText(R.id.schedule_days, ScheduleUtils.scheduleDaysToString(context, stop.days));
+
+        views.setImageViewResource(R.id.route_icon, ScheduleUtils.getTransportIcon(stop.route.transportType));
+        views.setTextViewText(R.id.route_name, stop.route.name);
+
+        views.setTextViewText(R.id.stop_name, stop.name);
+
+        int backRes = ScheduleUtils.getTransportWidgetBack(stop.route.transportType);
+        views.setInt(R.id.header_container, "setBackgroundResource", backRes);
     }
 
     @Override

@@ -70,6 +70,7 @@
     <string name="interval_hour">%d ч.</string>
 
     <string name="saved_stop_direction">%1$s → %2$s</string>
+    <string name="saved_stop_direction_short">→ %1$s</string>
 
     <string name="provider_name_mosgortrans">Мосгортранс</string>
     <string name="provider_name_avtoline">Автолайн</string>
@@ -107,4 +108,6 @@
     <string name="season_title">Сезон</string>
 
     <string name="appwidget_single_stop_title">Выберите остановку:</string>
+
+    <string name="widget_season">(%s)</string>
 </resources>

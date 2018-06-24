@@ -1,6 +1,9 @@
 package com.shalgachev.moscowpublictransport.data;
 
 import android.content.Context;
+import android.os.Debug;
+import android.support.annotation.ColorRes;
+import android.support.annotation.DrawableRes;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -147,17 +150,23 @@ public class ScheduleUtils {
         if (season == Season.ALL)
             return context.getString(R.string.schedule_days_all_seasons, maskStr);
 
-        String seasonStr = null;
-        switch (season) {
-            case WINTER:
-                seasonStr = context.getString(R.string.season_winter);
-                break;
-            case SUMMER:
-                seasonStr = context.getString(R.string.season_summer);
-                break;
-        }
+        String seasonStr = seasonToString(context, season);
 
         return context.getString(R.string.schedule_days_seasons, maskStr, seasonStr);
+    }
+
+    public static String seasonToString(Context context, Season season) {
+        switch (season) {
+            case WINTER:
+                return context.getString(R.string.season_winter);
+            case SUMMER:
+                return context.getString(R.string.season_summer);
+            case ALL:
+                return null;
+        }
+
+        Log.e(LOG_TAG, String.format("Unknown season %s!", season));
+        return "";
     }
 
     public static String formatShortTimeInterval(Context context, long minutes) {
@@ -200,6 +209,32 @@ public class ScheduleUtils {
         timepointCalendar.add(Calendar.MILLISECOND, -1);
 
         return timepointCalendar;
+    }
+
+    public static @DrawableRes int getTransportIcon(TransportType transportType) {
+        switch(transportType) {
+            case BUS:
+                return R.drawable.bus_in_circle;
+            case TROLLEY:
+                return R.drawable.trolley_in_circle;
+            case TRAM:
+                return R.drawable.tram_in_circle;
+        }
+
+        return R.drawable.ufo_in_circle;
+    }
+
+    public static @DrawableRes int getTransportWidgetBack(TransportType transportType) {
+        switch(transportType) {
+            case BUS:
+                return R.drawable.widget_header_bus_back;
+            case TROLLEY:
+                return R.drawable.widget_header_trolley_back;
+            case TRAM:
+                return R.drawable.widget_header_tram_back;
+        }
+
+        return R.color.ufo_color;
     }
 
     public static void requestSchedule(final Context context, final Stop stop, final IScheduleResultListener listener) {
