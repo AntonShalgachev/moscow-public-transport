@@ -533,25 +533,6 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
         return stops;
     }
 
-    private boolean isAddedToWidgetSimpleStop(int stopId) {
-        if (stopId < 0)
-            return false;
-
-        SQLiteDatabase db = getReadableDatabase();
-
-        String whereClause = COLUMN_SAVED_STOP_ID + " = ?";
-        String[] whereArgs = new String[] {
-                String.valueOf(stopId)
-        };
-
-        long rows = DatabaseUtils.queryNumEntries(db, TABLE_STOPS_WIDGET_SIMPLE_STOP, whereClause, whereArgs);
-
-        if (rows < 0 || rows > 1)
-            Log.w(LOG_TAG, String.format("queryNumEntries returned %d rows", rows));
-
-        return rows > 0;
-    }
-
     private boolean hasWidgetId(int widgetId) {
         if (widgetId < 0)
             return false;
@@ -580,11 +561,6 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
         if (stopId < 0) {
             Log.e(LOG_TAG, "Stop isn't saved!");
             // TODO: 6/23/2018 throw error
-            return;
-        }
-
-        if (isAddedToWidgetSimpleStop(stopId)) {
-            Log.w(LOG_TAG, "The stop is already added!");
             return;
         }
 

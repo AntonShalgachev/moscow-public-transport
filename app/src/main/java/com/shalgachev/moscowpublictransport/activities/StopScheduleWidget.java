@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -19,6 +20,7 @@ import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
  * App Widget Configuration implemented in {@link StopScheduleWidgetConfigureActivity StopScheduleWidgetConfigureActivity}
  */
 public class StopScheduleWidget extends AppWidgetProvider {
+    private static final String LOG_TAG = "StopScheduleWidget";
 
     static void updateAppWidget(final Context context, final AppWidgetManager appWidgetManager,
                                 final int appWidgetId) {
@@ -26,6 +28,8 @@ public class StopScheduleWidget extends AppWidgetProvider {
         new ScheduleCacheTask(context.getApplicationContext(), ScheduleCacheTask.Args.getStopForWidgetId(appWidgetId), new ScheduleCacheTask.IScheduleReceiver() {
             @Override
             public void onResult(ScheduleCacheTask.Result result) {
+                Log.v(LOG_TAG, String.format("Widget (id %d) received stop %s", appWidgetId, result.stop));
+
                 if (result.stop == null)
                     return;
 
@@ -35,7 +39,7 @@ public class StopScheduleWidget extends AppWidgetProvider {
 
                 Intent intent = new Intent(context, ScheduleActivity.class);
                 intent.putExtra(ExtraHelper.STOP_EXTRA, result.stop);
-                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, appWidgetId, intent, 0);
                 views.setOnClickPendingIntent(R.id.container, pendingIntent);
 
                 appWidgetManager.updateAppWidget(appWidgetId, views);
