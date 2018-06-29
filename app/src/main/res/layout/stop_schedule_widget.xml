@@ -1,5 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -17,7 +18,6 @@
             android:orientation="vertical">
 
             <LinearLayout
-                android:id="@+id/direction_and_days_container"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="4dp"
@@ -40,7 +40,6 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/direction_and_days_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="4dp"
@@ -117,5 +116,12 @@
         android:layout_height="match_parent"
         android:background="@drawable/widget_schedule_back">
 
+        <ListView
+            android:id="@+id/timepoint_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@null"
+            android:scrollbars="vertical"
+            tools:listitem="@layout/widget_stop_schedule_item" />
     </FrameLayout>
 </LinearLayout>

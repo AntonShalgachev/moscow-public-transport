@@ -5,15 +5,20 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
 import com.shalgachev.moscowpublictransport.R;
+import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.ScheduleCacheTask;
 import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
 import com.shalgachev.moscowpublictransport.data.Stop;
+import com.shalgachev.moscowpublictransport.data.db.ScheduleCacheSQLiteHelper;
 import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
+import com.shalgachev.moscowpublictransport.widgets.StopScheduleWidgetRemoteViewsService;
 
 /**
  * Implementation of App Widget functionality.
@@ -24,27 +29,39 @@ public class StopScheduleWidget extends AppWidgetProvider {
 
     static void updateAppWidget(final Context context, final AppWidgetManager appWidgetManager,
                                 final int appWidgetId) {
+        ScheduleCacheSQLiteHelper db = null;
 
-        new ScheduleCacheTask(context.getApplicationContext(), ScheduleCacheTask.Args.getStopForWidgetId(appWidgetId), new ScheduleCacheTask.IScheduleReceiver() {
-            @Override
-            public void onResult(ScheduleCacheTask.Result result) {
-                Log.v(LOG_TAG, String.format("Widget (id %d) received stop %s", appWidgetId, result.stop));
+        try {
+            db = new ScheduleCacheSQLiteHelper(context);
 
-                if (result.stop == null)
-                    return;
+            Stop stop = db.getStopForWidgetId(appWidgetId);
 
-                RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.stop_schedule_widget);
+            Log.v(LOG_TAG, String.format("Widget (id %d) received stop %s", appWidgetId, stop));
 
-                inflateStop(context, views, result.stop);
+            if (stop == null)
+                return;
 
-                Intent intent = new Intent(context, ScheduleActivity.class);
-                intent.putExtra(ExtraHelper.STOP_EXTRA, result.stop);
-                PendingIntent pendingIntent = PendingIntent.getActivity(context, appWidgetId, intent, 0);
-                views.setOnClickPendingIntent(R.id.container, pendingIntent);
+            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.stop_schedule_widget);
 
-                appWidgetManager.updateAppWidget(appWidgetId, views);
-            }
-        }).execute();
+            inflateStop(context, views, stop);
+
+            Intent listIntent = new Intent(context, StopScheduleWidgetRemoteViewsService.class);
+            Bundle extras = new Bundle();
+            extras.putSerializable(ExtraHelper.STOP_EXTRA, stop);
+            listIntent.putExtra(ExtraHelper.BUNDLE_EXTRA, extras);
+            listIntent.setData(Uri.fromParts("content", String.valueOf(appWidgetId), null));
+            views.setRemoteAdapter(R.id.timepoint_list, listIntent);
+
+            Intent intent = new Intent(context, ScheduleActivity.class);
+            intent.putExtra(ExtraHelper.STOP_EXTRA, stop);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, appWidgetId, intent, 0);
+            views.setOnClickPendingIntent(R.id.container, pendingIntent);
+
+            appWidgetManager.updateAppWidget(appWidgetId, views);
+        } finally {
+            if (db != null)
+                db.close();
+        }
     }
 
     static void inflateStop(Context context, RemoteViews views, Stop stop) {
@@ -62,9 +79,11 @@ public class StopScheduleWidget extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        PendingResult pendingResult = goAsync();
         for (int appWidgetId : appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId);
         }
+        pendingResult.finish();
     }
 
     @Override
