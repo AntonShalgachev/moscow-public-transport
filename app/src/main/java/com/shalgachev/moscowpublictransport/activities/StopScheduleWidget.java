@@ -1,6 +1,7 @@
 package com.shalgachev.moscowpublictransport.activities;
 
 import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
@@ -51,6 +52,14 @@ public class StopScheduleWidget extends AppWidgetProvider {
             listIntent.putExtra(ExtraHelper.BUNDLE_EXTRA, extras);
             listIntent.setData(Uri.fromParts("content", String.valueOf(appWidgetId), null));
             views.setRemoteAdapter(R.id.timepoint_list, listIntent);
+
+            // template to handle the click listener for each item
+            Intent clickIntentTemplate = new Intent(context, ScheduleActivity.class);
+            clickIntentTemplate.putExtra(ExtraHelper.STOP_EXTRA, stop);
+            PendingIntent clickPendingIntentTemplate = TaskStackBuilder.create(context)
+                    .addNextIntentWithParentStack(clickIntentTemplate)
+                    .getPendingIntent(appWidgetId, PendingIntent.FLAG_UPDATE_CURRENT);
+            views.setPendingIntentTemplate(R.id.timepoint_list, clickPendingIntentTemplate);
 
             Intent intent = new Intent(context, ScheduleActivity.class);
             intent.putExtra(ExtraHelper.STOP_EXTRA, stop);
