@@ -17,6 +17,7 @@ import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.adapters.SavedStopPagerAdapter;
 import com.shalgachev.moscowpublictransport.adapters.SavedStopRecyclerViewAdapter;
 import com.shalgachev.moscowpublictransport.data.ScheduleCacheTask;
+import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
 import com.shalgachev.moscowpublictransport.data.Stop;
 
 /**
@@ -65,6 +66,8 @@ public class StopScheduleWidgetConfigureActivity extends AppCompatActivity imple
     @Override
     public void onItemClicked(Stop stop, int position) {
         final Context context = StopScheduleWidgetConfigureActivity.this;
+
+        ScheduleUtils.requestSchedule(getApplicationContext(), stop, null);
 
         new ScheduleCacheTask(getApplicationContext(), ScheduleCacheTask.Args.addWidgetSimpleStop(stop, mAppWidgetId), new ScheduleCacheTask.IScheduleReceiver() {
             @Override

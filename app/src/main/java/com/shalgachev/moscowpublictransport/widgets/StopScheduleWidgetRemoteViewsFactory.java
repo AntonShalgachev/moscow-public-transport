@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.support.annotation.DrawableRes;
+import android.util.Log;
 import android.widget.AdapterView;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService.RemoteViewsFactory;
@@ -18,6 +19,8 @@ import com.shalgachev.moscowpublictransport.data.db.ScheduleCacheSQLiteHelper;
 import java.util.Locale;
 
 public class StopScheduleWidgetRemoteViewsFactory implements RemoteViewsFactory {
+    private static final String LOG_TAG = "StopScheduleWidgetRVF";
+
     private Context mContext;
     private Stop mStop;
     private Timepoints mTimepoints;
@@ -40,8 +43,10 @@ public class StopScheduleWidgetRemoteViewsFactory implements RemoteViewsFactory 
             db = new ScheduleCacheSQLiteHelper(mContext);
 
             Schedule schedule = db.getSchedule(mStop);
-            if (schedule == null)
+            if (schedule == null) {
+                Log.w(LOG_TAG, String.format("No schedule is available for stop %s", mStop));
                 return;
+            }
 
             mTimepoints = schedule.getTimepoints();
         } finally {
