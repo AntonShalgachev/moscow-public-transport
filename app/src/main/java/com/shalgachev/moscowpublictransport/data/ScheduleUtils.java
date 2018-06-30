@@ -1,6 +1,9 @@
 package com.shalgachev.moscowpublictransport.data;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Debug;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
@@ -9,6 +12,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.shalgachev.moscowpublictransport.R;
+import com.shalgachev.moscowpublictransport.activities.StopScheduleWidget;
 import com.shalgachev.moscowpublictransport.data.providers.BaseScheduleProvider;
 import com.shalgachev.moscowpublictransport.helpers.StringUtils;
 
@@ -270,6 +274,10 @@ public class ScheduleUtils {
                                         Log.i(LOG_TAG, "Schedule hasn't changed");
                                         return;
                                     }
+
+                                    Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+                                    intent.setComponent(new ComponentName(context, StopScheduleWidget.class));
+                                    context.sendBroadcast(intent);
 
                                     if (listener != null)
                                         listener.onFreshSchedule(freshSchedule);

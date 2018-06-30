@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -115,6 +116,17 @@ public class StopScheduleWidget extends AppWidgetProvider {
     @Override
     public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
+    }
+
+    @Override
+    public void onReceive(final Context context, Intent intent) {
+        final String action = intent.getAction();
+        if (action != null && action.equals(AppWidgetManager.ACTION_APPWIDGET_UPDATE)) {
+            AppWidgetManager mgr = AppWidgetManager.getInstance(context);
+            ComponentName cn = new ComponentName(context, StopScheduleWidget.class);
+            mgr.notifyAppWidgetViewDataChanged(mgr.getAppWidgetIds(cn), R.id.timepoint_list);
+        }
+        super.onReceive(context, intent);
     }
 }
 
