@@ -53,38 +53,6 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
         return new ViewHolder(view);
     }
 
-    private String getCountdownText(Context context, Timepoint timepoint) {
-        long diffInMinutes = timepoint.minutesFromNow();
-        if (diffInMinutes > 0) {
-            String intervalStr = ScheduleUtils.formatShortTimeInterval(context, diffInMinutes);
-            return context.getString(R.string.schedule_next_in, intervalStr);
-        } else if (diffInMinutes == 0) {
-            return context.getString(R.string.schedule_now);
-        } else {
-            return context.getString(R.string.schedule_late);
-        }
-    }
-
-    private int getCountdownColor(Context context, Timepoint timepoint) {
-        long diffInMinutes = timepoint.minutesFromNow();
-
-        // TODO: 3/21/2018 extract these values somewhere
-        int closeThreshold = 5;
-        int mediumThreshold = 10;
-
-        @ColorRes int color;
-        if (diffInMinutes < 0)
-            color = R.color.next_in_late_color;
-        else if (diffInMinutes <= closeThreshold)
-            color = R.color.next_in_close_color;
-        else if (diffInMinutes <= mediumThreshold)
-            color = R.color.next_in_medium_color;
-        else
-            color = R.color.next_in_far_color;
-
-        return context.getResources().getColor(color);
-    }
-
     @Override
     public void onBindViewHolder(final @NonNull ViewHolder holder, int position, @NonNull List<Object> payloads) {
         if (!payloads.isEmpty()) {
@@ -99,8 +67,8 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
             boolean isCountdownShown = timepoint.isCountdownShown;
             boolean wasCountdownShown = holder.mCountdownView.getAlpha() > 0.5f;
 
-            String countdownText = getCountdownText(context, timepoint);
-            int countdownColor = getCountdownColor(context, timepoint);
+            String countdownText = ScheduleUtils.getCountdownText(context, timepoint, true);
+            int countdownColor = ScheduleUtils.getCountdownColor(context, timepoint);
 
             if (!wasCountdownShown && isCountdownShown) {
                 holder.mCountdownView.setTextColor(countdownColor);
@@ -149,8 +117,8 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
         boolean isMinuteEnabled = timepoint.isEnabled();
 
         if (timepoint.isCountdownShown) {
-            holder.mCountdownView.setText(getCountdownText(context, timepoint));
-            holder.mCountdownView.setTextColor(getCountdownColor(context, timepoint));
+            holder.mCountdownView.setText(ScheduleUtils.getCountdownText(context, timepoint, true));
+            holder.mCountdownView.setTextColor(ScheduleUtils.getCountdownColor(context, timepoint));
             holder.mCountdownView.setAlpha(1.0f);
         } else {
             // TODO: 3/26/2018 warning antonsh

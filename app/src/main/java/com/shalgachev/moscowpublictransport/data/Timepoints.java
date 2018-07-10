@@ -52,7 +52,7 @@ public class Timepoints {
     private Integer[] mSortedHours;
     private int mFirstHour = 5;
 
-    Timepoints(List<Timepoint> timepoints, int firstHour) {
+    public Timepoints(List<Timepoint> timepoints, int firstHour) {
         mTimepoints = new ArrayList<>(timepoints);
         mFirstHour = firstHour;
 

@@ -6,6 +6,7 @@ import android.util.Log;
 import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
 import com.shalgachev.moscowpublictransport.data.Timepoint;
 import com.shalgachev.moscowpublictransport.data.Timepoints;
+import com.shalgachev.moscowpublictransport.helpers.TimeHelpers;
 
 import java.util.Calendar;
 
@@ -22,7 +23,7 @@ public class TimeUpdater implements Runnable {
     private int mMaxLateMinutes;
 
     public interface Listener {
-        void onTimeUpdated(TimeUpdater timeUpdater, long millisToNextUpdate);
+        void onTimeUpdated(TimeUpdater timeUpdater);
     }
 
     public TimeUpdater(Timepoints timepoints, Context context) {
@@ -66,14 +67,7 @@ public class TimeUpdater implements Runnable {
             }
         }
 
-        Calendar nowCalendar = Calendar.getInstance();
-
-        int seconds = nowCalendar.get(Calendar.SECOND);
-        int milliseconds = nowCalendar.get(Calendar.MILLISECOND);
-
-        long millisToNextUpdate = (60 - seconds) * 1000 - milliseconds;
-
         if (mListener != null)
-            mListener.onTimeUpdated(this, millisToNextUpdate);
+            mListener.onTimeUpdated(this);
     }
 }

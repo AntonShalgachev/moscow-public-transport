@@ -10,12 +10,16 @@ import android.widget.RemoteViews;
 import android.widget.RemoteViewsService.RemoteViewsFactory;
 
 import com.shalgachev.moscowpublictransport.R;
+import com.shalgachev.moscowpublictransport.TimeUpdater;
 import com.shalgachev.moscowpublictransport.data.Schedule;
+import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.Timepoint;
 import com.shalgachev.moscowpublictransport.data.Timepoints;
 import com.shalgachev.moscowpublictransport.data.db.ScheduleCacheSQLiteHelper;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class StopScheduleWidgetRemoteViewsFactory implements RemoteViewsFactory {
@@ -48,7 +52,18 @@ public class StopScheduleWidgetRemoteViewsFactory implements RemoteViewsFactory 
                 return;
             }
 
-            mTimepoints = schedule.getTimepoints();
+            Timepoints allTimepoints = schedule.getTimepoints();
+
+            new TimeUpdater(allTimepoints, mContext).run();
+
+            List<Timepoint> activeTimepoints = new ArrayList<>();
+
+            for (Timepoint timepoint : allTimepoints.getTimepoints()) {
+                if (timepoint.isEnabled())
+                    activeTimepoints.add(timepoint);
+            }
+
+            mTimepoints = new Timepoints(activeTimepoints, allTimepoints.getFirstHour());
         } finally {
             if (db != null)
                 db.close();
@@ -72,10 +87,17 @@ public class StopScheduleWidgetRemoteViewsFactory implements RemoteViewsFactory 
         }
 
         Timepoint timepoint = mTimepoints.getTimepoints().get(position);
-        String time = String.format(Locale.US, "%d:%d", timepoint.hour, timepoint.minute);
+        String time = String.format(Locale.US, "%02d:%02d", timepoint.hour, timepoint.minute);
+
+        String timeLeft = ScheduleUtils.getCountdownText(mContext, timepoint, false);
+        int timeLeftColor = ScheduleUtils.getCountdownColor(mContext, timepoint);
 
         RemoteViews rv = new RemoteViews(mContext.getPackageName(), R.layout.widget_stop_schedule_item);
+
         rv.setTextViewText(R.id.timepoint_text, time);
+
+        rv.setTextViewText(R.id.next_in_text, timeLeft);
+        rv.setTextColor(R.id.next_in_text, timeLeftColor);
 
         @DrawableRes int timepointIconRes;
         if (position == 0)

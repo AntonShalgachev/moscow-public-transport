@@ -13,6 +13,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.TimeUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -26,6 +27,7 @@ import com.shalgachev.moscowpublictransport.data.ScheduleError;
 import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
+import com.shalgachev.moscowpublictransport.helpers.TimeHelpers;
 
 public class ScheduleActivity extends AppCompatActivity {
     private static final String LOG_TAG = "ScheduleActivity";
@@ -180,7 +182,7 @@ public class ScheduleActivity extends AppCompatActivity {
 
         mTimeUpdater.setListener(new TimeUpdater.Listener() {
             @Override
-            public void onTimeUpdated(TimeUpdater timeUpdater, long millisToNextUpdate) {
+            public void onTimeUpdated(TimeUpdater timeUpdater) {
                 Log.d(LOG_TAG, String.format("Time updater finished: %s", timeUpdater.toString()));
                 mUIHandler.post(new Runnable() {
                     @Override
@@ -192,6 +194,7 @@ public class ScheduleActivity extends AppCompatActivity {
                 });
 
                 if (timeUpdater == mTimeUpdater) {
+                    long millisToNextUpdate = TimeHelpers.millisUntilNextMinute();
                     Log.i(LOG_TAG, String.format("Scheduling updater to run in %d ms", millisToNextUpdate));
                     mUpdaterHandler.postDelayed(mTimeUpdater, millisToNextUpdate);
                 } else {

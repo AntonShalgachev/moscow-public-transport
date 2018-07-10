@@ -185,6 +185,39 @@ public class ScheduleUtils {
         }
     }
 
+    public static String getCountdownText(Context context, Timepoint timepoint, boolean parenthesis) {
+        long diffInMinutes = timepoint.minutesFromNow();
+        if (diffInMinutes > 0) {
+            String intervalStr = ScheduleUtils.formatShortTimeInterval(context, diffInMinutes);
+            int strId = parenthesis ? R.string.schedule_next_in_parenthesis : R.string.schedule_next_in;
+            return context.getString(strId, intervalStr);
+        } else if (diffInMinutes == 0) {
+            return context.getString(R.string.schedule_now);
+        } else {
+            return context.getString(R.string.schedule_late);
+        }
+    }
+
+    public static int getCountdownColor(Context context, Timepoint timepoint) {
+        long diffInMinutes = timepoint.minutesFromNow();
+
+        // TODO: 3/21/2018 extract these values somewhere
+        int closeThreshold = 5;
+        int mediumThreshold = 10;
+
+        @ColorRes int color;
+        if (diffInMinutes < 0)
+            color = R.color.next_in_late_color;
+        else if (diffInMinutes <= closeThreshold)
+            color = R.color.next_in_close_color;
+        else if (diffInMinutes <= mediumThreshold)
+            color = R.color.next_in_medium_color;
+        else
+            color = R.color.next_in_far_color;
+
+        return context.getResources().getColor(color);
+    }
+
     public static Calendar getTimepointCalendar(Timepoint timepoint, int firstHour) {
         Calendar timepointCalendar = Calendar.getInstance();
 

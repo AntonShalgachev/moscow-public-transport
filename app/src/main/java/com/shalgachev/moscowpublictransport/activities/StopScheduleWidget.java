@@ -1,5 +1,6 @@
 package com.shalgachev.moscowpublictransport.activities;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.appwidget.AppWidgetManager;
@@ -20,6 +21,7 @@ import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.db.ScheduleCacheSQLiteHelper;
 import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
+import com.shalgachev.moscowpublictransport.helpers.TimeHelpers;
 import com.shalgachev.moscowpublictransport.widgets.StopScheduleWidgetRemoteViewsService;
 
 /**
@@ -28,6 +30,15 @@ import com.shalgachev.moscowpublictransport.widgets.StopScheduleWidgetRemoteView
  */
 public class StopScheduleWidget extends AppWidgetProvider {
     private static final String LOG_TAG = "StopScheduleWidget";
+    private static final String TIMEPOINTS_UPDATE_ACTION = "com.shalgachev.moscowpublictransport.action.TIMEPOINTS_UPDATE";
+
+    static int getWidgetRequestCode(int widgetId) {
+        return widgetId * 2;
+    }
+
+    static int getAlarmManagerRequestCode() {
+        return 1;
+    }
 
     static void updateAppWidget(final Context context, final AppWidgetManager appWidgetManager,
                                 final int appWidgetId) {
@@ -64,7 +75,7 @@ public class StopScheduleWidget extends AppWidgetProvider {
 
             Intent intent = new Intent(context, ScheduleActivity.class);
             intent.putExtra(ExtraHelper.STOP_EXTRA, stop);
-            PendingIntent pendingIntent = PendingIntent.getActivity(context, appWidgetId, intent, 0);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, getWidgetRequestCode(appWidgetId), intent, 0);
             views.setOnClickPendingIntent(R.id.container, pendingIntent);
 
             appWidgetManager.updateAppWidget(appWidgetId, views);
@@ -110,23 +121,71 @@ public class StopScheduleWidget extends AppWidgetProvider {
 
     @Override
     public void onEnabled(Context context) {
-        // Enter relevant functionality for when the first widget is created
+        scheduleWidgetsUpdate(context, 0);
     }
 
     @Override
     public void onDisabled(Context context) {
-        // Enter relevant functionality for when the last widget is disabled
+        cancleWidgetsUpdate(context);
     }
 
     @Override
-    public void onReceive(final Context context, Intent intent) {
+    public void onReceive(final Context context, Intent intent) { Log.i(LOG_TAG, String.format("Something was received: %s", intent.getAction()));
         final String action = intent.getAction();
-        if (action != null && action.equals(AppWidgetManager.ACTION_APPWIDGET_UPDATE)) {
-            AppWidgetManager mgr = AppWidgetManager.getInstance(context);
-            ComponentName cn = new ComponentName(context, StopScheduleWidget.class);
-            mgr.notifyAppWidgetViewDataChanged(mgr.getAppWidgetIds(cn), R.id.timepoint_list);
+        if (action != null) {
+            if (action.equals(AppWidgetManager.ACTION_APPWIDGET_UPDATE) || action.equals(TIMEPOINTS_UPDATE_ACTION)) {
+                updateWidgets(context);
+            }
         }
         super.onReceive(context, intent);
+    }
+
+    private static AlarmManager getAlarmManager(Context context) {
+        AlarmManager alarmManager =(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        if (alarmManager == null)
+            Log.e(LOG_TAG, "Failed to retrieve AlarmManager");
+
+        return alarmManager;
+    }
+
+    private static void cancleWidgetsUpdate(Context context) {
+        Log.i(LOG_TAG, "Stopping the AlarmManager");
+        AlarmManager alarmManager = getAlarmManager(context);
+        if (alarmManager == null)
+            return;
+
+        PendingIntent pendingIntent = getAlarmPendingIntent(context);
+
+        alarmManager.cancel(pendingIntent);
+    }
+
+    private static PendingIntent getAlarmPendingIntent(Context context) {
+        Intent intent = new Intent(context, StopScheduleWidget.class);
+        intent.setAction(TIMEPOINTS_UPDATE_ACTION);
+        return PendingIntent.getBroadcast(context, getAlarmManagerRequestCode(), intent, PendingIntent.FLAG_CANCEL_CURRENT);
+    }
+
+    private static void scheduleWidgetsUpdate(Context context, long millis) {
+        cancleWidgetsUpdate(context);
+
+        Log.i(LOG_TAG, "Starting the AlarmManager");
+        AlarmManager alarmManager = getAlarmManager(context);
+        if (alarmManager == null)
+            return;
+
+        PendingIntent pendingIntent = getAlarmPendingIntent(context);
+
+        alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + millis, pendingIntent);
+    }
+
+    private static void updateWidgets(final Context context) {
+        Log.i(LOG_TAG, "Updating widgets");
+
+        AppWidgetManager mgr = AppWidgetManager.getInstance(context);
+        ComponentName cn = new ComponentName(context, StopScheduleWidget.class);
+        mgr.notifyAppWidgetViewDataChanged(mgr.getAppWidgetIds(cn), R.id.timepoint_list);
+
+        scheduleWidgetsUpdate(context, TimeHelpers.millisUntilNextMinute());
     }
 }
 

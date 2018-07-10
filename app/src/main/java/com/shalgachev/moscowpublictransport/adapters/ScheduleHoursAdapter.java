@@ -20,6 +20,7 @@ import com.shalgachev.moscowpublictransport.data.Timepoints;
 import com.shalgachev.moscowpublictransport.helpers.AnimationHelper;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by anton on 3/17/2018.
@@ -95,7 +96,7 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
         int hour = mTimepoints.getNthHour(position);
         Log.d(LOG_TAG, String.format("Recreating dataset from scratch for hour %d", hour));
         List<Timepoint> timepoints = mTimepoints.getHoursMap().get(hour);
-        holder.mHourView.setText(String.valueOf(hour));
+        holder.mHourView.setText(String.format(Locale.US, "%02d", hour));
 
         holder.mAdapter = new ScheduleMinutesAdapter(mSchedule, hour, timepoints);
         holder.mMinutesRecyclerView.setAdapter(holder.mAdapter);
