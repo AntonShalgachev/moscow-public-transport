@@ -98,19 +98,25 @@ public class StopScheduleWidgetRemoteViewsFactory implements RemoteViewsFactory 
 
         rv.setTextViewText(R.id.next_in_text, timeLeft);
         rv.setTextColor(R.id.next_in_text, timeLeftColor);
-
-        @DrawableRes int timepointIconRes;
-        if (position == 0)
-            timepointIconRes = R.drawable.schedule_item_top;
-        else if (position == getCount() - 1)
-            timepointIconRes = R.drawable.schedule_item_bottom;
-        else
-            timepointIconRes = R.drawable.schedule_item_middle;
-        rv.setImageViewResource(R.id.timepoint_icon, timepointIconRes);
+        rv.setImageViewResource(R.id.timepoint_icon, getScheduleItemDrawable(position));
 
         rv.setOnClickFillInIntent(R.id.timepoint_container, new Intent());
 
         return rv;
+    }
+
+    @DrawableRes int getScheduleItemDrawable(int position) {
+        int count = getCount();
+
+        if (count < 2)
+            return R.drawable.schedule_item_single;
+
+        if (position == 0)
+            return R.drawable.schedule_item_top;
+        if (position == count - 1)
+            return R.drawable.schedule_item_bottom;
+
+        return R.drawable.schedule_item_middle;
     }
 
     @Override
