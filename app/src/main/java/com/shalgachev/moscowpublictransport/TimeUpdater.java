@@ -47,6 +47,7 @@ public class TimeUpdater implements Runnable {
             Calendar nowCalendar = Calendar.getInstance();
 
             int shownCountdowns = 0;
+            int firstHourPos = -1;
             for (Timepoint timepoint : mTimepoints.getTimepoints()) {
                 Calendar timepointCalendar = ScheduleUtils.getTimepointCalendar(timepoint, mTimepoints.getFirstHour());
 
@@ -64,7 +65,12 @@ public class TimeUpdater implements Runnable {
                 } else {
                     timepoint.isCountdownShown = isLate;
                 }
+
+                if (firstHourPos == -1 && timepoint.isEnabled)
+                    firstHourPos = mTimepoints.getHourPos(timepoint.hour);
             }
+
+            mTimepoints.firstActiveHourPos = firstHourPos;
         }
 
         if (mListener != null)

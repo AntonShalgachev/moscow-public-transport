@@ -50,7 +50,11 @@ public class Timepoints {
     private List<Timepoint> mTimepoints;
     private TreeMap<Integer, List<Timepoint>> mHours;
     private Integer[] mSortedHours;
-    private int mFirstHour = 5;
+    private TreeMap<Integer, Integer> mHourPositions;
+    private int mFirstHour;
+
+    // used in schedule activity to notify remaining time
+    public int firstActiveHourPos;
 
     public Timepoints(List<Timepoint> timepoints, int firstHour) {
         mTimepoints = new ArrayList<>(timepoints);
@@ -69,6 +73,13 @@ public class Timepoints {
         }
 
         mSortedHours = mHours.navigableKeySet().toArray(new Integer[]{});
+
+        mHourPositions = new TreeMap<>();
+        for (int pos = 0; pos < mSortedHours.length; pos++) {
+            int hour = mSortedHours[pos];
+
+            mHourPositions.put(hour, pos);
+        }
     }
 
     public List<Timepoint> getTimepoints() {
@@ -81,6 +92,10 @@ public class Timepoints {
 
     public int getNthHour(int pos) {
         return mSortedHours[pos];
+    }
+
+    public int getHourPos(int hour) {
+        return mHourPositions.get(hour);
     }
 
     public int getFirstHour() {

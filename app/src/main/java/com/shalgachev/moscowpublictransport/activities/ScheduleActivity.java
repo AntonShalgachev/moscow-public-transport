@@ -36,6 +36,7 @@ public class ScheduleActivity extends AppCompatActivity {
     private ProgressDialog mProgressDialog;
 
     private RecyclerView mContentRecyclerView;
+    private LinearLayoutManager mContentLayoutManager;
     private ScheduleHoursAdapter mScheduleHoursAdapter;
 
     Schedule mSchedule;
@@ -59,7 +60,8 @@ public class ScheduleActivity extends AppCompatActivity {
         mScheduleHoursAdapter = new ScheduleHoursAdapter(this, minutesPool);
         mContentRecyclerView.setAdapter(mScheduleHoursAdapter);
 
-        mContentRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mContentLayoutManager = new LinearLayoutManager(this);
+        mContentRecyclerView.setLayoutManager(mContentLayoutManager);
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -189,6 +191,16 @@ public class ScheduleActivity extends AppCompatActivity {
                     public void run() {
                         boolean shouldAnimate = mScheduleUpdated;
                         mScheduleHoursAdapter.updateSchedule(mSchedule, shouldAnimate);
+                        if (!mScheduleUpdated) {
+                            int firstActiveHourPos = mSchedule.getTimepoints().firstActiveHourPos;
+                            int offset = 0;
+                            if (firstActiveHourPos > 1) {
+                                firstActiveHourPos -= 1;
+                                offset = 100;
+                            }
+                            mContentLayoutManager.scrollToPositionWithOffset(firstActiveHourPos, offset);
+                        }
+
                         mScheduleUpdated = true;
                     }
                 });
