@@ -57,6 +57,7 @@ public class ScheduleActivity extends AppCompatActivity {
         mContentRecyclerView = findViewById(R.id.schedule_container);
 
         RecyclerView.RecycledViewPool minutesPool = new RecyclerView.RecycledViewPool();
+        minutesPool.setMaxRecycledViews(0, 100);
         mScheduleHoursAdapter = new ScheduleHoursAdapter(this, minutesPool);
         mContentRecyclerView.setAdapter(mScheduleHoursAdapter);
 

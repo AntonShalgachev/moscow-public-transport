@@ -54,7 +54,8 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public @NonNull ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        Log.v(LOG_TAG, "onCreateViewHolder");
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_schedule_hour_item, parent, false);
 
@@ -129,7 +130,7 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
             private int mVerticalOffset;
             private int mCols;
 
-            public SpacesItemDecoration(int horizontalSpace, int verticalSpace, int verticalOffset, int cols) {
+            private SpacesItemDecoration(int horizontalSpace, int verticalSpace, int verticalOffset, int cols) {
                 this.mHorizontalSpace = horizontalSpace;
                 this.mVerticalSpace = verticalSpace;
                 this.mVerticalOffset = verticalOffset;
@@ -156,17 +157,17 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
 
         // TODO: 3/18/2018 increase elevation of future timepoints
         public View view;
-        public CardView mCardView;
-        public TextView mHourView;
-        public RecyclerView mMinutesRecyclerView;
+        private CardView mCardView;
+        private TextView mHourView;
+        private RecyclerView mMinutesRecyclerView;
 
-        public boolean isEnabled;
-        public int colorEnabled;
-        public int colorDisabled;
+        private boolean isEnabled;
+        private int colorEnabled;
+        private int colorDisabled;
 
         private ScheduleMinutesAdapter mAdapter;
 
-        public ViewHolder(View view, Context context, RecyclerView.RecycledViewPool minutesPool) {
+        private ViewHolder(View view, Context context, RecyclerView.RecycledViewPool minutesPool) {
             super(view);
             this.view = view;
             mCardView = view.findViewById(R.id.schedule_item_hour_card);
