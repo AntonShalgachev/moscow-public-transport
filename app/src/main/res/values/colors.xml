@@ -19,4 +19,6 @@
     <color name="change_direction_background_color">#adfff2</color>
     <color name="direction_a_background_color">#ed8282</color>
     <color name="direction_b_background_color">#a0aeff</color>
+
+    <color name="empty_route_list_image_color">@android:color/darker_gray</color>
 </resources>

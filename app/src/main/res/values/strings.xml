@@ -111,4 +111,6 @@
     <string name="appwidget_single_stop_title">Выберите остановку:</string>
 
     <string name="widget_season">(%s)</string>
+    <string name="no_routes_subtitle">Нажмите на +, чтобы добавить</string>
+    <string name="no_routes_title">Нет маршрутов</string>
 </resources>

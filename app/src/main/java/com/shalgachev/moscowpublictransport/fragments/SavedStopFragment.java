@@ -12,17 +12,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.activities.AddTransportActivity;
 import com.shalgachev.moscowpublictransport.adapters.SavedStopRecyclerViewAdapter;
 import com.shalgachev.moscowpublictransport.data.ScheduleCacheTask;
-import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.TransportType;
-import com.shalgachev.moscowpublictransport.data.db.ScheduleCacheSQLiteHelper;
 import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
-
-import java.util.List;
 
 /**
  * A fragment representing a list of Items.
@@ -38,6 +35,8 @@ public class SavedStopFragment extends Fragment {
     private SavedStopRecyclerViewAdapter.ViewHolder.ItemIterationListener mListener;
     private RecyclerView mRecycleView;
     private SavedStopRecyclerViewAdapter mRecyclerAdapter;
+
+    private View mNoRoutesView;
 
     FloatingActionButton mFab = null;
 
@@ -119,6 +118,21 @@ public class SavedStopFragment extends Fragment {
             }
         });
 
+        ImageView transportTypeIcon = rootView.findViewById(R.id.transport_type_icon);
+        switch (mTransportType) {
+            case BUS:
+                transportTypeIcon.setImageResource(R.drawable.bus);
+                break;
+            case TROLLEY:
+                transportTypeIcon.setImageResource(R.drawable.trolley);
+                break;
+            case TRAM:
+                transportTypeIcon.setImageResource(R.drawable.tram);
+                break;
+        }
+
+        mNoRoutesView = rootView.findViewById(R.id.no_saved_routes_container);
+
         return rootView;
     }
 
@@ -140,6 +154,12 @@ public class SavedStopFragment extends Fragment {
         mListener = null;
     }
 
+    private void updateNoRoutesView() {
+        boolean hasItems = mRecyclerAdapter.getItemCount() > 0;
+
+        mNoRoutesView.setVisibility(hasItems ? View.INVISIBLE : View.VISIBLE);
+    }
+
     public void updateStops() {
         if (mRecycleView == null)
             return;
@@ -151,6 +171,7 @@ public class SavedStopFragment extends Fragment {
                 @Override
                 public void onResult(ScheduleCacheTask.Result result) {
                     mRecyclerAdapter.updateStops(result.stops);
+                    updateNoRoutesView();
                 }
             }).execute();
         }
