@@ -3,6 +3,8 @@ package com.shalgachev.moscowpublictransport.adapters;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
@@ -89,10 +91,13 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
 
             // TODO: 3/26/2018 Implement grid layout manager which supports different heights of items and set visibility to countdown view
 
+            int disabledColor = holder.getColor(timepoint, false);
+            int enabledColor = holder.getColor(timepoint, true);
+
             if (isMinuteEnabled && !holder.isEnabled)
-                AnimationHelper.animateTextColor(holder.mMinuteView, holder.colorDisabled, holder.colorEnabled).setDuration(animDuration).start();
+                AnimationHelper.animateTextColor(holder.mMinuteView, disabledColor, enabledColor).setDuration(animDuration).start();
             else if (!isMinuteEnabled && holder.isEnabled)
-                AnimationHelper.animateTextColor(holder.mMinuteView, holder.colorEnabled, holder.colorDisabled).setDuration(animDuration).start();
+                AnimationHelper.animateTextColor(holder.mMinuteView, enabledColor, disabledColor).setDuration(animDuration).start();
             holder.isEnabled = isMinuteEnabled;
 
             float enabledElevation = context.getResources().getDimensionPixelSize(R.dimen.minute_card_enabled_elevation);
@@ -129,7 +134,7 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
         // TODO: 3/26/2018 Implement grid layout manager which supports different heights of items and set visibility to countdown view
 
         holder.isEnabled = isMinuteEnabled;
-        holder.mMinuteView.setTextColor(isMinuteEnabled ? holder.colorEnabled : holder.colorDisabled);
+        holder.mMinuteView.setTextColor(holder.getColor(timepoint, isMinuteEnabled));
 
         float enabledElevation = context.getResources().getDimensionPixelSize(R.dimen.minute_card_enabled_elevation);
         float disabledElevation = context.getResources().getDimensionPixelSize(R.dimen.minute_card_disabled_elevation);
@@ -148,8 +153,9 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
         public TextView mCountdownView;
 
         public boolean isEnabled;
-        public int colorEnabled;
-        public int colorDisabled;
+
+        private int colorEnabled;
+        private int colorDisabled;
 
         public ViewHolder(View view) {
             super(view);
@@ -161,6 +167,13 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
             ColorStateList colors = mMinuteView.getTextColors();
             colorEnabled = colors.getColorForState(new int[]{android.R.attr.state_enabled}, 0);
             colorDisabled = colors.getColorForState(new int[]{-android.R.attr.state_enabled}, 0);
+        }
+
+        public @ColorInt int getColor(Timepoint timepoint, boolean enabled) {
+            if (timepoint.color != null)
+                return timepoint.getColor(view.getContext(), enabled);
+
+            return enabled ? colorEnabled : colorDisabled;
         }
     }
 }

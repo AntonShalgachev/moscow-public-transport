@@ -51,9 +51,17 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
     // for some reason Mosgortrans sends these strings in a list of routes
     private static final List<String> EXCLUDED_ROUTE_NAMES = Arrays.asList("route", "stations", "streets");
 
+    private static final List<Timepoint.Color> NOTE_COLORS = Arrays.asList(Timepoint.Color.RED, Timepoint.Color.GREEN, Timepoint.Color.BLUE);
+
     // Mosgortrans for some reason mangles '№' into 'в„–' in stop names
     private static String fixStopName(String route) {
         return route.replace("в„–", "№");
+    }
+
+    private class NoteData
+    {
+        public String note;
+        public Timepoint.Color color;
     }
 
     @NonNull
@@ -212,6 +220,32 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
             if (warning != null)
                 throw new ScheduleProviderException(ScheduleError.ErrorCode.INVALID_SCHEDULE_URL);
 
+            Map<String, NoteData> notes = new HashMap<>();
+            Element legendTitle = doc.selectFirst("table + p");
+            Element legend = legendTitle.nextElementSibling();
+            while (true) {
+                if (!legend.tag().getName().equals("p"))
+                    break;
+
+                Element legendIdElement = null;
+                Elements legendIdElements = legend.getElementsByTag("b");
+                for (Element el : legendIdElements)
+                    legendIdElement = el;
+
+                if (legendIdElement == null)
+                    continue;
+
+                String noteId = legendIdElement.text();
+
+                NoteData data = new NoteData();
+                data.note = legend.text().replaceFirst(noteId, "").replace("-", "").trim();
+                data.color = NOTE_COLORS.get(notes.size() % NOTE_COLORS.size());
+
+                notes.put(noteId, data);
+
+                legend = legend.nextElementSibling();
+            }
+
             Elements timeTags = doc.select("span[class~=(?:hour|minute)]");
 
             int hour = -1;
@@ -223,7 +257,7 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
                     continue;
 
                 int value;
-                String note = null;
+                String noteId = null;
                 try {
                     String[] words = tagText.split(" ");
                     if (words.length == 0) {
@@ -232,7 +266,7 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
                     }
 
                     if (words.length > 1)
-                        note = words[1];
+                        noteId = words[1];
                     value = Integer.parseInt(words[0]);
                 } catch (NumberFormatException e) {
                     Log.e(LOG_TAG, String.format("Failed to parse data '%s'", tagText));
@@ -244,7 +278,12 @@ public class MosgortransScheduleProvider extends BaseScheduleProvider {
                         hour = value;
                         break;
                     case "minute":
-                        timepoints.add(new Timepoint(hour,value));
+                        if (noteId != null) {
+                            NoteData noteData = notes.get(noteId);
+                            timepoints.add(new Timepoint(hour, value, noteData.color, noteData.note));
+                        } else {
+                            timepoints.add(new Timepoint(hour, value));
+                        }
                         break;
 
                     default:

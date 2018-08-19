@@ -21,4 +21,11 @@
     <color name="direction_b_background_color">#a0aeff</color>
 
     <color name="empty_route_list_image_color">@android:color/darker_gray</color>
+
+    <color name="timepoint_color_red_enabled">#FF5C5C</color>
+    <color name="timepoint_color_red_disabled">#ffa49d</color>
+    <color name="timepoint_color_green_enabled">#5CCC6B</color>
+    <color name="timepoint_color_green_disabled">#addebd</color>
+    <color name="timepoint_color_blue_enabled">#4c56eb</color>
+    <color name="timepoint_color_blue_disabled">#a6a2eb</color>
 </resources>
