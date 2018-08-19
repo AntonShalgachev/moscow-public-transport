@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.shalgachev.moscowpublictransport.BuildConfig;
 import com.shalgachev.moscowpublictransport.data.Direction;
 import com.shalgachev.moscowpublictransport.data.Route;
 import com.shalgachev.moscowpublictransport.data.Schedule;
@@ -17,9 +18,12 @@ import com.shalgachev.moscowpublictransport.data.Season;
 import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.data.Timepoint;
 import com.shalgachev.moscowpublictransport.data.TransportType;
+import com.shalgachev.moscowpublictransport.data.db.migrators.Migrator;
+import com.shalgachev.moscowpublictransport.data.db.migrators.Migrator10;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by anton on 7/2/2017.
@@ -30,44 +34,54 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
     private static final boolean SQL_DEBUG = true;
 
     // tables
-    private static final String TABLE_SAVED_STOPS = "saved_stops";
-    private static final String TABLE_STOPS_TRAITS = "stops_traits";
-    private static final String TABLE_TIMETABLES = "timetables";
-    private static final String TABLE_STOPS_ON_MAIN_SCREEN = "stops_on_main_screen";
-    private static final String TABLE_STOPS_WIDGET_SIMPLE_STOP = "stops_widget_simple_stop";
+    public static final String TABLE_SAVED_STOPS = "saved_stops";
+    public static final String TABLE_STOPS_TRAITS = "stops_traits";
+    public static final String TABLE_TIMETABLES = "timetables";
+    public static final String TABLE_STOPS_ON_MAIN_SCREEN = "stops_on_main_screen";
+    public static final String TABLE_STOPS_WIDGET_SIMPLE_STOP = "stops_widget_simple_stop";
 
     // columns
     // common
-    private static final String COLUMN_ID = "_id";
-    private static final String COLUMN_SAVED_STOP_ID = "saved_stop_id";
+    public static final String COLUMN_ID = "_id";
+    public static final String COLUMN_SAVED_STOP_ID = "saved_stop_id";
 
     // TABLE_SAVED_STOPS
-    private static final String COLUMN_PROVIDER_ID = "provider_id";
-    private static final String COLUMN_TRANSPORT_TYPE = "transport_type";
-    private static final String COLUMN_ROUTE_ID = "route_id";
-    private static final String COLUMN_SEASON = "season";
-    private static final String COLUMN_DAYS_ID = "days_id";
-    private static final String COLUMN_DIRECTION_ID = "direction_id";
-    private static final String COLUMN_STOP_ID = "stop_id";
+    public static final String COLUMN_PROVIDER_ID = "provider_id";
+    public static final String COLUMN_TRANSPORT_TYPE = "transport_type";
+    public static final String COLUMN_ROUTE_ID = "route_id";
+    public static final String COLUMN_SEASON = "season";
+    public static final String COLUMN_DAYS_ID = "days_id";
+    public static final String COLUMN_DIRECTION_ID = "direction_id";
+    public static final String COLUMN_STOP_ID = "stop_id";
 
     // TABLE_STOPS_TRAITS
-    private static final String COLUMN_STOP_NAME = "stop_name";
-    private static final String COLUMN_ROUTE_NAME = "route_name";
-    private static final String COLUMN_DIRECTION_FROM = "direction_from";
-    private static final String COLUMN_DIRECTION_TO = "direction_to";
-    private static final String COLUMN_DAYS_MASK = "days_mask";
-    private static final String COLUMN_FIRST_HOUR = "first_hour";
-    private static final String COLUMN_SCHEDULE_TYPE = "schedule_type";
+    public static final String COLUMN_STOP_NAME = "stop_name";
+    public static final String COLUMN_ROUTE_NAME = "route_name";
+    public static final String COLUMN_DIRECTION_FROM = "direction_from";
+    public static final String COLUMN_DIRECTION_TO = "direction_to";
+    public static final String COLUMN_DAYS_MASK = "days_mask";
+    public static final String COLUMN_FIRST_HOUR = "first_hour";
+    public static final String COLUMN_SCHEDULE_TYPE = "schedule_type";
 
     // TABLE_TIMETABLES
-    private static final String COLUMN_HOUR = "hour";
-    private static final String COLUMN_MINUTE = "minute";
+    public static final String COLUMN_HOUR = "hour";
+    public static final String COLUMN_MINUTE = "minute";
+    public static final String COLUMN_COLOR = "color";
+    public static final String COLUMN_NOTE = "note";
 
     // TABLE_STOPS_WIDGET_SIMPLE_STOP
-    private static final String COLUMN_WIDGET_ID = "widget_id";
+    public static final String COLUMN_WIDGET_ID = "widget_id";
 
     private static final String DATABASE_NAME = "moscow_public_transport.db";
-    private static final int DATABASE_VERSION = 10;
+    private static final int DATABASE_VERSION = 11;
+
+    private static final List<Migrator> MIGRATORS;
+
+    static
+    {
+        MIGRATORS = new ArrayList<>();
+        MIGRATORS.add(new Migrator10());
+    }
 
     public ScheduleCacheSQLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -75,6 +89,56 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        createDatabase(db);
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        int version = oldVersion;
+
+        for (Migrator migrator : MIGRATORS) {
+            if (migrator.getOldVersion() != version)
+                continue;
+
+            migrator.migrate(db);
+            version = migrator.getNewVersion();
+        }
+
+        if (version != newVersion) {
+            String message = String.format(Locale.getDefault(), "Failed to migrate from %d to %d", oldVersion, newVersion);
+            if (BuildConfig.DEBUG) {
+                throw new IllegalStateException(message);
+            } else {
+                dropDatabase(db);
+                createDatabase(db);
+            }
+        }
+    }
+
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        if (BuildConfig.DEBUG)
+            super.onDowngrade(db, oldVersion, newVersion);
+    }
+
+    public void dropDatabase(SQLiteDatabase db) {
+        // TODO: 8/19/2018 Backup database?
+        Log.w(LOG_TAG, "Dropping whole database");
+
+        final String SAVED_STOPS_DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_SAVED_STOPS;
+        final String STOPS_TRAITS_DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_STOPS_TRAITS;
+        final String TIMETABLES_DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_TIMETABLES;
+        final String STOPS_ON_MAIN_SCREEN_DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_STOPS_ON_MAIN_SCREEN;
+        final String TABLE_STOPS_WIDGET_SIMPLE_STOP_DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_STOPS_WIDGET_SIMPLE_STOP;
+
+        execSQLDebug(db, SAVED_STOPS_DROP_QUERY, true);
+        execSQLDebug(db, STOPS_TRAITS_DROP_QUERY, true);
+        execSQLDebug(db, TIMETABLES_DROP_QUERY, true);
+        execSQLDebug(db, STOPS_ON_MAIN_SCREEN_DROP_QUERY, true);
+        execSQLDebug(db, TABLE_STOPS_WIDGET_SIMPLE_STOP_DROP_QUERY, true);
+    }
+
+    public void createDatabase(SQLiteDatabase db) {
         Log.i(LOG_TAG, "Creating new database");
         final String SAVED_STOPS_CREATE_QUERY = "create table " + TABLE_SAVED_STOPS
                 + "( "
@@ -105,6 +169,8 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
                 + ", " + COLUMN_SAVED_STOP_ID + " integer not null"
                 + ", " + COLUMN_HOUR + " integer not null"
                 + ", " + COLUMN_MINUTE + " integer not null"
+                + ", " + COLUMN_COLOR + " text"
+                + ", " + COLUMN_NOTE + " text"
                 + ");";
         final String STOPS_ON_MAIN_SCREEN_CREATE_QUERY = "create table " + TABLE_STOPS_ON_MAIN_SCREEN
                 + "( "
@@ -123,27 +189,6 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
         execSQLDebug(db, TIMETABLES_CREATE_QUERY, true);
         execSQLDebug(db, STOPS_ON_MAIN_SCREEN_CREATE_QUERY, true);
         execSQLDebug(db, TABLE_STOPS_WIDGET_SIMPLE_STOP_CREATE_QUERY, true);
-    }
-
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // TODO: 7/23/2017 Don't drop database on upgrade
-        Log.w(LOG_TAG, "Upgrading database from version " + oldVersion
-                + " to " + newVersion + ", which will destroy all old data");
-
-        final String SAVED_STOPS_DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_SAVED_STOPS;
-        final String STOPS_TRAITS_DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_STOPS_TRAITS;
-        final String TIMETABLES_DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_TIMETABLES;
-        final String STOPS_ON_MAIN_SCREEN_DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_STOPS_ON_MAIN_SCREEN;
-        final String TABLE_STOPS_WIDGET_SIMPLE_STOP_DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_STOPS_WIDGET_SIMPLE_STOP;
-
-        execSQLDebug(db, SAVED_STOPS_DROP_QUERY, true);
-        execSQLDebug(db, STOPS_TRAITS_DROP_QUERY, true);
-        execSQLDebug(db, TIMETABLES_DROP_QUERY, true);
-        execSQLDebug(db, STOPS_ON_MAIN_SCREEN_DROP_QUERY, true);
-        execSQLDebug(db, TABLE_STOPS_WIDGET_SIMPLE_STOP_DROP_QUERY, true);
-
-        onCreate(db);
     }
 
     private void execSQLDebug(SQLiteDatabase db, String sql) {
@@ -283,6 +328,8 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
         String[] timetableColumns = {
                 COLUMN_HOUR,
                 COLUMN_MINUTE,
+                COLUMN_COLOR,
+                COLUMN_NOTE,
         };
 
         Cursor cur = db.query(TABLE_TIMETABLES, timetableColumns, whereClause, whereArgs, "", "", "");
@@ -306,7 +353,13 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
             while (cur.moveToNext()) {
                 int hour = cur.getInt(cur.getColumnIndexOrThrow(COLUMN_HOUR));
                 int minute = cur.getInt(cur.getColumnIndexOrThrow(COLUMN_MINUTE));
-                timepoints.add(new Timepoint(hour, minute));
+
+                Timepoint.Color color = getEnum(Timepoint.Color.class, cur, COLUMN_COLOR);
+                String note = getString(cur, COLUMN_NOTE);
+                if (color != null && note != null)
+                    timepoints.add(new Timepoint(hour, minute, color, note));
+                else
+                    timepoints.add(new Timepoint(hour, minute));
             }
         } finally {
             cur.close();
@@ -350,6 +403,11 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
             values.put(COLUMN_SAVED_STOP_ID, stopId);
             values.put(COLUMN_HOUR, timepoint.hour);
             values.put(COLUMN_MINUTE, timepoint.minute);
+
+            if (timepoint.color != null)
+                values.put(COLUMN_COLOR, enumToString(timepoint.color));
+            if (timepoint.note != null)
+                values.put(COLUMN_NOTE, timepoint.note);
 
             db.insert(TABLE_TIMETABLES, "", values);
         }
@@ -698,6 +756,20 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
         };
     }
 
+    private String getString(Cursor cur, String colName)
+    {
+        int colIndex = cur.getColumnIndexOrThrow(colName);
+
+        if (cur.isNull(colIndex))
+            return null;
+
+        return cur.getString(colIndex);
+    }
+
+    private <T extends Enum<T>> T getEnum(Class<T> c, Cursor cur, String colName) {
+        return stringToEnum(c, getString(cur, colName));
+    }
+
     private String enumToString(Enum value) {
         if (value != null)
             return value.name();
@@ -706,6 +778,9 @@ public class ScheduleCacheSQLiteHelper extends SQLiteOpenHelper {
     }
 
     private <T extends Enum<T>> T stringToEnum(Class<T> c, String str) {
+        if (str == null || str.equals("null"))
+            return null;
+
         return T.valueOf(c, str);
     }
 }
