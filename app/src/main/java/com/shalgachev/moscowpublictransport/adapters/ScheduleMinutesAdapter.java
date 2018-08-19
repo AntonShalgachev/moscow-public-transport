@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.data.Schedule;
@@ -113,11 +115,19 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        Context context = holder.view.getContext();
+    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
+        final Context context = holder.view.getContext();
 
-        Timepoint timepoint = mTimepoints.get(position);
+        final Timepoint timepoint = mTimepoints.get(position);
         holder.mMinuteView.setText(String.format(Locale.US, "%02d", timepoint.minute));
+
+        holder.mCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (timepoint.note != null)
+                    Snackbar.make(holder.view, timepoint.note, Snackbar.LENGTH_LONG).show();
+            }
+        });
 
         boolean isMinuteEnabled = timepoint.isEnabled();
 
