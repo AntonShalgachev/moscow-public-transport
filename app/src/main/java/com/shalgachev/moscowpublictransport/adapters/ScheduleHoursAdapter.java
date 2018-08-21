@@ -30,17 +30,17 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
     private static final String LOG_TAG = "ScheduleHoursAdapter";
 
     private Context mContext;
-    private Schedule mSchedule;
     private Timepoints mTimepoints;
     private RecyclerView.RecycledViewPool mMinutesPool;
 
     public ScheduleHoursAdapter(Context context, RecyclerView.RecycledViewPool minutesPool) {
         mContext = context;
         mMinutesPool = minutesPool;
+
+        setHasStableIds(true);
     }
 
     public void updateSchedule(Schedule schedule, boolean animate) {
-        mSchedule = schedule;
         mTimepoints = schedule.getTimepoints();
 
         // TODO: 3/22/2018 change me plz
@@ -55,7 +55,7 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
 
     @Override
     public @NonNull ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Log.v(LOG_TAG, "onCreateViewHolder");
+        Log.v(LOG_TAG, String.format("Creating hour view holder, type %d", viewType));
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_schedule_hour_item, parent, false);
 
@@ -99,7 +99,7 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
         List<Timepoint> timepoints = mTimepoints.getHoursMap().get(hour);
         holder.mHourView.setText(String.format(Locale.US, "%02d", hour));
 
-        holder.mAdapter = new ScheduleMinutesAdapter(mSchedule, hour, timepoints);
+        holder.mAdapter = new ScheduleMinutesAdapter(hour, timepoints);
         holder.mMinutesRecyclerView.setAdapter(holder.mAdapter);
 
         Context context = holder.view.getContext();
@@ -121,6 +121,11 @@ public class ScheduleHoursAdapter extends RecyclerView.Adapter<ScheduleHoursAdap
     @Override
     public int getItemCount() {
         return mTimepoints != null ? mTimepoints.getHoursMap().size() : 0;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return mTimepoints.getNthHour(position);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

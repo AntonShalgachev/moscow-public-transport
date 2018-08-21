@@ -3,9 +3,7 @@ package com.shalgachev.moscowpublictransport.adapters;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.support.annotation.ColorInt;
-import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.CardView;
@@ -15,10 +13,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.shalgachev.moscowpublictransport.R;
-import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
 import com.shalgachev.moscowpublictransport.data.Timepoint;
 import com.shalgachev.moscowpublictransport.helpers.AnimationHelper;
@@ -33,14 +29,14 @@ import java.util.Locale;
 
 public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutesAdapter.ViewHolder> {
     private static final String LOG_TAG = "ScheduleMinutesAdapter";
-    private Schedule mSchedule;
     private int mHour;
     private List<Timepoint> mTimepoints;
 
-    public ScheduleMinutesAdapter(Schedule schedule, int hour, List<Timepoint> minutes) {
-        mSchedule = schedule;
+    ScheduleMinutesAdapter(int hour, List<Timepoint> minutes) {
         mHour = hour;
         mTimepoints = new ArrayList<>(minutes);
+
+        setHasStableIds(true);
     }
 
     public void onDataUpdated() {
@@ -49,8 +45,8 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        Log.v(LOG_TAG, String.format("Creating view holder for hour %d", mHour));
+    public @NonNull ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        Log.v(LOG_TAG, String.format("Creating minutes view holder for hour %d, type %d", mHour, viewType));
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_schedule_minute_item, parent, false);
 
@@ -156,18 +152,23 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
         return mTimepoints.size();
     }
 
+    @Override
+    public long getItemId(int position) {
+        return mTimepoints.get(position).getId();
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public View view;
-        public CardView mCard;
-        public TextView mMinuteView;
-        public TextView mCountdownView;
+        private CardView mCard;
+        private TextView mMinuteView;
+        private TextView mCountdownView;
 
-        public boolean isEnabled;
+        private boolean isEnabled;
 
         private int colorEnabled;
         private int colorDisabled;
 
-        public ViewHolder(View view) {
+        private ViewHolder(View view) {
             super(view);
             this.view = view;
             mCard = view.findViewById(R.id.schedule_item_minute_card);
@@ -179,7 +180,7 @@ public class ScheduleMinutesAdapter extends RecyclerView.Adapter<ScheduleMinutes
             colorDisabled = colors.getColorForState(new int[]{-android.R.attr.state_enabled}, 0);
         }
 
-        public @ColorInt int getColor(Timepoint timepoint, boolean enabled) {
+        private @ColorInt int getColor(Timepoint timepoint, boolean enabled) {
             if (timepoint.color != null)
                 return timepoint.getColor(view.getContext(), enabled);
 

@@ -62,6 +62,10 @@ public class Timepoint {
         return String.format(Locale.US, "%d:%d", hour, minute);
     }
 
+    public long getId() {
+        return hour * 60 + minute;
+    }
+
     public int hour;
     public int minute;
 

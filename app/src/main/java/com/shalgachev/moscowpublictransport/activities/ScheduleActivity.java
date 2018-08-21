@@ -13,7 +13,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.util.TimeUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -56,10 +55,11 @@ public class ScheduleActivity extends AppCompatActivity {
 
         mContentRecyclerView = findViewById(R.id.schedule_container);
 
-        RecyclerView.RecycledViewPool minutesPool = new RecyclerView.RecycledViewPool();
+        final RecyclerView.RecycledViewPool minutesPool = new RecyclerView.RecycledViewPool();
         minutesPool.setMaxRecycledViews(0, 100);
         mScheduleHoursAdapter = new ScheduleHoursAdapter(this, minutesPool);
         mContentRecyclerView.setAdapter(mScheduleHoursAdapter);
+        mContentRecyclerView.getRecycledViewPool().setMaxRecycledViews(0, 30);
 
         mContentLayoutManager = new LinearLayoutManager(this);
         mContentRecyclerView.setLayoutManager(mContentLayoutManager);
