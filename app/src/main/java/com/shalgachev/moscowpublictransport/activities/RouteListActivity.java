@@ -47,6 +47,7 @@ public class RouteListActivity extends AppCompatActivity implements SavedStopRec
 
         mViewPager = findViewById(R.id.container);
         mViewPager.setAdapter(mPagerAdapter);
+        mViewPager.setOffscreenPageLimit(2);
         mCurrentPage = mViewPager.getCurrentItem();
 
         TabLayout tabLayout = findViewById(R.id.tabs);
