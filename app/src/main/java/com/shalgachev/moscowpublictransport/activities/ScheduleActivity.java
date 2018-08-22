@@ -4,8 +4,10 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.support.annotation.IdRes;
 import android.support.annotation.StringRes;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.math.MathUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -15,12 +17,15 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.shalgachev.moscowpublictransport.HourItemDividerDecoration;
 import com.shalgachev.moscowpublictransport.R;
 import com.shalgachev.moscowpublictransport.TimeUpdater;
 import com.shalgachev.moscowpublictransport.adapters.ScheduleHoursAdapter;
+import com.shalgachev.moscowpublictransport.behaviors.TransitionTextViewBehavior;
+import com.shalgachev.moscowpublictransport.behaviors.TransitionViewBehavior;
 import com.shalgachev.moscowpublictransport.data.Schedule;
 import com.shalgachev.moscowpublictransport.data.ScheduleError;
 import com.shalgachev.moscowpublictransport.data.ScheduleUtils;
@@ -28,8 +33,16 @@ import com.shalgachev.moscowpublictransport.data.Stop;
 import com.shalgachev.moscowpublictransport.helpers.ExtraHelper;
 import com.shalgachev.moscowpublictransport.helpers.TimeHelpers;
 
+import org.w3c.dom.Text;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class ScheduleActivity extends AppCompatActivity {
     private static final String LOG_TAG = "ScheduleActivity";
+
+    private static final float TOP_CONTAINER_THRESHOLD = 0.4f;
+
     private Stop mStop;
     // TODO: 3/11/2018 use progress bar
     private ProgressDialog mProgressDialog;
@@ -37,6 +50,14 @@ public class ScheduleActivity extends AppCompatActivity {
     private RecyclerView mContentRecyclerView;
     private LinearLayoutManager mContentLayoutManager;
     private ScheduleHoursAdapter mScheduleHoursAdapter;
+    private Toolbar mToolbar;
+
+    private ImageView mTransportIcon;
+    private TextView mTitleView;
+    private TextView mSubtitleView;
+
+    private List<TextView> mTitleViews = new ArrayList<>();
+    private List<TextView> mSubtitleViews = new ArrayList<>();
 
     Schedule mSchedule;
     boolean mScheduleUpdated;
@@ -46,12 +67,14 @@ public class ScheduleActivity extends AppCompatActivity {
 
     private TimeUpdater mTimeUpdater;
 
+    private boolean mTopContainerIsShown = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_schedule);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mToolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
 
         mContentRecyclerView = findViewById(R.id.schedule_container);
 
@@ -101,6 +124,7 @@ public class ScheduleActivity extends AppCompatActivity {
         mContentRecyclerView.addItemDecoration(new HourItemDividerDecoration(this));
 
         initActivity();
+        initBehaviors();
         loadData();
 
         HandlerThread updaterThread = new HandlerThread("TimeUpdaterHandlerThread");
@@ -113,22 +137,95 @@ public class ScheduleActivity extends AppCompatActivity {
     {
         mStop = (Stop) getIntent().getSerializableExtra(ExtraHelper.STOP_EXTRA);
 
-        setTitle(mStop.route.name);
-
         AppBarLayout appBar = findViewById(R.id.app_bar);
-        ImageView image = appBar.findViewById(R.id.transport_image);
+        final View topContainer = findViewById(R.id.expanded_top_container);
+
+        appBar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                float maxScrollSize = appBarLayout.getTotalScrollRange();
+
+                float percentage = (Math.abs((float)verticalOffset)) / maxScrollSize;
+
+                Log.d(LOG_TAG, String.format("Percentage: %f", percentage));
+
+                if (percentage >= TOP_CONTAINER_THRESHOLD && mTopContainerIsShown) {
+                    mTopContainerIsShown = false;
+
+                    topContainer.animate()
+                            .alpha(0)
+                            .setDuration(200)
+                            .start();
+                }
+
+                if (percentage < TOP_CONTAINER_THRESHOLD && !mTopContainerIsShown) {
+                    mTopContainerIsShown = true;
+
+                    topContainer.animate()
+                            .alpha(1)
+                            .start();
+                }
+            }
+        });
+
+        mTransportIcon = findViewById(R.id.transport_icon);
+        mTitleView = findViewById(R.id.title);
+        mSubtitleView = findViewById(R.id.subtitle);
+
+        TextView direction = findViewById(R.id.expanded_direction);
+        TextView days = findViewById(R.id.expanded_days);
+
+        addTextView(mTitleViews, R.id.expanded_title);
+        addTextView(mTitleViews, R.id.collapsed_title);
+        addTextView(mTitleViews, R.id.title);
+        addTextView(mSubtitleViews, R.id.expanded_subtitle);
+        addTextView(mSubtitleViews, R.id.collapsed_subtitle);
+        addTextView(mSubtitleViews, R.id.subtitle);
+
+        for (TextView view : mTitleViews)
+            view.setText(mStop.route.name);
+        for (TextView view : mSubtitleViews)
+            view.setText(mStop.name);
+
+        direction.setText(getString(R.string.saved_stop_direction_short, mStop.direction.getTo()));
+        days.setText(ScheduleUtils.scheduleDaysToString(this, mStop.days));
 
         switch (mStop.route.transportType) {
             case BUS:
-                image.setImageResource(R.drawable.bus);
+                mTransportIcon.setImageResource(R.drawable.bus);
                 break;
             case TROLLEY:
-                image.setImageResource(R.drawable.trolley);
+                mTransportIcon.setImageResource(R.drawable.trolley);
                 break;
             case TRAM:
-                image.setImageResource(R.drawable.tram);
+                mTransportIcon.setImageResource(R.drawable.tram);
                 break;
         }
+    }
+
+    private void addTextView(List<TextView> container, @IdRes int viewId)
+    {
+        TextView view = findViewById(viewId);
+        container.add(view);
+    }
+
+    private void initBehavior(View view, @IdRes int expandedId, @IdRes int collapsedId)
+    {
+        View expandedView = findViewById(expandedId);
+        View collapsedView = findViewById(collapsedId);
+
+        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams)view.getLayoutParams();
+        if (view instanceof TextView && collapsedView instanceof TextView && expandedView instanceof TextView)
+            params.setBehavior(new TransitionTextViewBehavior((TextView)collapsedView, (TextView)expandedView, mToolbar));
+        else
+            params.setBehavior(new TransitionViewBehavior<>(collapsedView, expandedView, mToolbar));
+    }
+
+    private void initBehaviors()
+    {
+        initBehavior(mTransportIcon, R.id.expanded_transport_icon, R.id.collapsed_transport_icon);
+        initBehavior(mTitleView, R.id.expanded_title, R.id.collapsed_title);
+        initBehavior(mSubtitleView, R.id.expanded_subtitle, R.id.collapsed_subtitle);
     }
 
     private void loadData()

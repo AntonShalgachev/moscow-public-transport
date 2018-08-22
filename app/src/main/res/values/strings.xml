@@ -94,7 +94,6 @@
     <string name="toast_stops_saved">Добавлено остановок: %d</string>
     <string name="toast_stops_deleted">Удалено остановок: %d</string>
 
-    <string name="schedule_activity_title">Расписание</string>
     <string name="route_input_activity_title">Выберите маршрут</string>
     <string name="choose_route_button_title">Маршрут не выбран</string>
     <string name="schedule_refreshed_toast">Расписание обновлено</string>

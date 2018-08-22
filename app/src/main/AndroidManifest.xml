@@ -36,7 +36,7 @@
         </activity>
         <activity
             android:name=".activities.ScheduleActivity"
-            android:label="@string/schedule_activity_title"
+            android:label=""
             android:parentActivityName=".activities.RouteListActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
