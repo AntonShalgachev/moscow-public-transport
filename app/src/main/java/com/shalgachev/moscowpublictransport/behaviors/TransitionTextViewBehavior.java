@@ -24,7 +24,7 @@ public class TransitionTextViewBehavior extends TransitionViewBehavior<TextView>
         TextView fromView = mExpandedView;
         TextView toView = mCollapsedView;
 
-        child.setTextSize(TypedValue.COMPLEX_UNIT_PX, lerp(fromView.getTextSize(), toView.getTextSize(), perc));
+        child.setTextSize(TypedValue.COMPLEX_UNIT_PX, lerp(fromView.getTextSize(), toView.getTextSize(), perc) * 0.9f);
 
 
     }
